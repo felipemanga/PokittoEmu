@@ -5,6 +5,7 @@
 // #include "../common/Settings.h"
 #include "sys.hpp"
 #include "iocon.hpp"
+#include "adc.hpp"
 
 #include <algorithm>
 
@@ -49,6 +50,7 @@ namespace CPU
     {
 	SYS::init();
 	IOCON::init();
+	ADC::init();
 
 	// clean registers
 	for (int i = 0; i < 45; i++)
