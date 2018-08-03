@@ -22,6 +22,7 @@ namespace CPU
 
     bool armIrqEnable = true;
     u32 armNextPC = 0x00000000;
+    u32 ADDRESS;
     int armMode = 0x1f;
 
     bool busPrefetch = false; //TODO: never read ?

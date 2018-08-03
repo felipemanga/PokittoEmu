@@ -1,4 +1,5 @@
 #include "types.hpp"
+#include "cpu.hpp"
 #include "sys.hpp"
 #include "iocon.hpp"
 #include <iostream>
@@ -79,19 +80,27 @@ namespace MMU
 		      << std::endl;
 	    return 0; // to-do: raise exception?
 	}
-
-	std::cout << "Read "
-		  << layout.map[idx].name
-		  << std::hex << addr
-		  << std::endl;
 	
 	u32 value = *layout.map[ idx ].value;
 	auto read = layout.map[ idx ].read;
 	
 	if( read )
 	    value = *layout.map[ idx ].value = (*read)( value, addr );
+
+	if( addr&3 )
+	    value = (value >> ((8<<(addr&0x3))-8)) & valType(~0);
 	
-	return (value >> (8<<(addr&0x3))) & valType(~0);
+	std::cout << "Read "
+		  << layout.map[idx].name
+		  << std::hex	    
+		  << "(@"
+		  << addr
+		  << ") = " << value << " "
+		  << " on PC="
+		  << CPU::ADDRESS
+		  << std::endl;
+
+	return value;
     }
 
     template< Layout &layout, typename valType >
@@ -111,8 +120,8 @@ namespace MMU
 
 	auto write = layout.map[ idx ].write;
 	u32 oldvalue = *layout.map[ idx ].value;
-	value = (value&valType(~0)) << (8<<(addr&3));
-	value |= oldvalue & ~((u32(valType(~0))<<(8<<(addr&3)) ));
+	value = (value&valType(~0)) << ((8<<(addr&3))-9);
+	value |= oldvalue & ~(u32(valType(~0))<<((8<<(addr&3))-8) );
 	
 	if( write )
 	    value = (*write)( value, oldvalue, addr );

@@ -50,6 +50,7 @@ extern bool V_FLAG;
 // extern bool armState;
 extern bool armIrqEnable;
 extern u32 armNextPC;
+extern u32 ADDRESS;
 extern int armMode;
 
 extern bool busPrefetch;
