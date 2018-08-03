@@ -60,6 +60,8 @@ namespace MMU
     u32 readHole( u32, u32 addr ){
 	std::cout << "Reading hole: "
 		  << std::hex << addr
+		  << " on PC="
+		  << CPU::ADDRESS
 		  << std::endl;
 	return 0;
     }
@@ -67,6 +69,8 @@ namespace MMU
     u32 writeHole( u32, u32, u32 addr ){
 	std::cout << "Writing hole: "
 		  << std::hex << addr
+		  << " on PC="
+		  << CPU::ADDRESS
 		  << std::endl;
 	return 0;
     }
@@ -105,7 +109,7 @@ namespace MMU
 
     template< Layout &layout, typename valType >
     void writeRegister( u32 addr, valType value ){
-	u32 idx = (addr - layout.base) >> 1;
+	u32 idx = (addr - layout.base) >> 2;
 	if( idx >= layout.length ){
 	    std::cout << "Error writing register "
 		      << std::hex << addr
@@ -115,12 +119,17 @@ namespace MMU
 	
 	std::cout << "write "
 		  << layout.map[idx].name
-		  << std::hex << addr
+		  << std::hex	    
+		  << "(@"
+		  << addr
+		  << ") = " << value << " "
+		  << " on PC="
+		  << CPU::ADDRESS
 		  << std::endl;
 
 	auto write = layout.map[ idx ].write;
 	u32 oldvalue = *layout.map[ idx ].value;
-	value = (value&valType(~0)) << ((8<<(addr&3))-9);
+	value = (value&valType(~0)) << ((8<<(addr&3))-8);
 	value |= oldvalue & ~(u32(valType(~0))<<((8<<(addr&3))-8) );
 	
 	if( write )

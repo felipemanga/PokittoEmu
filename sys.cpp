@@ -144,7 +144,11 @@ namespace SYS {
 	VTOR = 0;
 	SYSPLLCLKUEN = 1;
 	SYSPLLSTAT = 1;
-
+	MAINCLKUEN = 1;
+	SYSAHBCLKDIV = 1;
+	USBPLLCLKUEN = 1;
+	USBPLLSTAT = 1;
+/*
 	for( u32 i=0; i<sizeof(map)/sizeof(map[0]); ++i ){
 	    std::cout << map[i].name
 		      << " "
@@ -152,6 +156,7 @@ namespace SYS {
 		      << (layout.base+(i*4))
 		      << std::endl;
 	}
+*/
     }
     
 }

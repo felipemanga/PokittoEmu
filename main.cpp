@@ -91,7 +91,7 @@ int main( int argc, char * argv[] ){
         return 1;
     }
 
-    CPU::cpuNextEvent = 10000;
+    CPU::cpuNextEvent = 200000;
 
     try{
 
