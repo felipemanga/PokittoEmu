@@ -2,9 +2,7 @@
 
 #include "mmu.hpp"
 
-namespace SYS {
-
-    extern u32 VTOR;
+namespace IOCON {
 
     void init();
 

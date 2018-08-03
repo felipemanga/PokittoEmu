@@ -10,9 +10,35 @@ extern u8 usbsram[0x800];
 
 struct Register {
     u32 *value;
-    u32 (*read)( u32 );
-    u32 (*write)( u32, u32 );
+    const char *name;
+    u32 (*read)( u32, u32 );
+    u32 (*write)( u32, u32, u32 );
 };
+
+    u32 defaultRead( u32 v, u32 addr );
+    u32 defaultWrite( u32 v, u32 ov, u32 addr );
+    u32 nopWrite( u32 v, u32 ov, u32 addr );
+    u32 readHole( u32 v, u32 addr );
+    u32 writeHole( u32 v, u32 ov, u32 addr );
+
+#define MMUREGRW( name, read, write ) { &name, #name, &read, &write }
+
+#define MMUREGRO( name, read ) { &name, #name, &read, &MMU::nopWrite }
+
+#define MMUREGR( name, read ) { &name, #name, &read, &MMU::defaultWrite }
+
+#define MMUREGW( name, write ) { &name, #name, &MMU::defaultRead, &write }
+
+    extern u32 _reserved;
+#define MMUREGX() { &MMU::_reserved, "RESERVED", &MMU::readHole, &MMU::writeHole }
+    
+#define MMUREG( name ) { &name, #name, &MMU::defaultRead, &MMU::defaultWrite }
+
+    struct Layout {
+	u32 base;
+	u32 length;
+	Register *map;
+    };
 
 bool init();
 void uninit();
