@@ -2,6 +2,7 @@
 #include "cpu.hpp"
 #include "sys.hpp"
 #include "iocon.hpp"
+#include "adc.hpp"
 #include <iostream>
 
 namespace MMU
@@ -15,14 +16,20 @@ namespace MMU
     template< u8* buffer, u32 base, u32 size, typename retType > 
     retType readBuffer( u32 addr ){
 	if( addr < base ){
-	    std::cout << "Read OOB " << std::hex << addr << std::endl;
+	    std::cout << "Read OOB " << std::hex << addr
+		  << " on PC="
+		  << CPU::ADDRESS
+		  << std::endl;
 	    return ~0;
 	}
 
 	addr -= base;
 
 	if( addr >= size ){
-	    std::cout << "Read OOB " << std::hex << addr << std::endl;
+	    std::cout << "Read OOB " << std::hex << addr
+		  << " on PC="
+		  << CPU::ADDRESS
+		  << std::endl;
 	    return ~0;
 	}
 
@@ -32,20 +39,29 @@ namespace MMU
     template< typename valType > 
     void writeROR( u32 addr, valType ){
 	// throw?
-	std::cout << " Write to read-only region: " << std::hex << addr << std::endl;
+	std::cout << " Write to read-only region: " << std::hex << addr
+		  << " on PC="
+		  << CPU::ADDRESS
+		  << std::endl;
     }
 
     template< u8* buffer, u32 base, u32 size, typename valType > 
     void writeBuffer( u32 addr, valType value ){
 	if( addr < base ){
-	    std::cout << "OOB Write " << std::hex << addr << std::endl;
+	    std::cout << "OOB Write " << std::hex << addr
+		  << " on PC="
+		  << CPU::ADDRESS
+		  << std::endl;
 	    return;
 	}
 
 	addr -= base;
 
 	if( addr >= size ){
-	    std::cout << "OOB Write " << std::hex << addr << std::endl;
+	    std::cout << "OOB Write " << std::hex << addr
+		  << " on PC="
+		  << CPU::ADDRESS
+		  << std::endl;
 	    return;
 	}
 
@@ -216,6 +232,15 @@ namespace MMU
 	&writeRegister< IOCON::layout, u16 >,
 	&writeRegister< IOCON::layout, u8  >
     };
+
+    MemoryBank adcBank = {
+	&readRegister<  ADC::layout, u32 >,
+	&readRegister<  ADC::layout, u16 >,
+	&readRegister<  ADC::layout, u8  >,
+	&writeRegister< ADC::layout, u32 >,
+	&writeRegister< ADC::layout, u16 >,
+	&writeRegister< ADC::layout, u8  >
+    };
     
     MemoryBank apbMap[32] = {
 	voidBank, // 0 - I2C
@@ -225,7 +250,7 @@ namespace MMU
 	voidBank, // 4 - 16-bit counter 1
 	voidBank, // 5 - 32-bit counter 0
 	voidBank, // 6 - 32-bit counter 1
-	voidBank, // 7 - ADC
+	adcBank,  // 7 - ADC
 	voidBank, // 8 - I2C1
 	voidBank, // 9 - RTC
 	voidBank, // 10 - DMA TRIGMUX
@@ -252,7 +277,7 @@ namespace MMU
 	voidBank  // 31 - Reserved
     };
 
-    MemoryBank memoryMap[0xF] = {
+    MemoryBank memoryMap[0x10] = {
 
 	{ // 0x0 - Flash
 	    &readBuffer< flash, 0, sizeof(flash), u32 >,
@@ -290,8 +315,19 @@ namespace MMU
 	    &writeMap32< apbMap, 14, 0x1F >,
 	    &writeMap16< apbMap, 14, 0x1F >,
 	    &writeMap8 < apbMap, 14, 0x1F >
-	}
+	},
 
+	voidBank, // 0x5
+	voidBank, // 0x6
+	voidBank, // 0x7
+	voidBank, // 0x8
+	voidBank, // 0x9
+	voidBank, // 0xA
+	voidBank, // 0xB
+	voidBank, // 0xC
+	voidBank, // 0xD
+	voidBank, // 0xE
+	voidBank  // 0xF
     };
 
     bool init(){

@@ -86,7 +86,7 @@ bool loadBin( const std::string &fileName ){
 
 int main( int argc, char * argv[] ){
 
-    if( !loadBin( argc > 1 ? argv[1] : "firmware.bin" ) ){
+    if( !loadBin( argc > 1 ? argv[1] : "file.bin" ) ){
         std::cerr << "Error: Could not load file." << std::endl;
         return 1;
     }

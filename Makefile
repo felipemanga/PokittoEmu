@@ -22,6 +22,7 @@ BPROJECT := BUILD/PokittoEmu
 
 OBJECTS += BUILD/sys.o
 OBJECTS += BUILD/iocon.o
+OBJECTS += BUILD/adc.o
 OBJECTS += BUILD/thumb2.o
 OBJECTS += BUILD/mmu.o
 OBJECTS += BUILD/main.o
