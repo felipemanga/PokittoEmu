@@ -22,8 +22,12 @@ BPROJECT := BUILD/PokittoEmu
 
 OBJECTS += BUILD/sys.o
 OBJECTS += BUILD/iocon.o
+OBJECTS += BUILD/gpio.o
 OBJECTS += BUILD/adc.o
+OBJECTS += BUILD/iap.o
+OBJECTS += BUILD/timers.o
 OBJECTS += BUILD/thumb2.o
+OBJECTS += BUILD/screen.o
 OBJECTS += BUILD/mmu.o
 OBJECTS += BUILD/main.o
 OBJECTS += BUILD/cpu.o
@@ -35,7 +39,7 @@ LD_FLAGS :=
 LIBRARIES :=  $(shell sdl2-config --libs)
 LD_SYS_LIBS := 
 
-CPP = 'g++' '-c'
+CPP = 'g++' '-c' '-g'
 LD  = 'g++'
 
 CXX_FLAGS += -std=c++17
@@ -46,6 +50,9 @@ CXX_FLAGS += $(shell sdl2-config --cflags)
 
 all: $(BPROJECT) size
 	+@$(call MAKEDIR,$(OBJDIR))
+
+clean:
+	$(call RM,$(OBJDIR))
 
 BUILD/%.o : %.cpp
 	+@$(call MAKEDIR,$(dir $@))

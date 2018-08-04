@@ -3,15 +3,19 @@
 #include "sys.hpp"
 #include "iocon.hpp"
 #include "adc.hpp"
+#include "gpio.hpp"
+#include "timers.hpp"
 #include <iostream>
 
 namespace MMU
 {
+    bool mute = true;
 
     u8 flash[0x40000];
     u8 sram[0x8000];
     u8 sram1[0x800];
     u8 usbsram[0x800];
+    u8 eeprom[0x1000];
 
     template< u8* buffer, u32 base, u32 size, typename retType > 
     retType readBuffer( u32 addr ){
@@ -109,16 +113,18 @@ namespace MMU
 
 	if( addr&3 )
 	    value = (value >> ((8<<(addr&0x3))-8)) & valType(~0);
-	
-	std::cout << "Read "
-		  << layout.map[idx].name
-		  << std::hex	    
-		  << "(@"
-		  << addr
-		  << ") = " << value << " "
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+
+	if( !mute && !layout.map[idx].mute ){
+	    std::cout << "Read "
+		      << layout.map[idx].name
+		      << std::hex	    
+		      << "(@"
+		      << addr
+		      << ") = " << value << " "
+		      << " on PC="
+		      << CPU::ADDRESS
+		      << std::endl;
+	}
 
 	return value;
     }
@@ -132,16 +138,18 @@ namespace MMU
 		      << std::endl;
 	    return; // to-do: raise exception?
 	}
-	
-	std::cout << "write "
-		  << layout.map[idx].name
-		  << std::hex	    
-		  << "(@"
-		  << addr
-		  << ") = " << value << " "
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+
+	if( !mute ){
+	    std::cout << "write "
+		      << layout.map[idx].name
+		      << std::hex	    
+		      << "(@"
+		      << addr
+		      << ") = " << value << " "
+		      << " on PC="
+		      << CPU::ADDRESS
+		      << std::endl;
+	}
 
 	auto write = layout.map[ idx ].write;
 	u32 oldvalue = *layout.map[ idx ].value;
@@ -241,6 +249,62 @@ namespace MMU
 	&writeRegister< ADC::layout, u16 >,
 	&writeRegister< ADC::layout, u8  >
     };
+
+    MemoryBank ct32b1Bank = {
+	&readRegister<  TIMERS::ct32b1Layout, u32 >,
+	&readRegister<  TIMERS::ct32b1Layout, u16 >,
+	&readRegister<  TIMERS::ct32b1Layout, u8  >,
+	&writeRegister< TIMERS::ct32b1Layout, u32 >,
+	&writeRegister< TIMERS::ct32b1Layout, u16 >,
+	&writeRegister< TIMERS::ct32b1Layout, u8  >
+    };
+
+    MemoryBank ct32b0Bank = {
+	&readRegister<  TIMERS::ct32b0Layout, u32 >,
+	&readRegister<  TIMERS::ct32b0Layout, u16 >,
+	&readRegister<  TIMERS::ct32b0Layout, u8  >,
+	&writeRegister< TIMERS::ct32b0Layout, u32 >,
+	&writeRegister< TIMERS::ct32b0Layout, u16 >,
+	&writeRegister< TIMERS::ct32b0Layout, u8  >
+    };
+    
+    MemoryBank gpioByteBank = {
+	&readRegister<  GPIO::byteLayout, u32 >,
+	&readRegister<  GPIO::byteLayout, u16 >,
+	&readRegister<  GPIO::byteLayout, u8  >,
+	&writeRegister< GPIO::byteLayout, u32 >,
+	&writeRegister< GPIO::byteLayout, u16 >,
+	&writeRegister< GPIO::byteLayout, u8  >
+    };
+
+
+    MemoryBank gpioWordBank = {
+	&readRegister<  GPIO::wordLayout, u32 >,
+	&readRegister<  GPIO::wordLayout, u16 >,
+	&readRegister<  GPIO::wordLayout, u8  >,
+	&writeRegister< GPIO::wordLayout, u32 >,
+	&writeRegister< GPIO::wordLayout, u16 >,
+	&writeRegister< GPIO::wordLayout, u8  >
+    };
+
+
+    MemoryBank gpioMainBank = {
+	&readRegister<  GPIO::mainLayout, u32 >,
+	&readRegister<  GPIO::mainLayout, u16 >,
+	&readRegister<  GPIO::mainLayout, u8  >,
+	&writeRegister< GPIO::mainLayout, u32 >,
+	&writeRegister< GPIO::mainLayout, u16 >,
+	&writeRegister< GPIO::mainLayout, u8  >
+    };
+
+    MemoryBank systickBank = {
+	&readRegister<  TIMERS::systickLayout, u32 >,
+	&readRegister<  TIMERS::systickLayout, u16 >,
+	&readRegister<  TIMERS::systickLayout, u8  >,
+	&writeRegister< TIMERS::systickLayout, u32 >,
+	&writeRegister< TIMERS::systickLayout, u16 >,
+	&writeRegister< TIMERS::systickLayout, u8  >
+    };    
     
     MemoryBank apbMap[32] = {
 	voidBank, // 0 - I2C
@@ -248,8 +312,8 @@ namespace MMU
 	voidBank, // 2 - USART0
 	voidBank, // 3 - 16-bit counter 0
 	voidBank, // 4 - 16-bit counter 1
-	voidBank, // 5 - 32-bit counter 0
-	voidBank, // 6 - 32-bit counter 1
+	ct32b0Bank, // 5 - 32-bit counter 0
+	ct32b1Bank, // 6 - 32-bit counter 1
 	adcBank,  // 7 - ADC
 	voidBank, // 8 - I2C1
 	voidBank, // 9 - RTC
@@ -275,6 +339,44 @@ namespace MMU
 	voidBank, // 29 - USART3
 	voidBank, // 30 - Reserved
 	voidBank  // 31 - Reserved
+    };
+
+    MemoryBank gpioMap[0x10] = {
+	gpioByteBank,
+	gpioWordBank,
+	gpioMainBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank
+    };
+
+    MemoryBank ppbMap[0x10] = {
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	voidBank,
+	systickBank,
+	voidBank
     };
 
     MemoryBank memoryMap[0x10] = {
@@ -322,11 +424,27 @@ namespace MMU
 	voidBank, // 0x7
 	voidBank, // 0x8
 	voidBank, // 0x9
-	voidBank, // 0xA
+	
+	{ // 0xA - GPIO
+	    &readMap32<  gpioMap, 12, 0xF >,
+	    &readMap16<  gpioMap, 12, 0xF >,
+	    &readMap8 <  gpioMap, 12, 0xF >,
+	    &writeMap32< gpioMap, 12, 0xF >,
+	    &writeMap16< gpioMap, 12, 0xF >,
+	    &writeMap8 < gpioMap, 12, 0xF >
+	},
+	
 	voidBank, // 0xB
 	voidBank, // 0xC
 	voidBank, // 0xD
-	voidBank, // 0xE
+	{ // 0xE - PPB Private Periferal Bus
+	    &readMap32<  ppbMap, 12, 0xF >,
+	    &readMap16<  ppbMap, 12, 0xF >,
+	    &readMap8 <  ppbMap, 12, 0xF >,
+	    &writeMap32< ppbMap, 12, 0xF >,
+	    &writeMap16< ppbMap, 12, 0xF >,
+	    &writeMap8 < ppbMap, 12, 0xF >
+	},
 	voidBank  // 0xF
     };
 

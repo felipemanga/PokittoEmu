@@ -6,7 +6,8 @@
 #include "sys.hpp"
 #include "iocon.hpp"
 #include "adc.hpp"
-
+#include "gpio.hpp"
+#include "timers.hpp"
 #include <algorithm>
 
 namespace CPU
@@ -48,9 +49,12 @@ namespace CPU
 
     void reset()
     {
+	cpuTotalTicks = 0;
 	SYS::init();
 	IOCON::init();
 	ADC::init();
+	GPIO::init();
+	TIMERS::init();
 
 	// clean registers
 	for (int i = 0; i < 45; i++)
@@ -59,7 +63,7 @@ namespace CPU
 	reg[15].I = MMU::read32( SYS::VTOR+4 );
 	reg[14].I = ~0;
 	reg[13].I = MMU::read32( SYS::VTOR );
-	armIrqEnable = false;
+	armIrqEnable = true;
 
 	C_FLAG = false;
 	V_FLAG = false;
@@ -492,74 +496,73 @@ namespace CPU
 	    CPSR |= 0x20000000;
 	if (V_FLAG)
 	    CPSR |= 0x10000000;
-	//	CPSR |= 0x00000020;
-	if (!armIrqEnable)
-	    CPSR |= 0x80;
-	// CPSR |= (armMode & 0x1F);
+	// if (!armIrqEnable) CPSR |= 0x80;
 	reg[16].I = CPSR;
-    }
-
-    void CPUUpdateFlags(bool breakLoop)
-    {
-	u32 CPSR = reg[16].I;
-
-	N_FLAG = (CPSR & 0x80000000) ? true: false;
-	Z_FLAG = (CPSR & 0x40000000) ? true: false;
-	C_FLAG = (CPSR & 0x20000000) ? true: false;
-	V_FLAG = (CPSR & 0x10000000) ? true: false;
-	// armState = false; // (CPSR & 0x20) ? false : true;
-	armIrqEnable = (CPSR & 0x80) ? false : true;
-	if (breakLoop)
-	{
-//		if (armIrqEnable && (IF & IE) && (IME & 1))
-	    cpuNextEvent = cpuTotalTicks;
-	}
     }
 
     void CPUUpdateFlags()
     {
-	CPUUpdateFlags(true);
+	u32 CPSR = reg[16].I;
+	N_FLAG = (CPSR & 0x80000000) ? true: false;
+	Z_FLAG = (CPSR & 0x40000000) ? true: false;
+	C_FLAG = (CPSR & 0x20000000) ? true: false;
+	V_FLAG = (CPSR & 0x10000000) ? true: false;
+	// armIrqEnable = (CPSR & 0x80) ? false : true;
     }
 
-    void interrupt()
-    {
-	u32 PC = reg[15].I;
-	// bool savedState = armState;
-	CPUSwitchMode(0x12, true, false);
-	reg[14].I = PC;
-	// if (!savedState)
-	reg[14].I += 2;
-	reg[15].I = 0x18;
-	// armState = true;
-	armIrqEnable = false;
+    void push( u32 v ){
+	u32 addr = (reg[13].I -= 4);
+	MMU::write32(addr, v);
+	cpuTotalTicks++; 
+    }
 
+
+    u32 pop(){
+	u32 ret = MMU::read32(reg[13].I);
+	reg[13].I += 4;
+	cpuTotalTicks++;
+	return ret;
+    }
+
+    void exitInterrupt(){
+	reg[0].I = pop();
+	reg[1].I = pop();
+	reg[2].I = pop();
+	reg[3].I = pop();
+	reg[12].I = pop();
+	reg[14].I = pop();
+	reg[15].I = pop() - 2;
+	reg[16].I = pop();
+	armIrqEnable = true;
+	CPUUpdateFlags();
 	armNextPC = reg[15].I;
 	reg[15].I += 2;
 	THUMB_PREFETCH();
-
-	//  if(!holdState)
-	/*
-	  biosProtected[0] = 0x02;
-	  biosProtected[1] = 0xc0;
-	  biosProtected[2] = 0x5e;
-	  biosProtected[3] = 0xe5;
-	*/
+    }
+    
+    void interrupt( u32 id )
+    {
+	CPUUpdateCPSR();
+	push( reg[16].I );
+	push( reg[15].I );
+	push( reg[14].I );
+	push( reg[12].I );
+	push( reg[3].I );
+	push( reg[2].I );
+	push( reg[1].I );
+	push( reg[0].I );
+	reg[15].I = MMU::read32(SYS::VTOR+(id<<2));
+	reg[14].I = 0xFFFFFFF9;
+	
+	armIrqEnable = false;
+	
+	armNextPC = reg[15].I;
+	reg[15].I += 2;
+	THUMB_PREFETCH();
     }
 
     void enableBusPrefetch(bool enable)
     {
-	if (enable)
-	{
-	    busPrefetchEnable = true;
-	    busPrefetch = false;
-	    busPrefetchCount = 0;
-	}
-	else
-	{
-	    busPrefetchEnable = false;
-	    busPrefetch = false;
-	    busPrefetchCount = 0;
-	}
     }
 
 } // namespace CPU

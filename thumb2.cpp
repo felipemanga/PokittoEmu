@@ -1,5 +1,6 @@
 #include "cpu.hpp"
 #include <iostream>
+#include "iap.hpp"
 
 /*
   #include "GBA.h"
@@ -20,7 +21,11 @@ namespace CPU
 
     static INSN_REGPARM void thumbUnknownInsn(u32 opcode)
     {
-	std::cout << "UNKNOWN OP" << " " << std::hex << opcode << std::endl;
+	std::cout << "UNKNOWN OP "
+		  << std::hex << opcode
+		  << "@ PC=" << armNextPC-2
+		  << std::endl;
+	
 	// LOG(thumbUnknownInsn);
 #ifdef GBA_LOGGING
 	if (settings_log_channel_enabled(LOG_UNDEFINED))
@@ -709,6 +714,10 @@ namespace CPU
 	    reg[15].I &= 0xFFFFFFFE;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
+	    
+	    if( (armNextPC&~1) == 0xFFFFFFF8 )
+		exitInterrupt();
+	    
 	    THUMB_PREFETCH();
 	    clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
 	}
@@ -731,17 +740,26 @@ namespace CPU
 	LOG(thumb47b);
 	int base = (opcode >> 3) & 15;
 	busPrefetchCount=0;
-	reg[14].I = reg[15].I-2;
-	reg[15].I = reg[base].I;
-	// if (reg[base].I & 1)
-	{
-	    // armState = false;
+
+	if( reg[base].I == 0x1fff1ff1 ){
+	    u32 cmdId = MMU::read32(reg[0].I);
+	    if( cmdId > 62 ){
+		std::cout << "Invalid IAP: " << cmdId << std::endl;
+	    }else{
+		IAP::command[cmdId](reg[0].I, reg[1].I, reg[2].I, reg[3].I);
+	    }
+	}else{	
+	    reg[14].I = reg[15].I-2;
+	    reg[15].I = reg[base].I;
 	    reg[15].I &= 0xFFFFFFFE;
-	    armNextPC = reg[15].I;
-	    reg[15].I += 2;
-	    THUMB_PREFETCH();
-	    clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
 	}
+	
+	armNextPC = reg[15].I;
+	reg[15].I += 2;
+	THUMB_PREFETCH();
+	
+	clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
+	
     }
     
 // Load/store instructions ////////////////////////////////////////////////
@@ -1093,6 +1111,12 @@ namespace CPU
 	PUSH_REG(opcode, count, address, 256, 14);
 	clockTicks += 1 + codeTicksAccess16(armNextPC);
 	reg[13].I = temp;
+    }
+
+    static INSN_REGPARM void thumbB6(u32 opcode){
+	LOG(thumbB6);
+	armIrqEnable = 1 ^ ((opcode>>4)&1);
+	clockTicks += 1;
     }
 
 // REV rx
@@ -1688,7 +1712,7 @@ namespace CPU
 	thumbB0,thumbB0,thumbB0,thumbB0,thumbUI,thumbUI,thumbUI,thumbUI,  // B0
 	thumbB2a,thumbB2b,thumbB2c,thumbB2d,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbB4,thumbB4,thumbB4,thumbB4,thumbB5,thumbB5,thumbB5,thumbB5,
-	thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,
+	thumbUI,thumbB6,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,  // B8
 	thumbBA,thumbBAb,thumbUI,thumbBAc,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbBC,thumbBC,thumbBC,thumbBC,thumbBD,thumbBD,thumbBD,thumbBD,
@@ -1741,16 +1765,16 @@ namespace CPU
 	}
 	std::cout << std::endl;
     }
-    
+
+    u32 echo = 0, echoRes = 0xFFFFFF;
     int thumbExecute()
     {
-	u32 echo = 1, echoRes = 0xFFFFFFFF;
 	do
 	{
 	    PREVADDRESS = ADDRESS;
 	    u32 opcode = cpuPrefetch[0];
 
-	    if( armNextPC == 0x5a0e ){
+	    if( armNextPC&~1 == 0x1250 ){
 		echoRes = 0;
 		echo = 0;
 	    }
