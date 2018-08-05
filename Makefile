@@ -39,7 +39,7 @@ LD_FLAGS :=
 LIBRARIES :=  $(shell sdl2-config --libs)
 LD_SYS_LIBS := 
 
-CPP = 'g++' '-c' '-g'
+CPP = 'g++' '-c' '-O3'
 LD  = 'g++'
 
 CXX_FLAGS += -std=c++17

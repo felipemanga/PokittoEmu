@@ -157,8 +157,8 @@ int main( int argc, char * argv[] ){
 	    }
 
 	    GPIO::update();
-	    for( u32 i=0; i<100000; i+=1 ){
-		CPU::cpuNextEvent += 10;
+	    for( u32 i=0; i<500000; i+=1 ){
+		CPU::cpuNextEvent += 5;
 		CPU::thumbExecute();
 		TIMERS::update();
 	    }
