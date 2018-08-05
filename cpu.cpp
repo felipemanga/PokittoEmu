@@ -1,3 +1,4 @@
+#include <iostream>
 #include "cpu.hpp"
 // #include "GBA.h"
 // #include "Globals.h"
@@ -553,7 +554,6 @@ namespace CPU
 	push( reg[0].I );
 	reg[15].I = MMU::read32(SYS::VTOR+(id<<2));
 	reg[14].I = 0xFFFFFFF9;
-	
 	armIrqEnable = false;
 	
 	armNextPC = reg[15].I;

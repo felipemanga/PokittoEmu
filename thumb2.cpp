@@ -748,6 +748,7 @@ namespace CPU
 	    }else{
 		IAP::command[cmdId](reg[0].I, reg[1].I, reg[2].I, reg[3].I);
 	    }
+	    reg[15].I -= 2;
 	}else{	
 	    reg[14].I = reg[15].I-2;
 	    reg[15].I = reg[base].I;
@@ -1113,9 +1114,11 @@ namespace CPU
 	reg[13].I = temp;
     }
 
+// CPSID / CPSIE
     static INSN_REGPARM void thumbB6(u32 opcode){
 	LOG(thumbB6);
 	armIrqEnable = 1 ^ ((opcode>>4)&1);
+	// std::cout << "IRQEN " << armIrqEnable << " " << opcode << " " << ADDRESS << std::endl;
 	clockTicks += 1;
     }
 
@@ -1573,6 +1576,17 @@ namespace CPU
 	clockTicks = 1;
     }
 
+// MRS
+    static INSN_REGPARM void thumbF3(u32 opcode)
+    {
+	LOG(thumbF3);
+	reg[(cpuPrefetch[0]>>8)&0xF].I = reg[13].I;
+	armNextPC = reg[15].I;
+	THUMB_PREFETCH();
+	reg[15].I += 2;
+	clockTicks = 1;
+    }
+
 // BLL #offset (backward)
     static INSN_REGPARM void thumbF4(u32 opcode)
     {
@@ -1742,7 +1756,7 @@ namespace CPU
 	thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,  // F0
-	thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,
+	thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF0,thumbF3,
 	thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,
 	thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,thumbF4,
 	thumbF8,thumbF8,thumbF8,thumbF8,thumbF8,thumbF8,thumbF8,thumbF8,  // F8
@@ -1766,7 +1780,7 @@ namespace CPU
 	std::cout << std::endl;
     }
 
-    u32 echo = 0, echoRes = 0xFFFFFF;
+    u32 echo = 0, echoRes = 0xFFFFFFF;
     int thumbExecute()
     {
 	do

@@ -1,10 +1,21 @@
 #include <iostream>
 #include "types.hpp"
 #include "gpio.hpp"
-
+#include "sys.hpp"
 #include "screen.hpp"
+#include "cpu.hpp"
 
 namespace GPIO {
+
+    u32 ISEL,
+	IENR,
+	IENF,
+	RISE,
+	FALL,
+	IST,
+	PMCTRL,
+	PMSRC,
+	PMCFG;
 
     u32 PIN0,
 	PIN1,
@@ -18,6 +29,134 @@ namespace GPIO {
 	DIR0,
 	DIR1,
 	DIR2;
+
+    u32 *PIN[] = {&PIN0, &PIN1, &PIN2};
+    
+    void input( u32 pinId, u32 bit, u32 val ){
+	val = !!val;
+	u32 old = (*PIN[pinId]>>bit) & 1;
+	if( old == val ) return;
+//	std::cout << "Setting " << pinId << "_" << bit << " = " << val << std::endl;
+	*PIN[pinId] = (*PIN[pinId]&~(1<<bit)) | (val<<bit);
+
+	u32 id = bit, f = 1;
+	if( pinId == 1 ) id += 24;
+	else if( pinId == 2 ) id += 56;
+
+	if( val ){
+	
+	    if( SYS::PINTSEL0 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL1 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL2 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL3 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL4 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL5 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL6 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL7 == id && (IENR & f) ){
+		IST |= f; RISE |= f;
+	    }
+	
+	    f <<= 1;
+
+	}else{
+
+	    if( SYS::PINTSEL0 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL1 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL2 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL3 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL4 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL5 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL6 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+
+	    if( SYS::PINTSEL7 == id && (IENF & f) ){
+		IST |= f; FALL |= f;
+	    }
+	
+	    f <<= 1;
+	    
+	}
+	
+    }
+
+    void update(){
+	if( IST && CPU::armIrqEnable ){
+	    for( u32 f=0; f<8; ++f ){
+		if( IST & (1<<f) ){
+		    CPU::interrupt(16+f);
+		    return;
+		}
+	    }
+	}
+    }
     
     template<u32 &pin> u32 readPin( u32, u32 ){
 	return pin;
@@ -75,6 +214,60 @@ namespace GPIO {
     template<u32 &pin, u32 &mask> u32 writeMasked( u32 v, u32, u32 ){
 	return writePin<pin>( (pin&mask) | (v&~mask), 0, 0 );
     }
+
+    MMU::Register flagMap[] = {
+	MMUREG( ISEL ),
+	MMUREG( IENR ),
+	{
+	    &MMU::_reserved,
+	    "SIENR", [](u32,u32){ return IENR; },
+	    [](u32 v, u32,u32){
+		IENR |= v;
+		return IENR;
+	    }
+	},
+	{
+	    &MMU::_reserved,
+	    "CIENR", [](u32,u32){ return IENR; },
+	    [](u32 v, u32,u32){
+		IENR &= ~v;
+		return IENR;
+	    }
+	},
+	MMUREG(IENF),
+	{
+	    &MMU::_reserved,
+	    "SIENF", [](u32,u32){ return IENF; },
+	    [](u32 v, u32,u32){
+		IENF |= v;
+		return IENF;
+	    }
+	},
+	{
+	    &MMU::_reserved,
+	    "CIENF", [](u32,u32){ return IENF; },
+	    [](u32 v, u32,u32){
+		IENF &= ~v;
+		return IENF;
+	    }
+	},
+	MMUREG( RISE ),
+	MMUREG( FALL ),
+	{
+	    &IST,
+	    "IST",
+	    [](u32,u32){
+		return IST;
+	    },
+	    [](u32 v, u32,u32){
+		IST &= ~v;
+		RISE &= ~v;
+		FALL &= ~v;
+		return IST;
+	    }
+	}
+
+    };
     
 #define BYTEREG(B,p,b)							\
     { &MMU::_reserved, "B"#B, &readByte<PIN##p,b>, &writeByte<POUT##p,b> }
@@ -357,17 +550,22 @@ namespace GPIO {
 	mainMap
     };
 
+    MMU::Layout flagLayout = {
+	0xA0004000,
+	sizeof(flagMap) / sizeof(flagMap[0]),
+	flagMap
+    };
 
     void init(){
 	/*
-	for( u32 i=0; i<sizeof(mainMap)/sizeof(mainMap[0]); ++i ){
-	    std::cout << mainMap[i].name
+	for( u32 i=0; i<sizeof(flagMap)/sizeof(flagMap[0]); ++i ){
+	    std::cout << flagMap[i].name
 		      << " "
 		      << std::hex
-		      << (mainLayout.base+(i*4))
+		      << (flagLayout.base+(i*4))
 		      << std::endl;
 	}
-	*/
+/* */
     }
     
 }

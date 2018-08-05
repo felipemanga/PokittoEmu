@@ -297,6 +297,15 @@ namespace MMU
 	&writeRegister< GPIO::mainLayout, u8  >
     };
 
+    MemoryBank gpioFlagBank = {
+	&readRegister<  GPIO::flagLayout, u32 >,
+	&readRegister<  GPIO::flagLayout, u16 >,
+	&readRegister<  GPIO::flagLayout, u8  >,
+	&writeRegister< GPIO::flagLayout, u32 >,
+	&writeRegister< GPIO::flagLayout, u16 >,
+	&writeRegister< GPIO::flagLayout, u8  >
+    };
+    
     MemoryBank systickBank = {
 	&readRegister<  TIMERS::systickLayout, u32 >,
 	&readRegister<  TIMERS::systickLayout, u16 >,
@@ -346,7 +355,7 @@ namespace MMU
 	gpioWordBank,
 	gpioMainBank,
 	voidBank,
-	voidBank,
+	gpioFlagBank,
 	voidBank,
 	voidBank,
 	voidBank,
@@ -426,12 +435,12 @@ namespace MMU
 	voidBank, // 0x9
 	
 	{ // 0xA - GPIO
-	    &readMap32<  gpioMap, 12, 0xF >,
-	    &readMap16<  gpioMap, 12, 0xF >,
-	    &readMap8 <  gpioMap, 12, 0xF >,
-	    &writeMap32< gpioMap, 12, 0xF >,
-	    &writeMap16< gpioMap, 12, 0xF >,
-	    &writeMap8 < gpioMap, 12, 0xF >
+	    &readMap32<  gpioMap, 12, 0x7 >,
+	    &readMap16<  gpioMap, 12, 0x7 >,
+	    &readMap8 <  gpioMap, 12, 0x7 >,
+	    &writeMap32< gpioMap, 12, 0x7 >,
+	    &writeMap16< gpioMap, 12, 0x7 >,
+	    &writeMap8 < gpioMap, 12, 0x7 >
 	},
 	
 	voidBank, // 0xB

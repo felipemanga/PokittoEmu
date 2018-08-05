@@ -6,6 +6,7 @@
 
 #include "cpu.hpp"
 #include "timers.hpp"
+#include "gpio.hpp"
 #include "screen.hpp"
 
 class InitError : public std::exception
@@ -126,13 +127,39 @@ int main( int argc, char * argv[] ){
 	    SDL_Event e;
 	    while (SDL_PollEvent(&e)) {
 		if( e.type == SDL_QUIT ) return 0;
+		
+		if( e.type == SDL_KEYDOWN ){
+		    switch( e.key.keysym.sym ){
+		    case SDLK_UP: GPIO::input(1,13,1); break;
+		    case SDLK_DOWN: GPIO::input(1,3,1); break;
+		    case SDLK_LEFT: GPIO::input(1,25,1); break;
+		    case SDLK_RIGHT: GPIO::input(1,7,1); break;
+		    case SDLK_a: GPIO::input(1,9,1); break;
+		    case SDLK_s:
+		    case SDLK_b: GPIO::input(1,4,1); break;
+		    case SDLK_d:
+		    case SDLK_c: GPIO::input(1,10,1); break;
+		    }
+		}else if( e.type == SDL_KEYUP ){
+		    switch( e.key.keysym.sym ){
+		    case SDLK_UP: GPIO::input(1,13,0); break;
+		    case SDLK_DOWN: GPIO::input(1,3,0); break;
+		    case SDLK_LEFT: GPIO::input(1,25,0); break;
+		    case SDLK_RIGHT: GPIO::input(1,7,0); break;
+		    case SDLK_a: GPIO::input(1,9,0); break;
+		    case SDLK_s:
+		    case SDLK_b: GPIO::input(1,4,0); break;
+		    case SDLK_d:
+		    case SDLK_c: GPIO::input(1,10,0); break;
+		    }
+		}
+		
 	    }
 
-	    for( u32 i=0; i<50000; i+=10 ){
-		for( u32 j=0; j<10; j++ ){
-		    CPU::cpuNextEvent += 10;
-		    CPU::thumbExecute();
-		}
+	    GPIO::update();
+	    for( u32 i=0; i<100000; i+=1 ){
+		CPU::cpuNextEvent += 10;
+		CPU::thumbExecute();
 		TIMERS::update();
 	    }
 

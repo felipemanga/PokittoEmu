@@ -5,7 +5,8 @@
 namespace GPIO {
 
     void init();
-
-    extern MMU::Layout byteLayout, wordLayout, mainLayout;
+    void update();
+    void input( u32 pinId, u32 bit, u32 val );
+    extern MMU::Layout byteLayout, wordLayout, mainLayout, flagLayout;
 
 }
