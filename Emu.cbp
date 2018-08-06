@@ -12,6 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++14" />
 					<Add option="-g" />
 				</Compiler>
 			</Target>
@@ -22,6 +23,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-std=c++14" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -45,7 +47,27 @@
 		<ExtraCommands>
 			<Add after="XCOPY $(#sdl2)\bin\*.dll $(TARGET_OUTPUT_DIR) /D /Y" />
 		</ExtraCommands>
+		<Unit filename="adc.cpp" />
+		<Unit filename="adc.hpp" />
+		<Unit filename="cpu.cpp" />
+		<Unit filename="cpu.hpp" />
+		<Unit filename="gpio.cpp" />
+		<Unit filename="gpio.hpp" />
+		<Unit filename="iap.cpp" />
+		<Unit filename="iap.hpp" />
+		<Unit filename="iocon.cpp" />
+		<Unit filename="iocon.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="mmu.cpp" />
+		<Unit filename="mmu.hpp" />
+		<Unit filename="screen.cpp" />
+		<Unit filename="screen.hpp" />
+		<Unit filename="sys.cpp" />
+		<Unit filename="sys.hpp" />
+		<Unit filename="thumb2.cpp" />
+		<Unit filename="timers.cpp" />
+		<Unit filename="timers.hpp" />
+		<Unit filename="types.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

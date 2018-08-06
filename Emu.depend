@@ -382,3 +382,120 @@
 	"types.hpp"
 	"sys.hpp"
 
+1533469748 source:c:\users\felip\projects\pokittoemu\adc.cpp
+	<iostream>
+	"types.hpp"
+	"adc.hpp"
+
+1532646825 c:\users\felip\projects\pokittoemu\types.hpp
+	<cstdint>
+
+1533469748 c:\users\felip\projects\pokittoemu\adc.hpp
+	"mmu.hpp"
+
+1533469748 c:\users\felip\projects\pokittoemu\mmu.hpp
+
+1533469748 source:c:\users\felip\projects\pokittoemu\cpu.cpp
+	<iostream>
+	"cpu.hpp"
+	"mmu.hpp"
+	"sys.hpp"
+	"iocon.hpp"
+	"adc.hpp"
+	"gpio.hpp"
+	"timers.hpp"
+	<algorithm>
+
+1533469748 c:\users\felip\projects\pokittoemu\cpu.hpp
+	"types.hpp"
+	"mmu.hpp"
+
+1533469748 c:\users\felip\projects\pokittoemu\sys.hpp
+	"mmu.hpp"
+
+1533469748 c:\users\felip\projects\pokittoemu\iocon.hpp
+	"mmu.hpp"
+
+1533469748 c:\users\felip\projects\pokittoemu\gpio.hpp
+	"mmu.hpp"
+
+1533469748 c:\users\felip\projects\pokittoemu\timers.hpp
+	"mmu.hpp"
+
+1533469748 source:c:\users\felip\projects\pokittoemu\gpio.cpp
+	<iostream>
+	"types.hpp"
+	"gpio.hpp"
+	"sys.hpp"
+	"screen.hpp"
+	"cpu.hpp"
+
+1533469748 c:\users\felip\projects\pokittoemu\screen.hpp
+
+1533469748 source:c:\users\felip\projects\pokittoemu\iap.cpp
+	<iostream>
+	"types.hpp"
+	"iap.hpp"
+	"mmu.hpp"
+
+1533469748 c:\users\felip\projects\pokittoemu\iap.hpp
+
+1533469748 source:c:\users\felip\projects\pokittoemu\iocon.cpp
+	"types.hpp"
+	"iocon.hpp"
+
+1533499977 source:c:\users\felip\projects\pokittoemu\main.cpp
+	<exception>
+	<string>
+	<iostream>
+	<fstream>
+	<SDL2/SDL.h>
+	"cpu.hpp"
+	"timers.hpp"
+	"gpio.hpp"
+	"screen.hpp"
+
+1533469748 source:c:\users\felip\projects\pokittoemu\mmu.cpp
+	"types.hpp"
+	"cpu.hpp"
+	"sys.hpp"
+	"iocon.hpp"
+	"adc.hpp"
+	"gpio.hpp"
+	"timers.hpp"
+	<iostream>
+	"../common/Port.h"
+	"../common/Settings.h"
+	"Cartridge.h"
+	"CPU.h"
+	"GBA.h"
+	"Globals.h"
+	"Sound.h"
+	<cstdio>
+
+1533469748 source:c:\users\felip\projects\pokittoemu\screen.cpp
+	<iostream>
+	"types.hpp"
+	<SDL2/SDL.h>
+
+1533469748 source:c:\users\felip\projects\pokittoemu\sys.cpp
+	<iostream>
+	"types.hpp"
+	"sys.hpp"
+
+1533469748 source:c:\users\felip\projects\pokittoemu\thumb2.cpp
+	"cpu.hpp"
+	<iostream>
+	"iap.hpp"
+	"GBA.h"
+	"Globals.h"
+	"MMU.h"
+	"../common/Settings.h"
+
+1533469748 source:c:\users\felip\projects\pokittoemu\timers.cpp
+	<iostream>
+	"types.hpp"
+	"timers.hpp"
+	"cpu.hpp"
+	"sys.hpp"
+
