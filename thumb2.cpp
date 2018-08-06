@@ -1669,7 +1669,7 @@ namespace CPU
 	thumb38<6>,thumb38<6>,thumb38<6>,thumb38<6>,thumb38<7>,thumb38<7>,thumb38<7>,thumb38<7>,
 	thumb40_0,thumb40_1,thumb40_2,thumb40_3,thumb41_0,thumb41_1,thumb41_2,thumb41_3,  // 40
 	thumb42_0,thumb42_1,thumb42_2,thumb42_3,thumb43_0,thumb43_1,thumb43_2,thumb43_3,
-	thumbUI,thumb44_1,thumb44_2,thumb44_3,thumbUI,thumb45_1,thumb45_2,thumb45_3,
+	thumb44_1,thumb44_1,thumb44_2,thumb44_3,thumbUI,thumb45_1,thumb45_2,thumb45_3,
 	thumb46_0,thumb46_1,thumb46_2,thumb46_3,thumb47,thumb47,thumb47b,thumb47b,
 	thumb48,thumb48,thumb48,thumb48,thumb48,thumb48,thumb48,thumb48,  // 48
 	thumb48,thumb48,thumb48,thumb48,thumb48,thumb48,thumb48,thumb48,
