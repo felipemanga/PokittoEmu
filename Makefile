@@ -31,12 +31,15 @@ OBJECTS += BUILD/screen.o
 OBJECTS += BUILD/mmu.o
 OBJECTS += BUILD/main.o
 OBJECTS += BUILD/cpu.o
+OBJECTS += BUILD/gdb.o
 
 INCLUDE_PATHS += -I./.
 
 LIBRARY_PATHS :=
 LD_FLAGS :=
-LIBRARIES :=  $(shell sdl2-config --libs)
+LIBRARIES := $(shell sdl2-config --libs)
+LIBRARIES += -lSDL2_net
+LIBRARIES += -lpthread
 LD_SYS_LIBS := 
 
 CPP = 'g++' '-c' '-O3'

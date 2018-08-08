@@ -2,6 +2,8 @@
 #include "types.hpp"
 #include <SDL2/SDL.h>
 
+namespace SCREEN {
+
 u16 *LCD;
 
 #define HEIGHT 176
@@ -129,4 +131,6 @@ void LCDWrite( u32 cd, u16 v ){
 	default: stubId = v; cmd=stub; break;
 	}
     }
+}
+
 }

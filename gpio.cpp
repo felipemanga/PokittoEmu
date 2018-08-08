@@ -168,9 +168,9 @@ namespace GPIO {
 
     template<> u32 writePin<POUT1>( u32 v, u32 ov, u32 addr ){
 	if( !(POUT1 & (1<<12)) && (v & (1<<12)) )
-	    LCDWrite( (POUT0>>2)&1, POUT2>>3 );
+	    SCREEN::LCDWrite( (POUT0>>2)&1, POUT2>>3 );
 	if( !(POUT1 & 1) && (v&1) )
-	    LCDReset();
+	    SCREEN::LCDReset();
 	return POUT1 = v;
     }
     

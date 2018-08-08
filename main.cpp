@@ -8,18 +8,10 @@
 #include "timers.hpp"
 #include "gpio.hpp"
 #include "screen.hpp"
+#include "initerror.hpp"
+#include "state.hpp"
+#include "gdb.hpp"
 
-class InitError : public std::exception
-{
-    std::string msg;
-public:
-    InitError() : exception(), msg( SDL_GetError() ){}
-    InitError( const std::string & );
-    virtual ~InitError() throw() {}
-    virtual const char * what() const throw() {
-        return msg.c_str();
-    }
-};
 
 class SDL
 {
@@ -74,7 +66,7 @@ SDL::SDL( Uint32 flags )
 	throw InitError();
 
     SDL_LockSurface(vscreen);
-    LCD = (u16 *) vscreen->pixels;
+    SCREEN::LCD = (u16 *) vscreen->pixels;
 }
 
 SDL::~SDL()
@@ -93,9 +85,6 @@ void SDL::draw()
     SDL_UnlockSurface( vscreen );
     SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
     SDL_UpdateWindowSurface(m_window);
-    // SDL_RenderPresent( m_renderer );
-    // SDL_RenderClear( m_renderer );
-    
     SDL_LockSurface(vscreen);
 }
 
@@ -105,6 +94,8 @@ bool loadBin( const std::string &fileName ){
     inp.read( (char *) MMU::flash, sizeof(MMU::flash) );
     return true;
 }
+
+EmuState emustate = EmuState::RUNNING;
 
 int main( int argc, char * argv[] ){
 
@@ -118,6 +109,18 @@ int main( int argc, char * argv[] ){
     try{
 
         SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER );
+
+	if( argc > 2 && argv[2] == std::string("-g") ){
+
+	    u32 port = 0;
+	    if( argc > 3 )
+		port = atoi( argv[3] );
+
+	    if( !GDB::init( port ) )
+		throw InitError();
+	    
+	}
+
         MMU::init();
         CPU::init();
 
@@ -125,47 +128,61 @@ int main( int argc, char * argv[] ){
 
 	while( true ){
 	    SDL_Event e;
+
+	    GDB::update();
 	    while (SDL_PollEvent(&e)) {
-		if( e.type == SDL_QUIT ) return 0;
 		
-		if( e.type == SDL_KEYDOWN ){
+		if( e.type == SDL_QUIT ) 
+		    return 0;
+
+		if( emustate == EmuState::STOPPED ) 
+		    continue;
+
+		if( e.type == SDL_KEYDOWN || e.type == SDL_KEYUP ){
+		    u32 btnState = e.type == SDL_KEYDOWN;
 		    switch( e.key.keysym.sym ){
-		    case SDLK_UP: GPIO::input(1,13,1); break;
-		    case SDLK_DOWN: GPIO::input(1,3,1); break;
-		    case SDLK_LEFT: GPIO::input(1,25,1); break;
-		    case SDLK_RIGHT: GPIO::input(1,7,1); break;
-		    case SDLK_a: GPIO::input(1,9,1); break;
+		    case SDLK_UP: GPIO::input(1,13,btnState); break;
+		    case SDLK_DOWN: GPIO::input(1,3,btnState); break;
+		    case SDLK_LEFT: GPIO::input(1,25,btnState); break;
+		    case SDLK_RIGHT: GPIO::input(1,7,btnState); break;
+		    case SDLK_a: GPIO::input(1,9,btnState); break;
 		    case SDLK_s:
-		    case SDLK_b: GPIO::input(1,4,1); break;
+		    case SDLK_b: GPIO::input(1,4,btnState); break;
 		    case SDLK_d:
-		    case SDLK_c: GPIO::input(1,10,1); break;
-		    }
-		}else if( e.type == SDL_KEYUP ){
-		    switch( e.key.keysym.sym ){
-		    case SDLK_UP: GPIO::input(1,13,0); break;
-		    case SDLK_DOWN: GPIO::input(1,3,0); break;
-		    case SDLK_LEFT: GPIO::input(1,25,0); break;
-		    case SDLK_RIGHT: GPIO::input(1,7,0); break;
-		    case SDLK_a: GPIO::input(1,9,0); break;
-		    case SDLK_s:
-		    case SDLK_b: GPIO::input(1,4,0); break;
-		    case SDLK_d:
-		    case SDLK_c: GPIO::input(1,10,0); break;
+		    case SDLK_c: GPIO::input(1,10,btnState); break;
 		    }
 		}
 		
 	    }
 
-	    GPIO::update();
-	    for( u32 i=0; i<500000; i+=1 ){
-		CPU::cpuNextEvent += 5;
+	    switch( emustate ){
+	    case EmuState::STOPPED:
+		break;
+
+	    case EmuState::RUNNING:
+		GPIO::update();
+		for( u32 i=0; i<500000; i+=1 ){
+		    CPU::cpuNextEvent += 5;
+		    CPU::thumbExecute();
+		    TIMERS::update();
+		}
+		break;
+
+	    case EmuState::STEP:
+		GPIO::update();
+		CPU::cpuNextEvent++;
 		CPU::thumbExecute();
 		TIMERS::update();
+		emustate = EmuState::STOPPED;
+		break;
+		
 	    }
 
-	    LCD[ 1*220+1 ] = CPU::cpuTotalTicks;
-
-	    sdl.draw();
+	    SCREEN::LCD[ 1*220+1 ] = CPU::cpuTotalTicks;
+	    if( SCREEN::dirty ){
+		sdl.draw();
+		SCREEN::dirty = false;
+	    }
 	}
 	
         return 0;

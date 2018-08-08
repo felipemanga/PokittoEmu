@@ -1819,7 +1819,7 @@ namespace CPU
 	    reg[15].I += 2;
 	    THUMB_PREFETCH_NEXT();
 
-	    CPU::logops = ADDRESS == 0x51b8;
+	    // CPU::logops = ADDRESS == 0x51b8;
 
 	    (*thumbInsnTable[opcode>>6])(opcode);
 
