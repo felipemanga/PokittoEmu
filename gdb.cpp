@@ -53,6 +53,7 @@ namespace GDB {
 	    
 	    if( !client ){
 		client = SDLNet_TCP_Accept(server);
+		noAckMode = false;
 		if( !client ){
 		    std::this_thread::sleep_for( std::chrono::milliseconds(100) );
 			continue;
@@ -72,6 +73,10 @@ namespace GDB {
 	    if( current.empty() ){
 
 		switch( ch ){
+		case 3:
+		    interrupt();
+		    continue;
+
 		case '+': // ACK, ignore;
 		{
 		    lock omg(outmut);
@@ -218,11 +223,21 @@ namespace GDB {
 	
     }    
     */
-    
+
+    bool connected(){
+	return !!client;
+    }
+
+    void interrupt(){
+	emustate = EmuState::STOPPED;
+	write("T05");
+    }
+
     void update(){
 
-	if( !server || inPackets.empty() ) 
-	    return;
+	if( !server ) return;
+	
+	if( inPackets.empty() ) return;
 
 	lock img(inmut);
 	std::string cmd = inPackets.front();
@@ -232,6 +247,11 @@ namespace GDB {
 	switch( cmd[1] ){
 	case 'c': // continue;
 	    emustate = EmuState::RUNNING;
+	    write("OK");
+	    break;
+
+	case 's': // step
+	    emustate = EmuState::STEP;
 	    write("OK");
 	    break;
 

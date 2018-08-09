@@ -142,6 +142,8 @@ int main( int argc, char * argv[] ){
 		if( e.type == SDL_KEYDOWN || e.type == SDL_KEYUP ){
 		    u32 btnState = e.type == SDL_KEYDOWN;
 		    switch( e.key.keysym.sym ){
+		    case SDLK_ESCAPE: return 0;
+		    case SDLK_F9: GDB::interrupt(); break;
 		    case SDLK_UP: GPIO::input(1,13,btnState); break;
 		    case SDLK_DOWN: GPIO::input(1,3,btnState); break;
 		    case SDLK_LEFT: GPIO::input(1,25,btnState); break;
@@ -174,7 +176,7 @@ int main( int argc, char * argv[] ){
 		CPU::cpuNextEvent++;
 		CPU::thumbExecute();
 		TIMERS::update();
-		emustate = EmuState::STOPPED;
+		GDB::interrupt();
 		break;
 		
 	    }
