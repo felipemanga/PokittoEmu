@@ -75,15 +75,50 @@ namespace CPU
 
     int thumbExecute();
 
-    int dataTicksAccess16(u32 address);
-    int dataTicksAccess32(u32 address);
-    int dataTicksAccessSeq16(u32 address);
-    int dataTicksAccessSeq32(u32 address);
-    int codeTicksAccess16(u32 address);
-    int codeTicksAccess32(u32 address);
-    int codeTicksAccessSeq16(u32 address);
-    int codeTicksAccessSeq32(u32 address);
+// Waitstates when accessing data
+    inline int dataTicksAccess16(u32 address) // DATA 8/16bits NON SEQ
+    {
+	return 0;
+    }
 
+    inline int dataTicksAccess32(u32 address) // DATA 32bits NON SEQ
+    {
+	return 0;
+    }
+
+    inline int dataTicksAccessSeq16(u32 address)// DATA 8/16bits SEQ
+    {
+	return 0;
+    }
+
+    inline int dataTicksAccessSeq32(u32 address)// DATA 32bits SEQ
+    {
+	return 0;
+    }
+
+
+// Waitstates when executing opcode
+    inline int codeTicksAccess16(u32 address) // THUMB NON SEQ
+    {
+	return 0;
+    }
+
+    inline int codeTicksAccess32(u32 address) // ARM NON SEQ
+    {
+	return 0;
+    }
+
+    inline int codeTicksAccessSeq16(u32 address) // THUMB SEQ
+    {
+	return 0;
+    }
+
+    inline int codeTicksAccessSeq32(u32 address) // ARM SEQ
+    {
+	return 0;
+    }
+
+    
     void CPUSwitchMode(int mode, bool saveState);
     void CPUSwitchMode(int mode, bool saveState, bool breakLoop);
     void CPUUpdateCPSR();
