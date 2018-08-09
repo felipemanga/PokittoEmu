@@ -283,8 +283,8 @@ namespace GDB {
 
 	case 'p':
 	{
-	    u32 i = atoi( cmd.c_str()+2 );
-	    if( i == 19 ){
+	    u32 i = strtol( cmd.c_str()+2, NULL, 16 );
+	    if( i == 0x19 ){
 		i = 16;
 		CPU::CPUUpdateCPSR();
 	    }
@@ -292,6 +292,25 @@ namespace GDB {
 	    write(out);
 	    break;
 	}
+
+	case 'm': // read memory
+	{
+	    u32 addr, len, comma;
+	    addr = strtoul( cmd.c_str() + 2, NULL, 16 );
+	    len  = strtoul( cmd.c_str() + 1 + cmd.find(','), NULL, 16 );
+	    char *outp = out;
+	    // std::cout << std::hex << addr << ", " << len << std::endl;
+	    for( u32 i=0; i<len; ++i, outp += 2 )
+		sprintf( outp, "%02x", MMU::read8( addr+i ) );
+	    
+	    write( out );
+	}
+	    break;
+
+	case 'D':
+	    write("OK");
+	    emustate = EmuState::RUNNING;
+	    break;
 
 	case 'H': // set thread id. There is only thread 0.
 	    write("OK");
