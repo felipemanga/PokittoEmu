@@ -12,6 +12,7 @@
 #include "state.hpp"
 #include "gdb.hpp"
 
+bool hasQuit = false;
 
 class SDL
 {
@@ -126,7 +127,7 @@ int main( int argc, char * argv[] ){
 
         CPU::reset();
 
-	while( true ){
+	while( !hasQuit ){
 	    SDL_Event e;
 
 	    GDB::update();

@@ -15,18 +15,33 @@
 TCPsocket server, client;
 
 static std::list<std::string> inPackets, outPackets;
-static std::mutex inmut, outmut;
-
-static bool hasQuit = false;
+static std::mutex inmut, outmut, txmut;
+extern bool hasQuit;
+static bool noAckMode = false;
 static std::thread worker;
 
 using lock = std::lock_guard<std::mutex>;
 
+char out[0x4000];
+
+u32 rev32( u32 i ){
+    return ((i<<24) | (i>>24) | ((i&0xff00) << 8) | ((i>>8) & 0xff00 ));
+}
+
 namespace GDB {
 
-    void tx( const std::string &s ){
+    void tx( std::string s ){
+	lock tml(txmut);
+
+	std::cout << "\n<<(" << s << ")\n";
 	SDLNet_TCP_Send( client, s.c_str(), s.size() );
-	std::cout << "\n(" << s << ")\n";
+	/*
+	std::cout << "\n(";
+	for( auto i : s )
+	    std::cout << u32(i) << " ";
+	std::cout << s << ")\n";
+	*/
+	
     }
 
     void run(){
@@ -73,6 +88,8 @@ namespace GDB {
 
 		    if( !outPackets.empty() )
 			tx( outPackets.front() );
+		    else
+			tx("+");
 
 		    continue;
 		}
@@ -100,7 +117,8 @@ namespace GDB {
 		    inPackets.push_back( current );
 		    current.clear();
 
-		    tx("+");
+		    if( !noAckMode )
+			tx("+");
 		}
 
 	    }else{
@@ -162,10 +180,14 @@ namespace GDB {
 	snprintf(hex, 3, "%02x", u32(checksum));
 	s += hex;
 
-	lock omg(outmut);
-	outPackets.push_back(s);
-	if( outPackets.size() == 1 )
+	if( noAckMode ){
 	    tx(s);
+	}else{
+	    lock omg(outmut);
+	    outPackets.push_back(s);
+	    if( outPackets.size() == 1 )
+		tx(s);
+	}
     }
 
     bool isCommand( const std::string &cmd, const std::string &search ){
@@ -196,35 +218,6 @@ namespace GDB {
 	
     }    
     */
-
-
-enum gdb_regnum {
-    ARM_A1_REGNUM = 0,            /* first integer-like argument */
-    ARM_A4_REGNUM = 3,            /* last integer-like argument */
-    ARM_AP_REGNUM = 11,
-    ARM_IP_REGNUM = 12,
-    ARM_SP_REGNUM = 13,           /* Contains address of top of stack */
-    ARM_LR_REGNUM = 14,           /* address to return to from a function call */
-    ARM_PC_REGNUM = 15,           /* Contains program counter */
-    ARM_F0_REGNUM = 16,           /* first floating point register */
-    ARM_F3_REGNUM = 19,           /* last floating point argument register */
-    ARM_F7_REGNUM = 23,           /* last floating point register */
-    ARM_FPS_REGNUM = 24,          /* floating point status register */
-    ARM_PS_REGNUM = 25,           /* Contains processor status */
-    ARM_WR0_REGNUM,               /* WMMX data registers.  */
-    ARM_WR15_REGNUM = ARM_WR0_REGNUM + 15,
-    ARM_WC0_REGNUM,               /* WMMX control registers.  */
-    ARM_WCSSF_REGNUM = ARM_WC0_REGNUM + 2,
-    ARM_WCASF_REGNUM = ARM_WC0_REGNUM + 3,
-    ARM_WC7_REGNUM = ARM_WC0_REGNUM + 7,
-    ARM_WCGR0_REGNUM,             /* WMMX general purpose registers.  */
-    ARM_WCGR3_REGNUM = ARM_WCGR0_REGNUM + 3,
-    ARM_WCGR7_REGNUM = ARM_WCGR0_REGNUM + 7,
-    ARM_D0_REGNUM,                /* VFP double-precision registers.  */
-    ARM_D31_REGNUM = ARM_D0_REGNUM + 31,
-    ARM_FPSCR_REGNUM,
-    ARM_NUM_REGS
-};
     
     void update(){
 
@@ -237,39 +230,67 @@ enum gdb_regnum {
 
 	std::cout << "\nGot: [" << cmd << "]\n";
 	switch( cmd[1] ){
+	case 'c': // continue;
+	    emustate = EmuState::RUNNING;
+	    write("OK");
+	    break;
+
 	case '?': // query status
-	    write("S5");
+	    write("S05");
+	    break;
+
+	case 'k': // kill
+	    hasQuit = true;
 	    break;
 
 	case 'g':
 	{
-	    char out[1024]; // > 8*16+2
 	    char *outp = out;
-	    CPU::CPUUpdateCPSR();
 	    u32 i;
-	    
-	    for( i=0; i<16; ++i, outp += 8 )
-		sprintf(outp, "%08x", CPU::reg[i].I);
-	    
-	    for( ; i<60; ++i, outp += 8 )
-		sprintf(outp, "%08x", i);
 
-	    sprintf(outp, "%08x", CPU::reg[16].I);
+	    for( i=0; i<16; ++i, outp += 8 )
+		sprintf(outp, "%08x", rev32(CPU::reg[i].I) );
+
+	    for( i=0; i<12; ++i, outp += 16 )
+		sprintf(outp, "0000000000000000");
+
+	    sprintf(outp, "00000000"); outp+=8; // FPSR
 
 	    write(out);
-
-	}
 	    
 	    break;
+	}
+
+	case 'p':
+	{
+	    u32 i = atoi( cmd.c_str()+2 );
+	    if( i == 19 ){
+		i = 16;
+		CPU::CPUUpdateCPSR();
+	    }
+	    sprintf(out, "%08x", rev32(CPU::reg[i].I));
+	    write(out);
+	    break;
+	}
 
 	case 'H': // set thread id. There is only thread 0.
 	    write("OK");
 	    break;
 
+	case 'Q':
+	    if( isCommand(cmd, "StartNoAckMode") ){
+		noAckMode=true;
+		write("OK");
+		break;
+	    }
+
+	    write("");
+	    break;
+
 	case 'q':
 	    
 	    if( isCommand(cmd,"Supported") ){
-		write("qXfer:memory-map:read+");
+		write("PacketSize=3fff;qXfer:memory-map:read+;QStartNoAckMode+");
 		break;
 	    }
 
@@ -287,7 +308,7 @@ enum gdb_regnum {
 		write("");
 		break;
 	    }
-
+/*
 	    if( isCommand(cmd,"fThreadInfo") ){
 		write("m-1");
 		break;
@@ -297,7 +318,7 @@ enum gdb_regnum {
 		write("l");
 		break;
 	    }
-
+*/
 	default:
 	    write("");
 	    return;
