@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <thread>
 #include <SDL2/SDL.h>
 
 #include "cpu.hpp"
@@ -164,8 +165,8 @@ int main( int argc, char * argv[] ){
 
 	    case EmuState::RUNNING:
 		GPIO::update();
-		for( u32 i=0; i<500000; i+=1 ){
-		    CPU::cpuNextEvent += 5;
+		for( u32 opcount=0; opcount<500000 && emustate == EmuState::RUNNING; ++opcount ){
+		    CPU::cpuNextEvent = CPU::cpuTotalTicks + 5;
 		    CPU::thumbExecute();
 		    TIMERS::update();
 		}
@@ -173,7 +174,7 @@ int main( int argc, char * argv[] ){
 
 	    case EmuState::STEP:
 		GPIO::update();
-		CPU::cpuNextEvent++;
+		CPU::cpuNextEvent = CPU::cpuTotalTicks + 1;
 		CPU::thumbExecute();
 		TIMERS::update();
 		GDB::interrupt();
@@ -185,6 +186,8 @@ int main( int argc, char * argv[] ){
 	    if( SCREEN::dirty ){
 		sdl.draw();
 		SCREEN::dirty = false;
+	    }else if( emustate != EmuState::RUNNING ){
+		std::this_thread::sleep_for( std::chrono::milliseconds(50) );
 	    }
 	}
 	

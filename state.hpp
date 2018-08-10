@@ -2,6 +2,7 @@
 
 enum class EmuState {
     STOPPED,
+    JUST_STOPPED,
     RUNNING,
     STEP
 };

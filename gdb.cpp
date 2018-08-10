@@ -33,7 +33,7 @@ namespace GDB {
     void tx( std::string s ){
 	lock tml(txmut);
 
-	std::cout << "\n<<(" << s << ")\n";
+	// std::cout << "\n<<(" << s << ")\n";
 	SDLNet_TCP_Send( client, s.c_str(), s.size() );
 	/*
 	std::cout << "\n(";
@@ -68,7 +68,12 @@ namespace GDB {
 		continue;
 	    }
 
-	    std::cout << '[' << ch << ']';
+	    // std::cout << '[' << ch << ']';
+
+	    {
+		lock omg(outmut);
+		outPackets.clear();
+	    }
 
 	    if( current.empty() ){
 
@@ -149,7 +154,7 @@ namespace GDB {
 	    port = 1234;
 
 	IPaddress ip;
-	if( SDLNet_ResolveHost( &ip, NULL, port ) == -1 ){
+	if( SDLNet_ResolveHost( &ip, nullptr, port ) == -1 ){
 	    printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
 	    return false;
 	}
@@ -229,13 +234,18 @@ namespace GDB {
     }
 
     void interrupt(){
-	emustate = EmuState::STOPPED;
-	write("T05");
+	emustate = EmuState::JUST_STOPPED;
+	CPU::cpuNextEvent = CPU::cpuTotalTicks;
     }
 
     void update(){
 
 	if( !server ) return;
+
+	if( emustate == EmuState::JUST_STOPPED ){
+	    write("T05");
+	    emustate = EmuState::STOPPED;
+	}
 	
 	if( inPackets.empty() ) return;
 
@@ -243,7 +253,7 @@ namespace GDB {
 	std::string cmd = inPackets.front();
 	inPackets.pop_front();
 
-	std::cout << "\nGot: [" << cmd << "]\n";
+	// std::cout << "\nGot: [" << cmd << "]\n";
 	switch( cmd[1] ){
 	case 'c': // continue;
 	    emustate = EmuState::RUNNING;
@@ -283,7 +293,7 @@ namespace GDB {
 
 	case 'p':
 	{
-	    u32 i = strtol( cmd.c_str()+2, NULL, 16 );
+	    u32 i = strtol( cmd.c_str()+2, nullptr, 16 );
 	    if( i == 0x19 ){
 		i = 16;
 		CPU::CPUUpdateCPSR();
@@ -295,18 +305,49 @@ namespace GDB {
 
 	case 'm': // read memory
 	{
-	    u32 addr, len, comma;
-	    addr = strtoul( cmd.c_str() + 2, NULL, 16 );
-	    len  = strtoul( cmd.c_str() + 1 + cmd.find(','), NULL, 16 );
+	    u32 addr, len;
+	    addr = strtoul( cmd.c_str() + 2, nullptr, 16 );
+	    len  = strtoul( cmd.c_str() + 1 + cmd.find(','), nullptr, 16 );
 	    char *outp = out;
 	    // std::cout << std::hex << addr << ", " << len << std::endl;
-	    for( u32 i=0; i<len; ++i, outp += 2 )
+	    for( u32 i=0; i<len; ++i, outp += 2 ){
+		if( addr+i > 0x30000000 ) break;
 		sprintf( outp, "%02x", MMU::read8( addr+i ) );
+	    }
 	    
 	    write( out );
 	}
 	    break;
 
+	case 'M': // write memory
+	{
+	    u32 addr, len, start = cmd.find(':') + 1;
+	    addr = strtoul( cmd.c_str() + 2, nullptr, 16 );
+	    // len  = strtoul( cmd.c_str() + 1 + cmd.find(','), nullptr, 16 )*2;
+	    len = cmd.size() - start;
+	    char tmp[3];
+	    tmp[2] = 0;
+	    
+	    // std::cout << std::hex << addr << ", " << len << std::endl;
+	    for( u32 i=0; i<len-1; i+=2, ++addr ){
+		tmp[0] = cmd[start+i];
+		tmp[1] = cmd[start+i+1];
+		u8 b = strtol(tmp, nullptr,16);
+		// std::cout << addr << " = " << u32(MMU::flash[addr]) << " -> " << u32(b) << std::endl;
+		
+		if( addr > 0x30000000 ) break;
+		if( addr < sizeof(MMU::flash) ){
+		    MMU::flash[addr] = b;
+		}else
+		    MMU::write8( addr++, b );
+	    }
+
+	    CPU::THUMB_PREFETCH();
+	    
+	    write("OK");
+	}
+	    break;
+	    
 	case 'D':
 	    write("OK");
 	    emustate = EmuState::RUNNING;
@@ -345,6 +386,16 @@ namespace GDB {
 
 	    if( isCommand(cmd,"C") ){
 		write("");
+		break;
+	    }
+
+	    if( isCommand(cmd,"Xfer:memory-map:read") ) {
+	        write(
+		    "l<memory-map>\n"
+		    " <memory type='ram' start='0x10000000' length='0x8000'/>\n"
+		    " <memory type='ram' start='0' length='0x40000'/>"
+		    "</memory-map>"
+		    );
 		break;
 	    }
 /*

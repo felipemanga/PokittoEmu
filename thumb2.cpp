@@ -1,6 +1,7 @@
 #include "cpu.hpp"
 #include <iostream>
 #include "iap.hpp"
+#include "gdb.hpp"
 
 /*
   #include "GBA.h"
@@ -25,7 +26,9 @@ namespace CPU
 		  << std::hex << opcode
 		  << "@ PC=" << armNextPC-2
 		  << std::endl;
-	
+	if( GDB::connected() ){
+	    GDB::interrupt();
+	}
 	// LOG(thumbUnknownInsn);
 #ifdef GBA_LOGGING
 	if (settings_log_channel_enabled(LOG_UNDEFINED))
@@ -1221,6 +1224,16 @@ namespace CPU
 	clockTicks += 3 + codeTicksAccess16(armNextPC) + codeTicksAccess16(armNextPC);
     }
 
+// BKPT
+    static void thumbBE( u32 opcode ){
+	LOG(thumbBE);
+	if( GDB::connected() )
+	    GDB::interrupt();
+	armNextPC -= 2;
+	reg[15].I -= 2;
+	clockTicks += 1;
+    }
+
 // Load/store multiple ////////////////////////////////////////////////////
 
     static inline void THUMB_STM_REG(u32 opcode, int &count, u32 &address, u32 temp, int val, int r, int b)
@@ -1737,7 +1750,7 @@ namespace CPU
 	thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,  // B8
 	thumbBA,thumbBAb,thumbUI,thumbBAc,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbBC,thumbBC,thumbBC,thumbBC,thumbBD,thumbBD,thumbBD,thumbBD,
-	thumbBP,thumbBP,thumbBP,thumbBP,thumbUI,thumbUI,thumbUI,thumbUI,
+	thumbBE,thumbBE,thumbBE,thumbBE,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,  // C0
 	thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,
 	thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,
