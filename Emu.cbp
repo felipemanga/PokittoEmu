@@ -21,6 +21,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="file.elf" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-std=c++14" />

@@ -26,9 +26,11 @@ namespace CPU
 		  << std::hex << opcode
 		  << "@ PC=" << armNextPC-2
 		  << std::endl;
+
 	if( GDB::connected() ){
 	    GDB::interrupt();
 	}
+
 	// LOG(thumbUnknownInsn);
 #ifdef GBA_LOGGING
 	if (settings_log_channel_enabled(LOG_UNDEFINED))
@@ -724,10 +726,10 @@ namespace CPU
 	    reg[15].I &= 0xFFFFFFFE;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
-	    
+
 	    if( (armNextPC&~1) == 0xFFFFFFF8 )
 		exitInterrupt();
-	    
+
 	    THUMB_PREFETCH();
 	    clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
 	}
@@ -759,20 +761,20 @@ namespace CPU
 		IAP::command[cmdId](reg[0].I, reg[1].I, reg[2].I, reg[3].I);
 	    }
 	    reg[15].I -= 2;
-	}else{	
+	}else{
 	    reg[14].I = reg[15].I-2;
 	    reg[15].I = reg[base].I;
 	    reg[15].I &= 0xFFFFFFFE;
 	}
-	
+
 	armNextPC = reg[15].I;
 	reg[15].I += 2;
 	THUMB_PREFETCH();
-	
+
 	clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
-	
+
     }
-    
+
 // Load/store instructions ////////////////////////////////////////////////
 
 // LDR R0~R7,[PC, #Imm]
@@ -997,7 +999,7 @@ namespace CPU
 	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
-// SXTH    
+// SXTH
     static INSN_REGPARM void thumbB2a(u32 opcode)
     {
 	LOG(thumbB2a);
@@ -1020,7 +1022,7 @@ namespace CPU
 	reg[dest].I = (mask & src) | sign;
 	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
-    
+
 // UXTH R0~7
     static INSN_REGPARM void thumbB2c(u32 opcode)
     {
@@ -1032,7 +1034,7 @@ namespace CPU
 	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
-// UXTB    
+// UXTB
     static INSN_REGPARM void thumbB2d(u32 opcode)
     {
 	LOG(thumbB2d);
@@ -1042,7 +1044,7 @@ namespace CPU
 	reg[dest].I = (mask & src);
 	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
-    
+
 // Push and pop ///////////////////////////////////////////////////////////
 
     static inline void PUSH_REG(u32 opcode, int &count, u32 &address, int val, int r)
@@ -1167,7 +1169,7 @@ namespace CPU
 	reg[dest].I = ((src&0xFF00)>>8) | sign;
 	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
-    
+
 // POP {Rlist}
     static INSN_REGPARM void thumbBC(u32 opcode)
     {
@@ -1807,12 +1809,12 @@ namespace CPU
 	{
 	    PREVADDRESS = ADDRESS;
 	    u32 opcode = cpuPrefetch[0];
-
+/*
 	    if( armNextPC&~1 == 0x1250 ){
 		echoRes = 0;
 		echo = 0;
 	    }
-
+*/
 	    if( !echo-- ){
 		dump();
 		echo = echoRes;

@@ -1,5 +1,6 @@
 #include <exception>
 #include <string>
+#include <regex>
 #include <iostream>
 #include <fstream>
 #include <thread>
@@ -83,7 +84,7 @@ SDL::~SDL()
 }
 
 void SDL::draw()
-{    
+{
     SDL_UnlockSurface( vscreen );
     SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
     SDL_UpdateWindowSurface(m_window);
@@ -101,8 +102,15 @@ EmuState emustate = EmuState::RUNNING;
 
 int main( int argc, char * argv[] ){
 
-    if( !loadBin( argc > 1 ? argv[1] : "file.bin" ) ){
-        std::cerr << "Error: Could not load file." << std::endl;
+    std::string srcPath;
+
+    if( argc > 1 ) srcPath = argv[1];
+    else srcPath = "file.bin";
+
+    srcPath = std::regex_replace( srcPath, std::regex(R"(\.elf$)", std::regex_constants::icase), ".bin" );
+
+    if( !loadBin( srcPath ) ){
+        std::cerr << "Error: Could not load file. [" << srcPath << "]" << std::endl;
         return 1;
     }
 
@@ -156,7 +164,7 @@ int main( int argc, char * argv[] ){
 		    case SDLK_c: GPIO::input(1,10,btnState); break;
 		    }
 		}
-		
+
 	    }
 
 	    switch( emustate ){
@@ -190,7 +198,7 @@ int main( int argc, char * argv[] ){
 		std::this_thread::sleep_for( std::chrono::milliseconds(50) );
 	    }
 	}
-	
+
         return 0;
     }
     catch ( const InitError & err )
