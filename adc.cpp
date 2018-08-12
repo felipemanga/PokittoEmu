@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include "types.hpp"
 #include "adc.hpp"
 
@@ -27,7 +28,7 @@ namespace ADC {
     }
 
     u32 readDAT1( u32, u32 ){
-	return rand() & 0xFFF;
+	return std::rand() & 0xFFF;
     }
 
     u32 setCTRL( u32 val, u32 oldVal, u32 addr ){
