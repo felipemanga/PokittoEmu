@@ -395,7 +395,8 @@
 
 1533469748 c:\users\felip\projects\pokittoemu\mmu.hpp
 
-1533469748 source:c:\users\felip\projects\pokittoemu\cpu.cpp
+1533905596 source:c:\users\felip\projects\pokittoemu\cpu.cpp
+	<algorithm>
 	<iostream>
 	"cpu.hpp"
 	"mmu.hpp"
@@ -404,9 +405,9 @@
 	"adc.hpp"
 	"gpio.hpp"
 	"timers.hpp"
-	<algorithm>
+	"gdb.hpp"
 
-1533469748 c:\users\felip\projects\pokittoemu\cpu.hpp
+1533905596 c:\users\felip\projects\pokittoemu\cpu.hpp
 	"types.hpp"
 	"mmu.hpp"
 
@@ -422,7 +423,7 @@
 1533469748 c:\users\felip\projects\pokittoemu\timers.hpp
 	"mmu.hpp"
 
-1533469748 source:c:\users\felip\projects\pokittoemu\gpio.cpp
+1533905596 source:c:\users\felip\projects\pokittoemu\gpio.cpp
 	<iostream>
 	"types.hpp"
 	"gpio.hpp"
@@ -430,7 +431,7 @@
 	"screen.hpp"
 	"cpu.hpp"
 
-1533469748 c:\users\felip\projects\pokittoemu\screen.hpp
+1533905596 c:\users\felip\projects\pokittoemu\screen.hpp
 
 1533469748 source:c:\users\felip\projects\pokittoemu\iap.cpp
 	<iostream>
@@ -444,16 +445,21 @@
 	"types.hpp"
 	"iocon.hpp"
 
-1533499977 source:c:\users\felip\projects\pokittoemu\main.cpp
+1533905936 source:c:\users\felip\projects\pokittoemu\main.cpp
 	<exception>
 	<string>
+	<regex>
 	<iostream>
 	<fstream>
+	<thread>
 	<SDL2/SDL.h>
 	"cpu.hpp"
 	"timers.hpp"
 	"gpio.hpp"
 	"screen.hpp"
+	"initerror.hpp"
+	"state.hpp"
+	"gdb.hpp"
 
 1533469748 source:c:\users\felip\projects\pokittoemu\mmu.cpp
 	"types.hpp"
@@ -473,7 +479,7 @@
 	"Sound.h"
 	<cstdio>
 
-1533469748 source:c:\users\felip\projects\pokittoemu\screen.cpp
+1533905596 source:c:\users\felip\projects\pokittoemu\screen.cpp
 	<iostream>
 	"types.hpp"
 	<SDL2/SDL.h>
@@ -483,10 +489,11 @@
 	"types.hpp"
 	"sys.hpp"
 
-1533469748 source:c:\users\felip\projects\pokittoemu\thumb2.cpp
+1533905779 source:c:\users\felip\projects\pokittoemu\thumb2.cpp
 	"cpu.hpp"
 	<iostream>
 	"iap.hpp"
+	"gdb.hpp"
 	"GBA.h"
 	"Globals.h"
 	"MMU.h"
@@ -498,4 +505,31 @@
 	"timers.hpp"
 	"cpu.hpp"
 	"sys.hpp"
+
+1533905596 c:\users\felip\projects\pokittoemu\gdb.hpp
+
+1533905596 c:\users\felip\projects\pokittoemu\initerror.hpp
+
+1533905596 c:\users\felip\projects\pokittoemu\state.hpp
+
+1533905596 source:c:\users\felip\projects\pokittoemu\gdb.cpp
+	<iostream>
+	<numeric>
+	<SDL2/SDL_net.h>
+	<list>
+	<thread>
+	<mutex>
+	<chrono>
+	"types.hpp"
+	"cpu.hpp"
+	"gdb.hpp"
+	"state.hpp"
+
+1451807846 c:\users\felip\downloads\sdl2-2.0.8\i686-w64-mingw32\include\sdl2\sdl_net.h
+	<stdint.h>
+	"SDL.h"
+	"SDL_endian.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
 

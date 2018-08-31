@@ -21,12 +21,14 @@
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="file.elf" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-std=c++14" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="../../Downloads/SDL2-2.0.8/i686-w64-mingw32/lib/libSDL2_net.dll.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -51,6 +53,7 @@
 		<Unit filename="adc.hpp" />
 		<Unit filename="cpu.cpp" />
 		<Unit filename="cpu.hpp" />
+		<Unit filename="gdb.cpp" />
 		<Unit filename="gpio.cpp" />
 		<Unit filename="gpio.hpp" />
 		<Unit filename="iap.cpp" />
