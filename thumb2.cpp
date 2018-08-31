@@ -1234,6 +1234,12 @@ namespace CPU
 	clockTicks += 1;
     }
 
+    // NOP
+    static void thumbBF( u32 opcode ){
+	LOG(thumbBF);
+	clockTicks += 1;
+    }
+
 // Load/store multiple ////////////////////////////////////////////////////
 
     static inline void THUMB_STM_REG(u32 opcode, int &count, u32 &address, u32 temp, int val, int r, int b)
@@ -1750,7 +1756,7 @@ namespace CPU
 	thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,thumbUI,  // B8
 	thumbBA,thumbBAb,thumbUI,thumbBAc,thumbUI,thumbUI,thumbUI,thumbUI,
 	thumbBC,thumbBC,thumbBC,thumbBC,thumbBD,thumbBD,thumbBD,thumbBD,
-	thumbBE,thumbBE,thumbBE,thumbBE,thumbUI,thumbUI,thumbUI,thumbUI,
+	thumbBE,thumbBE,thumbBE,thumbBE,thumbBF,thumbUI,thumbUI,thumbUI,
 	thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,  // C0
 	thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,
 	thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,thumbC0,

@@ -208,27 +208,6 @@ namespace GDB {
 	return true;
     }
 
-    /*
-    static void sendQuickStatus( u8 signal ){
-	char cmd[64];
-	u32 cpsr;
-
-	CPU::CPUUpdateCPSR();
-
-	READ_SREG_INTO(g->avr, sreg);
-
-	snprintf(cmd, 64, "T%02x20:%02x;21:%02x%02x;22:%02x%02x%02x00;",
-		signal ? signal : 5,
-		 CPU::reg[16].I,
-		 CPU::reg[13].I,
-		 CPU::reg[15].I
-	    );
-	
-	gdb_send_reply(g, cmd);
-	
-    }    
-    */
-
     bool connected(){
 	return !!client;
     }
