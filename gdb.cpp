@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include <numeric>
 #include <SDL2/SDL_net.h>
 
@@ -155,13 +156,13 @@ namespace GDB {
 
 	IPaddress ip;
 	if( SDLNet_ResolveHost( &ip, nullptr, port ) == -1 ){
-	    printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+	    std::printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
 	    return false;
 	}
 	
 	server = SDLNet_TCP_Open(&ip);
 	if (!server) {
-	    printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+	    std::printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
 	    return false;
 	}
 
@@ -187,7 +188,7 @@ namespace GDB {
 	u8 checksum = std::accumulate(raw.begin(), raw.end(), 0);
 
 	char hex[3];
-	snprintf(hex, 3, "%02x", u32(checksum));
+	std::snprintf(hex, 3, "%02x", u32(checksum));
 	s += hex;
 
 	if( noAckMode ){
@@ -258,12 +259,12 @@ namespace GDB {
 	    u32 i;
 
 	    for( i=0; i<16; ++i, outp += 8 )
-		sprintf(outp, "%08x", rev32(CPU::reg[i].I) );
+		std::sprintf(outp, "%08x", rev32(CPU::reg[i].I) );
 
 	    for( i=0; i<12; ++i, outp += 16 )
-		sprintf(outp, "0000000000000000");
+		std::sprintf(outp, "0000000000000000");
 
-	    sprintf(outp, "00000000"); outp+=8; // FPSR
+	    std::sprintf(outp, "00000000"); outp+=8; // FPSR
 
 	    write(out);
 	    
@@ -277,7 +278,7 @@ namespace GDB {
 		i = 16;
 		CPU::CPUUpdateCPSR();
 	    }
-	    sprintf(out, "%08x", rev32(CPU::reg[i].I));
+	    std::sprintf(out, "%08x", rev32(CPU::reg[i].I));
 	    write(out);
 	    break;
 	}
@@ -291,7 +292,7 @@ namespace GDB {
 	    // std::cout << std::hex << addr << ", " << len << std::endl;
 	    for( u32 i=0; i<len; ++i, outp += 2 ){
 		if( addr+i > 0x30000000 ) break;
-		sprintf( outp, "%02x", MMU::read8( addr+i ) );
+		std::sprintf( outp, "%02x", MMU::read8( addr+i ) );
 	    }
 	    
 	    write( out );
