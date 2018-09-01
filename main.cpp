@@ -13,8 +13,9 @@
 #include "initerror.hpp"
 #include "state.hpp"
 #include "gdb.hpp"
+#include "prof.hpp"
 
-bool hasQuit = false;
+volatile bool hasQuit = false;
 
 class SDL
 {
@@ -133,8 +134,11 @@ int main( int argc, char * argv[] ){
 
         MMU::init();
         CPU::init();
-
         CPU::reset();
+
+	if( argc > 2 && argv[2] == std::string("-p") ){
+	    PROF::init();
+	}
 
 	while( !hasQuit ){
 	    SDL_Event e;
@@ -142,8 +146,10 @@ int main( int argc, char * argv[] ){
 	    GDB::update();
 	    while (SDL_PollEvent(&e)) {
 		
-		if( e.type == SDL_QUIT ) 
+		if( e.type == SDL_QUIT ){
+		    hasQuit = true;
 		    return 0;
+		}
 
 		if( emustate == EmuState::STOPPED ) 
 		    continue;

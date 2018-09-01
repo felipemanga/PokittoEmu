@@ -32,6 +32,7 @@ OBJECTS += BUILD/mmu.o
 OBJECTS += BUILD/main.o
 OBJECTS += BUILD/cpu.o
 OBJECTS += BUILD/gdb.o
+OBJECTS += BUILD/prof.o
 
 INCLUDE_PATHS += -I./.
 
