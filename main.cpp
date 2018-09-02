@@ -4,7 +4,10 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
+#include <mutex>
+
 #include <SDL2/SDL.h>
+#include "gif.h"
 
 #include "cpu.hpp"
 #include "timers.hpp"
@@ -16,6 +19,7 @@
 #include "prof.hpp"
 
 volatile bool hasQuit = false;
+std::string srcPath;
 
 class SDL
 {
@@ -23,8 +27,17 @@ class SDL
     SDL_Renderer * m_renderer;
     SDL_Surface *vscreen;
     SDL_Surface *screen;
+    std::thread worker;
+
+    u8 *screenpixels;
+    u32 gifNum = 0;
+    bool recording = false;
+    std::mutex gifmut;
+    GifWriter gif;
+
 public:
     SDL( Uint32 flags = 0 );
+    void toggleRecording();
     virtual ~SDL();
     void draw();
 };
@@ -51,6 +64,8 @@ SDL::SDL( Uint32 flags )
     if( !m_renderer )
 	throw InitError();
 
+    recording = false;
+
     // Clear the window with a black background
     SDL_SetRenderDrawColor( m_renderer, 0, 0, 0, 255 );
     SDL_RenderClear( m_renderer );
@@ -71,10 +86,23 @@ SDL::SDL( Uint32 flags )
 
     SDL_LockSurface(vscreen);
     SCREEN::LCD = (u16 *) vscreen->pixels;
+
+    SDL_LockSurface(screen);
+    screenpixels = (u8 *) screen->pixels;
+    SDL_UnlockSurface( screen );
+    
+    worker = std::thread( &SDL::draw, this );
 }
 
 SDL::~SDL()
 {
+    
+    if( recording )
+	toggleRecording();
+
+    hasQuit = true;
+    worker.join();
+    
     if( vscreen ){
 	SDL_UnlockSurface(vscreen);
 	SDL_FreeSurface(vscreen);
@@ -82,14 +110,67 @@ SDL::~SDL()
     SDL_DestroyWindow( m_window );
     SDL_DestroyRenderer( m_renderer );
     SDL_Quit();
+    
+}
+
+void SDL::toggleRecording(){
+    recording = !recording;
+    std::lock_guard<std::mutex> gml(gifmut);
+    
+    if( recording ){
+	gifNum++;
+	std::string name = srcPath;
+	name += ".";
+	name += std::to_string(gifNum);
+	name += ".gif";
+	GifBegin( &gif, name.c_str(), 220, 176, 2 );
+    }else{
+	GifEnd( &gif );
+    }
+    
 }
 
 void SDL::draw()
 {
-    SDL_UnlockSurface( vscreen );
-    SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
-    SDL_UpdateWindowSurface(m_window);
-    SDL_LockSurface(vscreen);
+    uint8_t rgba[220*176*4];
+    
+    while( !hasQuit ){
+	std::this_thread::sleep_for( std::chrono::milliseconds(10) );
+	if( !SCREEN::dirty ) continue;
+
+	SDL_UnlockSurface( vscreen );
+	SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
+	
+	{
+	    std::lock_guard<std::mutex> gml(gifmut);
+
+	    if( recording ){
+
+		uint8_t *rgbap = rgba;
+		for( u32 i=0; i<220*176; ++i ){
+		    u16 c = ((u16 *)SCREEN::LCD)[i];
+		    *rgbap++ = float(c >> 11) / 0x1F * 255.0f;
+		    *rgbap++ = float((c >> 5) & 0x3F) / 0x3F * 255.0f;
+		    *rgbap++ = float(c & 0x1F) / 0x1F * 255.0f;
+		    *rgbap++ = 255;
+		}
+		
+		GifWriteFrame( &gif, (u8*) rgba, 220, 176, 2, 8 );
+
+		for( u32 y=0; y<15; ++y ){
+		    for( u32 x=0; x<15; ++x ){
+			screenpixels[ (((y+3)*440+x+3)<<2)+2 ] = ~CPU::cpuTotalTicks;
+		    }
+		}
+		
+	    }
+	    
+	}
+
+	SDL_UpdateWindowSurface(m_window);
+	SDL_LockSurface(vscreen);
+	SCREEN::dirty = false;
+    }
 }
 
 bool loadBin( const std::string &fileName ){
@@ -102,9 +183,6 @@ bool loadBin( const std::string &fileName ){
 EmuState emustate = EmuState::RUNNING;
 
 int main( int argc, char * argv[] ){
-
-    std::string srcPath;
-
     if( argc > 1 ) srcPath = argv[1];
     else srcPath = "file.bin";
 
@@ -158,6 +236,10 @@ int main( int argc, char * argv[] ){
 		    u32 btnState = e.type == SDL_KEYDOWN;
 		    switch( e.key.keysym.sym ){
 		    case SDLK_ESCAPE: return 0;
+		    case SDLK_F3:
+			if(e.type == SDL_KEYDOWN)
+			    sdl.toggleRecording();
+			break;
 		    case SDLK_F9: GDB::interrupt(); break;
 		    case SDLK_UP: GPIO::input(1,13,btnState); break;
 		    case SDLK_DOWN: GPIO::input(1,3,btnState); break;
@@ -197,11 +279,10 @@ int main( int argc, char * argv[] ){
 	    }
 
 	    SCREEN::LCD[ 1*220+1 ] = CPU::cpuTotalTicks;
-	    if( SCREEN::dirty ){
-		sdl.draw();
-		SCREEN::dirty = false;
-	    }else if( emustate != EmuState::RUNNING ){
+	    if( emustate != EmuState::RUNNING ){
 		std::this_thread::sleep_for( std::chrono::milliseconds(50) );
+	    }else{
+		std::this_thread::sleep_for( std::chrono::milliseconds(20) );
 	    }
 	}
 

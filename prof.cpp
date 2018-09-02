@@ -74,15 +74,8 @@ namespace PROF {
 		return r.count < l.count;
 	    });
 
-	for( u32 i=0; i<20; ++i ){
-	    std::cout << "#" << std::hex << samples[i].addr
-		      << " ... " << std::dec
-		      << samples[i].count
-		      << " ... "
-		      << (samples[i].count * 1000 / maxCount) / 10.0f
-		      << "%"
-		      << std::endl;
-	}
+	for( u32 i=0; i<20; ++i )
+	    std::cout << std::hex << samples[i].addr << std::endl;
 
     }
 
