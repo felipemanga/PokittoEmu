@@ -382,12 +382,13 @@
 	"types.hpp"
 	"sys.hpp"
 
-1533469748 source:c:\users\felip\projects\pokittoemu\adc.cpp
+1535921958 source:c:\users\felip\projects\pokittoemu\adc.cpp
 	<iostream>
+	<cstdlib>
 	"types.hpp"
 	"adc.hpp"
 
-1532646825 c:\users\felip\projects\pokittoemu\types.hpp
+1534041458 c:\users\felip\projects\pokittoemu\types.hpp
 	<cstdint>
 
 1533469748 c:\users\felip\projects\pokittoemu\adc.hpp
@@ -445,14 +446,16 @@
 	"types.hpp"
 	"iocon.hpp"
 
-1533905936 source:c:\users\felip\projects\pokittoemu\main.cpp
+1535921959 source:c:\users\felip\projects\pokittoemu\main.cpp
 	<exception>
 	<string>
 	<regex>
 	<iostream>
 	<fstream>
 	<thread>
+	<mutex>
 	<SDL2/SDL.h>
+	"gif.h"
 	"cpu.hpp"
 	"timers.hpp"
 	"gpio.hpp"
@@ -460,6 +463,7 @@
 	"initerror.hpp"
 	"state.hpp"
 	"gdb.hpp"
+	"prof.hpp"
 
 1533469748 source:c:\users\felip\projects\pokittoemu\mmu.cpp
 	"types.hpp"
@@ -489,7 +493,7 @@
 	"types.hpp"
 	"sys.hpp"
 
-1533905779 source:c:\users\felip\projects\pokittoemu\thumb2.cpp
+1535921959 source:c:\users\felip\projects\pokittoemu\thumb2.cpp
 	"cpu.hpp"
 	<iostream>
 	"iap.hpp"
@@ -512,8 +516,9 @@
 
 1533905596 c:\users\felip\projects\pokittoemu\state.hpp
 
-1533905596 source:c:\users\felip\projects\pokittoemu\gdb.cpp
+1535921958 source:c:\users\felip\projects\pokittoemu\gdb.cpp
 	<iostream>
+	<cstdio>
 	<numeric>
 	<SDL2/SDL_net.h>
 	<list>
@@ -532,4 +537,28 @@
 	"SDL_version.h"
 	"begin_code.h"
 	"close_code.h"
+
+1535921959 c:\users\felip\projects\pokittoemu\gif.h
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	<stdlib.h>
+	<stdlib.h>
+	<stdlib.h>
+	<stdlib.h>
+
+1535921959 c:\users\felip\projects\pokittoemu\prof.hpp
+
+1535921959 source:c:\users\felip\projects\pokittoemu\prof.cpp
+	<iostream>
+	<cstdio>
+	<numeric>
+	<SDL2/SDL_net.h>
+	<vector>
+	<algorithm>
+	<thread>
+	<mutex>
+	<chrono>
+	"types.hpp"
+	"cpu.hpp"
 
