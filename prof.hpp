@@ -1,5 +1,5 @@
 #pragma once
 
 namespace PROF {
-    void init();
+    void init( bool );
 }

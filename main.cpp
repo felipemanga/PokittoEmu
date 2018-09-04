@@ -214,8 +214,8 @@ int main( int argc, char * argv[] ){
         CPU::init();
         CPU::reset();
 
-	if( argc > 2 && argv[2] == std::string("-p") ){
-	    PROF::init();
+	if( argc > 2 && (argv[2] == std::string("-p") || argv[2] == std::string("-P")) ){
+	    PROF::init( argv[2] == std::string("-P") );
 	}
 
 	while( !hasQuit ){

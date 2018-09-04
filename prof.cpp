@@ -17,6 +17,7 @@ extern volatile bool hasQuit;
 namespace PROF {
     u32 lastTick;
     u32 hits[ sizeof(MMU::flash)>>1 ];
+    bool hitCaller;
 
     static std::thread worker;
 
@@ -46,11 +47,12 @@ namespace PROF {
 	    if( addr < hitCount )
 		hits[addr]++;
 
-	    /*
-	    addr = (CPU::reg[14].I >> 1)-2;
-	    if( addr < hitCount )
-		hits[addr]++;
-	    */
+	    if( hitCaller ){
+		addr = (CPU::reg[14].I >> 1)-2;
+		if( addr < hitCount )
+		    hits[addr]++;
+	    }
+	    
 	}
 
 	std::cout << "Preparing samples..." << std::endl;
@@ -79,7 +81,8 @@ namespace PROF {
 
     }
 
-    void init(){
+    void init( bool _hitCaller ){
+	hitCaller = _hitCaller;
 	worker = std::thread(run);
 	atexit([](){
 		hasQuit = true;

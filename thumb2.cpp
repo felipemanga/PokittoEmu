@@ -1006,7 +1006,7 @@ namespace CPU
 	u32 src = reg[(opcode >> 3) & 7].I;
 	int dest = opcode & 7;
 	int mask = 0xFFFF;
-	int sign = (src & 0x80000000) ? ~mask : 0;
+	int sign = (src & 0x8000) ? ~mask : 0;
 	reg[dest].I = (mask & src) | sign;
 	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
@@ -1018,7 +1018,7 @@ namespace CPU
 	u32 src = reg[(opcode >> 3) & 7].I;
 	int dest = opcode & 7;
 	int mask = 0xFF;
-	int sign = (src & 0x80000000) ? ~mask : 0;
+	int sign = (src & 0x80) ? ~mask : 0;
 	reg[dest].I = (mask & src) | sign;
 	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
