@@ -147,6 +147,7 @@ namespace CPU
 	if (V_FLAG)
 	    CPSR |= 0x10000000;
 	// if (!armIrqEnable) CPSR |= 0x80;
+	CPSR |= 1<<24; // T-bit
 	reg[16].I = CPSR;
     }
 

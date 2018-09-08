@@ -258,8 +258,12 @@ namespace GDB {
 	    char *outp = out;
 	    u32 i;
 
-	    for( i=0; i<16; ++i, outp += 8 )
-		std::sprintf(outp, "%08x", rev32(CPU::reg[i].I) );
+	    for( i=0; i<16; ++i, outp += 8 ){
+		if( i == 15 )
+		    std::sprintf(outp, "%08x", rev32(CPU::armNextPC&~1));
+		else
+		    std::sprintf(outp, "%08x", rev32(CPU::reg[i].I) );
+	    }
 
 	    for( i=0; i<12; ++i, outp += 16 )
 		std::sprintf(outp, "0000000000000000");

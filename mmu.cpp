@@ -471,8 +471,8 @@ namespace MMU
 	return (*memoryMap[ address>>28 ].read16)( address&~1 );
     }
 
-    u16 read16s(u32 address){
-	return (*memoryMap[ address>>28 ].read16)( address&~3 );
+    s16 read16s(u32 address){
+	return (*memoryMap[ address>>28 ].read16)( address&~1 );
     }
 
     u8 read8(u32 address){

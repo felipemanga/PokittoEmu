@@ -16,6 +16,7 @@
 #include "initerror.hpp"
 #include "state.hpp"
 #include "gdb.hpp"
+#include "verify.hpp"
 #include "prof.hpp"
 
 volatile bool hasQuit = false;
@@ -218,10 +219,16 @@ int main( int argc, char * argv[] ){
 	    PROF::init( argv[2] == std::string("-P") );
 	}
 
+	if( argc > 2 && (argv[2] == std::string("-v")) ){
+	    VERIFY::init();
+	}
+
 	while( !hasQuit ){
 	    SDL_Event e;
 
 	    GDB::update();
+	    VERIFY::update();
+
 	    while (SDL_PollEvent(&e)) {
 		
 		if( e.type == SDL_QUIT ){

@@ -1,7 +1,8 @@
 #include <iostream>
 #include <cstdio>
 #include <numeric>
-#include <SDL2/SDL_net.h>
+#include <SDL2/SDL.h>
+#include <fstream>
 
 #include <vector>
 #include <algorithm>
@@ -76,8 +77,10 @@ namespace PROF {
 		return r.count < l.count;
 	    });
 
-	for( u32 i=0; i<20; ++i )
-	    std::cout << std::hex << samples[i].addr << std::endl;
+	std::ofstream out("hotspots.log");
+	for( u32 i=0; i<20; ++i ){
+	    out << std::hex << samples[i].addr << std::endl;
+	}
 
     }
 
