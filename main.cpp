@@ -104,7 +104,9 @@ SDL::~SDL()
 	toggleRecording();
 
     hasQuit = true;
-    worker.join();
+    
+    if( worker.joinable() )
+	worker.join();
     
     if( vscreen ){
 	SDL_UnlockSurface(vscreen);
