@@ -37,13 +37,14 @@ class SDL
     GifWriter gif;
 
 public:
-    SDL( Uint32 flags = 0 );
+    SDL( Uint32 flags = 0, bool multithread = false );
     void toggleRecording();
     virtual ~SDL();
+    void thread();
     void draw();
 };
 
-SDL::SDL( Uint32 flags )
+SDL::SDL( Uint32 flags, bool multithread )
 {
     if ( SDL_Init( flags ) != 0 )
         throw InitError();
@@ -91,8 +92,9 @@ SDL::SDL( Uint32 flags )
     SDL_LockSurface(screen);
     screenpixels = (u8 *) screen->pixels;
     SDL_UnlockSurface( screen );
-    
-    worker = std::thread( &SDL::draw, this );
+
+    if( multithread )
+	worker = std::thread( &SDL::thread, this );
 }
 
 SDL::~SDL()
@@ -131,47 +133,52 @@ void SDL::toggleRecording(){
     
 }
 
-void SDL::draw()
-{
-    uint8_t rgba[220*176*4];
-    
+void SDL::thread()
+{    
     while( !hasQuit ){
 	std::this_thread::sleep_for( std::chrono::milliseconds(10) );
-	if( !SCREEN::dirty ) continue;
-
-	SDL_UnlockSurface( vscreen );
-	SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
-	
-	{
-	    std::lock_guard<std::mutex> gml(gifmut);
-
-	    if( recording ){
-
-		uint8_t *rgbap = rgba;
-		for( u32 i=0; i<220*176; ++i ){
-		    u16 c = ((u16 *)SCREEN::LCD)[i];
-		    *rgbap++ = float(c >> 11) / 0x1F * 255.0f;
-		    *rgbap++ = float((c >> 5) & 0x3F) / 0x3F * 255.0f;
-		    *rgbap++ = float(c & 0x1F) / 0x1F * 255.0f;
-		    *rgbap++ = 255;
-		}
-		
-		GifWriteFrame( &gif, (u8*) rgba, 220, 176, 2, 8 );
-
-		for( u32 y=0; y<15; ++y ){
-		    for( u32 x=0; x<15; ++x ){
-			screenpixels[ (((y+3)*440+x+3)<<2)+2 ] = ~CPU::cpuTotalTicks;
-		    }
-		}
-		
-	    }
-	    
-	}
-
-	SDL_UpdateWindowSurface(m_window);
-	SDL_LockSurface(vscreen);
-	SCREEN::dirty = false;
+	draw();
     }
+}
+
+uint8_t rgba[220*176*4];
+
+void SDL::draw(){
+    if( !SCREEN::dirty ) return;
+
+    SDL_UnlockSurface( vscreen );
+    SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
+	
+    {
+	std::lock_guard<std::mutex> gml(gifmut);
+
+	if( recording ){
+
+	    uint8_t *rgbap = rgba;
+	    for( u32 i=0; i<220*176; ++i ){
+		u16 c = ((u16 *)SCREEN::LCD)[i];
+		*rgbap++ = float(c >> 11) / 0x1F * 255.0f;
+		*rgbap++ = float((c >> 5) & 0x3F) / 0x3F * 255.0f;
+		*rgbap++ = float(c & 0x1F) / 0x1F * 255.0f;
+		*rgbap++ = 255;
+	    }
+		
+	    GifWriteFrame( &gif, (u8*) rgba, 220, 176, 2, 8 );
+
+	    for( u32 y=0; y<15; ++y ){
+		for( u32 x=0; x<15; ++x ){
+		    screenpixels[ (((y+3)*440+x+3)<<2)+2 ] = ~CPU::cpuTotalTicks;
+		}
+	    }
+		
+	}
+	    
+    }
+
+    SDL_UpdateWindowSurface(m_window);
+    SDL_LockSurface(vscreen);
+    SCREEN::dirty = false;
+
 }
 
 bool loadBin( const std::string &fileName ){
@@ -182,8 +189,9 @@ bool loadBin( const std::string &fileName ){
 }
 
 EmuState emustate = EmuState::RUNNING;
-
 int main( int argc, char * argv[] ){
+    bool multithread = false;
+    
     if( argc > 1 ) srcPath = argv[1];
     else srcPath = "file.bin";
 
@@ -198,7 +206,7 @@ int main( int argc, char * argv[] ){
 
     try{
 
-        SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER );
+        SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER, multithread );
 
 	if( argc > 2 && argv[2] == std::string("-g") ){
 
@@ -289,7 +297,10 @@ int main( int argc, char * argv[] ){
 	    if( emustate != EmuState::RUNNING ){
 		std::this_thread::sleep_for( std::chrono::milliseconds(50) );
 	    }else{
-		std::this_thread::sleep_for( std::chrono::milliseconds(20) );
+		if( multithread )
+		    std::this_thread::sleep_for( std::chrono::milliseconds(20) );
+		else
+		    sdl.draw();
 	    }
 	}
 
