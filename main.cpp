@@ -20,7 +20,7 @@
 #include "prof.hpp"
 
 volatile bool hasQuit = false;
-std::string srcPath;
+std::string srcPath = "file.bin";
 
 class SDL
 {
@@ -100,14 +100,14 @@ SDL::SDL( Uint32 flags, bool multithread )
 
 SDL::~SDL()
 {
-    
-    if( recording )
-	toggleRecording();
 
     hasQuit = true;
     
     if( worker.joinable() )
 	worker.join();
+
+    if( recording )
+	toggleRecording();
     
     if( vscreen ){
 	SDL_UnlockSurface(vscreen);
@@ -148,7 +148,7 @@ uint8_t rgba[220*176*4];
 
 void SDL::draw(){
     if( !SCREEN::dirty ){
-	delay+=8;
+	delay+=4;
 	return;
     }
 
@@ -184,7 +184,7 @@ void SDL::draw(){
     SDL_UpdateWindowSurface(m_window);
     SDL_LockSurface(vscreen);
     SCREEN::dirty = false;
-    delay = 8;
+    delay = 4;
 
 }
 
@@ -195,15 +195,71 @@ bool loadBin( const std::string &fileName ){
     return true;
 }
 
+bool multithread = false,
+    verifier = false,
+    autorec = false;
+u16 debuggerPort = 0,
+    profiler = 0;
+
+void parseArgs( int argc, char *argv[] ){
+    for( u32 i=1; i<argc; ++i ){
+	const std::string arg = argv[i];
+
+	if( arg.empty() ) continue;
+
+	if( arg[0] == '-' && arg.size() == 2 ){
+	    switch( arg[1] ){
+	    case 'r':
+		autorec = true;
+		break;
+
+	    case 't':
+		multithread = true;
+		break;
+
+	    case 'g':
+		debuggerPort = 1234;
+		break;
+
+	    case 'G':		
+		if( i+1<argc && !(debuggerPort = atoi( argv[++i] )) )
+		    std::cout << "-G switch should be followed by port number." << std::endl;
+
+		break;
+
+	    case 'p':
+		profiler = 1;
+		break;
+		
+	    case 'P': // Try to guess hot functions instead of instructions. Might guess wrong.
+		profiler = 2;
+		break;
+
+	    case 'v':
+		#ifdef __linux__
+		verifier = true;
+		#else
+		std::cout << "Verifier only available on Linux." << std::endl;
+		#endif
+		break;
+
+	    default:
+		std::cout << "Unrecognized switch \"" << arg << "\"." << std::endl;
+		break;
+	    }
+	}else{
+	    srcPath = argv[i];
+	}
+
+    }
+}
+
 EmuState emustate = EmuState::RUNNING;
 int main( int argc, char * argv[] ){
-    bool multithread = false;
-    
-    if( argc > 1 ) srcPath = argv[1];
-    else srcPath = "file.bin";
+
+    parseArgs( argc, argv );
 
     srcPath = std::regex_replace( srcPath, std::regex(R"(\.elf$)", std::regex_constants::icase), ".bin" );
-
     if( !loadBin( srcPath ) ){
         std::cerr << "Error: Could not load file. [" << srcPath << "]" << std::endl;
         return 1;
@@ -215,28 +271,21 @@ int main( int argc, char * argv[] ){
 
         SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER, multithread );
 
-	if( argc > 2 && argv[2] == std::string("-g") ){
-
-	    u32 port = 0;
-	    if( argc > 3 )
-		port = atoi( argv[3] );
-
-	    if( !GDB::init( port ) )
-		throw InitError();
-	    
-	}
+	if( debuggerPort && !GDB::init( debuggerPort ) )
+	    throw InitError();
 
         MMU::init();
         CPU::init();
         CPU::reset();
 
-	if( argc > 2 && (argv[2] == std::string("-p") || argv[2] == std::string("-P")) ){
-	    PROF::init( argv[2] == std::string("-P") );
-	}
+	if( profiler )
+	    PROF::init( profiler == 2 );
 
-	if( argc > 2 && (argv[2] == std::string("-v")) ){
+	if( verifier )
 	    VERIFY::init();
-	}
+
+	if( autorec )
+	    sdl.toggleRecording();
 
 	while( !hasQuit ){
 	    SDL_Event e;
