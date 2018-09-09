@@ -32,6 +32,7 @@ class SDL
 
     u8 *screenpixels;
     u32 gifNum = 0;
+    u32 delay = 2;
     bool recording = false;
     std::mutex gifmut;
     GifWriter gif;
@@ -146,7 +147,10 @@ void SDL::thread()
 uint8_t rgba[220*176*4];
 
 void SDL::draw(){
-    if( !SCREEN::dirty ) return;
+    if( !SCREEN::dirty ){
+	delay+=8;
+	return;
+    }
 
     SDL_UnlockSurface( vscreen );
     SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
@@ -165,7 +169,7 @@ void SDL::draw(){
 		*rgbap++ = 255;
 	    }
 		
-	    GifWriteFrame( &gif, (u8*) rgba, 220, 176, 2, 8 );
+	    GifWriteFrame( &gif, (u8*) rgba, 220, 176, delay, 8 );
 
 	    for( u32 y=0; y<15; ++y ){
 		for( u32 x=0; x<15; ++x ){
@@ -180,6 +184,7 @@ void SDL::draw(){
     SDL_UpdateWindowSurface(m_window);
     SDL_LockSurface(vscreen);
     SCREEN::dirty = false;
+    delay = 8;
 
 }
 
