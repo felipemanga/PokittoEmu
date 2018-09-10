@@ -1,3 +1,18 @@
+#ifdef __EMSCRIPTEN__
+
+namespace GDB {
+
+    bool connected(){
+	return false;
+    }
+
+    void interrupt(){
+    }
+    
+}
+
+#else
+
 #include <iostream>
 #include <cstdio>
 #include <numeric>
@@ -401,3 +416,5 @@ namespace GDB {
     }
 
 }
+
+#endif

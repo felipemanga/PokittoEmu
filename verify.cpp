@@ -1,5 +1,4 @@
-
-#ifndef __linux__
+#if !defined(__linux__) || defined(__EMSCRIPTEN__)
 
 namespace VERIFY {
     void init(){}

@@ -3,8 +3,6 @@
 #include <regex>
 #include <iostream>
 #include <fstream>
-#include <thread>
-#include <mutex>
 
 #include <SDL2/SDL.h>
 #include "gif.h"
@@ -15,9 +13,16 @@
 #include "screen.hpp"
 #include "initerror.hpp"
 #include "state.hpp"
+
+#ifndef __EMSCRIPTEN__
+#include <thread>
+#include <mutex>
 #include "gdb.hpp"
 #include "verify.hpp"
 #include "prof.hpp"
+#else
+#include <emscripten/emscripten.h>
+#endif
 
 volatile bool hasQuit = false;
 std::string srcPath = "file.bin";
@@ -28,7 +33,9 @@ class SDL
     SDL_Renderer * m_renderer;
     SDL_Surface *vscreen;
     SDL_Surface *screen;
+    #ifndef __EMSCRIPTEN__
     std::thread worker;
+    #endif
 
     u8 *screenpixels;
     u32 gifNum = 0;
@@ -94,8 +101,10 @@ SDL::SDL( Uint32 flags, bool multithread )
     screenpixels = (u8 *) screen->pixels;
     SDL_UnlockSurface( screen );
 
+    #ifndef __EMSCRIPTEN__
     if( multithread )
 	worker = std::thread( &SDL::thread, this );
+    #endif
 }
 
 SDL::~SDL()
@@ -103,8 +112,10 @@ SDL::~SDL()
 
     hasQuit = true;
     
+    #ifndef __EMSCRIPTEN__
     if( worker.joinable() )
 	worker.join();
+    #endif
 
     if( recording )
 	toggleRecording();
@@ -137,11 +148,13 @@ void SDL::toggleRecording(){
 }
 
 void SDL::thread()
-{    
+{
+    #ifndef __EMSCRIPTEN__
     while( !hasQuit ){
 	std::this_thread::sleep_for( std::chrono::milliseconds(10) );
 	draw();
     }
+    #endif
 }
 
 uint8_t rgba[220*176*4];
@@ -180,7 +193,7 @@ void SDL::draw(){
 	}
 	    
     }
-
+//    SDL_RenderPresent( m_renderer );
     SDL_UpdateWindowSurface(m_window);
     SDL_LockSurface(vscreen);
     SCREEN::dirty = false;
@@ -255,6 +268,98 @@ void parseArgs( int argc, char *argv[] ){
 }
 
 EmuState emustate = EmuState::RUNNING;
+
+void loop( void *_sdl ){
+    SDL &sdl = *(SDL *)_sdl;
+
+    SDL_Event e;
+#ifndef __EMSCRIPTEN__
+    GDB::update();
+    VERIFY::update();
+#endif
+
+    while (SDL_PollEvent(&e)) {
+		
+	if( e.type == SDL_QUIT ){
+	    hasQuit = true;
+	    return;
+	}
+
+	if( emustate == EmuState::STOPPED ) 
+	    continue;
+
+	if( e.type == SDL_KEYDOWN || e.type == SDL_KEYUP ){
+	    u32 btnState = e.type == SDL_KEYDOWN;
+	    switch( e.key.keysym.sym ){
+	    case SDLK_ESCAPE: return;
+	    case SDLK_F3:
+		if(e.type == SDL_KEYDOWN)
+		    sdl.toggleRecording();
+		break;
+			
+#ifndef __EMSCRIPTEN__
+	    case SDLK_F9: GDB::interrupt(); break;
+#endif
+			
+	    case SDLK_UP: GPIO::input(1,13,btnState); break;
+	    case SDLK_DOWN: GPIO::input(1,3,btnState); break;
+	    case SDLK_LEFT: GPIO::input(1,25,btnState); break;
+	    case SDLK_RIGHT: GPIO::input(1,7,btnState); break;
+	    case SDLK_a: GPIO::input(1,9,btnState); break;
+	    case SDLK_s:
+	    case SDLK_b: GPIO::input(1,4,btnState); break;
+	    case SDLK_d:
+	    case SDLK_c: GPIO::input(1,10,btnState); break;
+	    }
+	}
+
+    }
+
+    switch( emustate ){
+    case EmuState::STOPPED:
+	break;
+
+    case EmuState::RUNNING:
+	GPIO::update();
+	for( u32 opcount=0; opcount<500000 && emustate == EmuState::RUNNING; ++opcount ){
+	    CPU::cpuNextEvent = CPU::cpuTotalTicks + 5;
+	    CPU::thumbExecute();
+	    TIMERS::update();
+	}
+	break;
+
+    case EmuState::STEP:
+		
+#ifndef __EMSCRIPTEN__
+	GPIO::update();
+	CPU::cpuNextEvent = CPU::cpuTotalTicks + 1;
+	CPU::thumbExecute();
+	TIMERS::update();
+	GDB::interrupt();
+#endif
+		
+	break;
+		
+    }
+
+    SCREEN::LCD[ 1*220+1 ] = CPU::cpuTotalTicks;
+
+#ifndef __EMSCRIPTEN__
+	    
+    if( emustate != EmuState::RUNNING ){
+	std::this_thread::sleep_for( std::chrono::milliseconds(50) );
+    }else{
+	if( multithread )
+	    std::this_thread::sleep_for( std::chrono::milliseconds(20) );
+	else
+	    sdl.draw();
+    }
+#else
+    sdl.draw();
+#endif
+    
+}
+
 int main( int argc, char * argv[] ){
 
     parseArgs( argc, argv );
@@ -271,94 +376,37 @@ int main( int argc, char * argv[] ){
 
         SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER, multithread );
 
+	#ifndef __EMSCRIPTEN__
 	if( debuggerPort && !GDB::init( debuggerPort ) )
 	    throw InitError();
+	#endif
 
         MMU::init();
         CPU::init();
         CPU::reset();
 
+	#ifndef __EMSCRIPTEN__
 	if( profiler )
 	    PROF::init( profiler == 2 );
 
 	if( verifier )
 	    VERIFY::init();
+	#endif
 
 	if( autorec )
 	    sdl.toggleRecording();
 
-	while( !hasQuit ){
-	    SDL_Event e;
+	#ifndef __EMSCRIPTEN__
+	
+	while( !hasQuit )
+	    loop( &sdl );
+	
+        #else
+	
+	emscripten_set_main_loop_arg( loop, &sdl, -1, 1 );
+	
+        #endif
 
-	    GDB::update();
-	    VERIFY::update();
-
-	    while (SDL_PollEvent(&e)) {
-		
-		if( e.type == SDL_QUIT ){
-		    hasQuit = true;
-		    return 0;
-		}
-
-		if( emustate == EmuState::STOPPED ) 
-		    continue;
-
-		if( e.type == SDL_KEYDOWN || e.type == SDL_KEYUP ){
-		    u32 btnState = e.type == SDL_KEYDOWN;
-		    switch( e.key.keysym.sym ){
-		    case SDLK_ESCAPE: return 0;
-		    case SDLK_F3:
-			if(e.type == SDL_KEYDOWN)
-			    sdl.toggleRecording();
-			break;
-		    case SDLK_F9: GDB::interrupt(); break;
-		    case SDLK_UP: GPIO::input(1,13,btnState); break;
-		    case SDLK_DOWN: GPIO::input(1,3,btnState); break;
-		    case SDLK_LEFT: GPIO::input(1,25,btnState); break;
-		    case SDLK_RIGHT: GPIO::input(1,7,btnState); break;
-		    case SDLK_a: GPIO::input(1,9,btnState); break;
-		    case SDLK_s:
-		    case SDLK_b: GPIO::input(1,4,btnState); break;
-		    case SDLK_d:
-		    case SDLK_c: GPIO::input(1,10,btnState); break;
-		    }
-		}
-
-	    }
-
-	    switch( emustate ){
-	    case EmuState::STOPPED:
-		break;
-
-	    case EmuState::RUNNING:
-		GPIO::update();
-		for( u32 opcount=0; opcount<500000 && emustate == EmuState::RUNNING; ++opcount ){
-		    CPU::cpuNextEvent = CPU::cpuTotalTicks + 5;
-		    CPU::thumbExecute();
-		    TIMERS::update();
-		}
-		break;
-
-	    case EmuState::STEP:
-		GPIO::update();
-		CPU::cpuNextEvent = CPU::cpuTotalTicks + 1;
-		CPU::thumbExecute();
-		TIMERS::update();
-		GDB::interrupt();
-		break;
-		
-	    }
-
-	    SCREEN::LCD[ 1*220+1 ] = CPU::cpuTotalTicks;
-	    if( emustate != EmuState::RUNNING ){
-		std::this_thread::sleep_for( std::chrono::milliseconds(50) );
-	    }else{
-		if( multithread )
-		    std::this_thread::sleep_for( std::chrono::milliseconds(20) );
-		else
-		    sdl.draw();
-	    }
-	}
 
         return 0;
     }

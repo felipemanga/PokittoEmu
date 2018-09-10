@@ -1,3 +1,5 @@
+#if defined(__EMSCRIPTEN__)
+
 #include <iostream>
 #include <cstdio>
 #include <numeric>
@@ -93,3 +95,5 @@ namespace PROF {
 	    });
     }
 }
+
+#endif
