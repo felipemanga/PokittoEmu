@@ -14,8 +14,8 @@
 #include "initerror.hpp"
 #include "state.hpp"
 
-#ifndef __EMSCRIPTEN__
 #include <thread>
+#ifndef __EMSCRIPTEN__
 #include <mutex>
 #include "gdb.hpp"
 #include "verify.hpp"
@@ -33,15 +33,15 @@ class SDL
     SDL_Renderer * m_renderer;
     SDL_Surface *vscreen;
     SDL_Surface *screen;
-    #ifndef __EMSCRIPTEN__
     std::thread worker;
-    #endif
 
     u8 *screenpixels;
     u32 gifNum = 0;
     u32 delay = 2;
     bool recording = false;
+#ifndef __EMSCRIPTEN__
     std::mutex gifmut;
+#endif
     GifWriter gif;
 
 public:
@@ -101,10 +101,8 @@ SDL::SDL( Uint32 flags, bool multithread )
     screenpixels = (u8 *) screen->pixels;
     SDL_UnlockSurface( screen );
 
-    #ifndef __EMSCRIPTEN__
     if( multithread )
 	worker = std::thread( &SDL::thread, this );
-    #endif
 }
 
 SDL::~SDL()
@@ -112,10 +110,8 @@ SDL::~SDL()
 
     hasQuit = true;
     
-    #ifndef __EMSCRIPTEN__
     if( worker.joinable() )
 	worker.join();
-    #endif
 
     if( recording )
 	toggleRecording();
@@ -132,7 +128,9 @@ SDL::~SDL()
 
 void SDL::toggleRecording(){
     recording = !recording;
+#ifndef __EMSCRIPTEN__
     std::lock_guard<std::mutex> gml(gifmut);
+#endif
     
     if( recording ){
 	gifNum++;
@@ -149,12 +147,10 @@ void SDL::toggleRecording(){
 
 void SDL::thread()
 {
-    #ifndef __EMSCRIPTEN__
     while( !hasQuit ){
 	std::this_thread::sleep_for( std::chrono::milliseconds(10) );
 	draw();
     }
-    #endif
 }
 
 uint8_t rgba[220*176*4];
@@ -169,8 +165,9 @@ void SDL::draw(){
     SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
 	
     {
+#ifndef __EMSCRIPTEN__
 	std::lock_guard<std::mutex> gml(gifmut);
-
+#endif
 	if( recording ){
 
 	    uint8_t *rgbap = rgba;
@@ -354,10 +351,12 @@ void loop( void *_sdl ){
 	else
 	    sdl.draw();
     }
-#else
-    sdl.draw();
 #endif
     
+}
+
+void drawLoop( void *_sdl ){
+    ((SDL*)_sdl)->draw();
 }
 
 int main( int argc, char * argv[] ){
@@ -403,7 +402,8 @@ int main( int argc, char * argv[] ){
 	
         #else
 	
-	emscripten_set_main_loop_arg( loop, &sdl, -1, 1 );
+	std::thread t( []( void *sdl ){ while(true){ loop(sdl); } }, (void *) &sdl );
+	emscripten_set_main_loop_arg( drawLoop, &sdl, -1, 1 );
 	
         #endif
 
