@@ -44,11 +44,11 @@ LIBRARIES += #-lSDL2_net
 LIBRARIES += #-lpthread
 LD_SYS_LIBS := 
 
-CPP = 'emcc' '-c' '-O3' -s USE_SDL=2 -s USE_PTHREADS=1 -s WASM=0
-LD  = 'emcc' '-O3' -s USE_SDL=2 --preload-file file.bin -s USE_PTHREADS=1 -s WASM=0
+CPP = 'emcc' '-c' '-O3' -s USE_SDL=2 -s USE_PTHREADS=1 -s WASM=0 -s EXPORTED_FUNCTIONS="['_reset']"
+LD  = 'emcc' '-O3' -s USE_SDL=2 --preload-file file.bin -s USE_PTHREADS=1 -s WASM=0 -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]' -s EXPORTED_FUNCTIONS="['_reset', '_main']"
 
 CXX_FLAGS += -std=c++17
-CXX_FLAGS += $(shell sdl2-config --cflags)
+#CXX_FLAGS += $(shell sdl2-config --cflags)
 
 .PHONY: all lst size
 

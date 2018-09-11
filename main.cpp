@@ -15,14 +15,14 @@
 #include "state.hpp"
 
 #include <thread>
-#ifndef __EMSCRIPTEN__
 #include <mutex>
-#include "gdb.hpp"
+#ifndef __EMSCRIPTEN__
 #include "verify.hpp"
 #include "prof.hpp"
 #else
 #include <emscripten/emscripten.h>
 #endif
+#include "gdb.hpp"
 
 volatile bool hasQuit = false;
 std::string srcPath = "file.bin";
@@ -264,7 +264,7 @@ void parseArgs( int argc, char *argv[] ){
     }
 }
 
-EmuState emustate = EmuState::RUNNING;
+volatile EmuState emustate = EmuState::RUNNING;
 
 void loop( void *_sdl ){
     SDL &sdl = *(SDL *)_sdl;
@@ -294,10 +294,7 @@ void loop( void *_sdl ){
 		    sdl.toggleRecording();
 		break;
 			
-#ifndef __EMSCRIPTEN__
 	    case SDLK_F9: GDB::interrupt(); break;
-#endif
-			
 	    case SDLK_UP: GPIO::input(1,13,btnState); break;
 	    case SDLK_DOWN: GPIO::input(1,3,btnState); break;
 	    case SDLK_LEFT: GPIO::input(1,25,btnState); break;
@@ -313,6 +310,8 @@ void loop( void *_sdl ){
     }
 
     switch( emustate ){
+    case EmuState::JUST_STOPPED:
+	break;
     case EmuState::STOPPED:
 	break;
 
@@ -359,6 +358,17 @@ void drawLoop( void *_sdl ){
     ((SDL*)_sdl)->draw();
 }
 
+std::thread cputhread;
+
+#ifdef __EMSCRIPTEN__
+extern "C" void reset(){
+    emustate = EmuState::STOPPED;
+    loadBin( srcPath );
+    CPU::reset();
+    emustate = EmuState::RUNNING;
+}
+#endif
+
 int main( int argc, char * argv[] ){
 
     parseArgs( argc, argv );
@@ -402,7 +412,10 @@ int main( int argc, char * argv[] ){
 	
         #else
 	
-	std::thread t( []( void *sdl ){ while(true){ loop(sdl); } }, (void *) &sdl );
+	cputhread = std::thread( []( void *sdl ){
+		while(true){ loop(sdl); }
+	    }, (void *) &sdl );
+	
 	emscripten_set_main_loop_arg( drawLoop, &sdl, -1, 1 );
 	
         #endif

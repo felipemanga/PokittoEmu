@@ -7,4 +7,4 @@ enum class EmuState {
     STEP
 };
 
-extern EmuState emustate;
+volatile extern EmuState emustate;
