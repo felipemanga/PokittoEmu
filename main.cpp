@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "gif.h"
 
 #include "cpu.hpp"
@@ -31,6 +32,13 @@ using namespace std::chrono_literals;
 volatile bool hasQuit = false;
 std::string srcPath = "file.bin";
 
+bool verifier = false,
+    autorec = false,
+    canTakeScreenshot;
+u32 screenshot;
+u16 debuggerPort = 0,
+    profiler = 0;
+
 class SDL
 {
     SDL_Window * m_window;
@@ -51,14 +59,16 @@ public:
     SDL( Uint32 flags = 0 );
     void toggleRecording();
     virtual ~SDL();
-    void thread();
     void draw();
+    void savePNG();
 };
 
 SDL::SDL( Uint32 flags )
 {
     if ( SDL_Init( flags ) != 0 )
         throw InitError();
+
+    canTakeScreenshot = (IMG_Init( IMG_INIT_PNG ) & IMG_INIT_PNG) == IMG_INIT_PNG;
 
     m_window = SDL_CreateWindow("PokittoEmu",
                              SDL_WINDOWPOS_UNDEFINED,
@@ -118,6 +128,9 @@ SDL::~SDL()
 	SDL_UnlockSurface(vscreen);
 	SDL_FreeSurface(vscreen);
     }
+
+    IMG_Quit();
+
     SDL_DestroyWindow( m_window );
     SDL_DestroyRenderer( m_renderer );
     SDL_Quit();
@@ -143,12 +156,14 @@ void SDL::toggleRecording(){
     
 }
 
-void SDL::thread()
-{
-    while( !hasQuit ){
-	std::this_thread::sleep_for( std::chrono::milliseconds(10) );
-	draw();
-    }
+void SDL::savePNG(){
+    gifNum++;
+    std::string name = srcPath;
+    name += ".";
+    name += std::to_string(gifNum);
+    name += ".png";
+
+    IMG_SavePNG( vscreen, name.c_str() );
 }
 
 uint8_t rgba[220*176*4];
@@ -161,6 +176,12 @@ void SDL::draw(){
 
     SDL_UnlockSurface( vscreen );
     SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
+
+    if( screenshot ){
+	screenshot--;
+	if( !screenshot )
+	    savePNG();
+    }
 	
     {
 #ifndef __EMSCRIPTEN__
@@ -203,12 +224,6 @@ bool loadBin( const std::string &fileName ){
     return true;
 }
 
-bool multithread = false,
-    verifier = false,
-    autorec = false;
-u16 debuggerPort = 0,
-    profiler = 0;
-
 void parseArgs( int argc, char *argv[] ){
     for( u32 i=1; i<argc; ++i ){
 	const std::string arg = argv[i];
@@ -221,8 +236,9 @@ void parseArgs( int argc, char *argv[] ){
 		autorec = true;
 		break;
 
-	    case 't':
-		multithread = true;
+	    case 's':
+		if( i+1>=argc || !(screenshot = atoi( argv[++i] )) )
+		    std::cout << "-s switch should be followed by frames to skip before taking a screenshot." << std::endl;
 		break;
 
 	    case 'g':
@@ -230,7 +246,7 @@ void parseArgs( int argc, char *argv[] ){
 		break;
 
 	    case 'G':		
-		if( i+1<argc && !(debuggerPort = atoi( argv[++i] )) )
+		if( i+1>=argc || !(debuggerPort = atoi( argv[++i] )) )
 		    std::cout << "-G switch should be followed by port number." << std::endl;
 
 		break;
@@ -304,6 +320,10 @@ void loop( void *_sdl ){
 		    emustate = EmuState::RUNNING;
 		break;
 		
+	    case SDLK_F2:
+		screenshot = 1;
+		break;
+
 	    }
 	}
 
@@ -345,7 +365,7 @@ void loop( void *_sdl ){
 	
 	{
 	    auto start = std::chrono::high_resolution_clock::now();
-	    for( u32 opcount=0; opcount<200000 && emustate == EmuState::RUNNING; ++opcount ){
+	    for( u32 opcount=0; opcount<120000 && emustate == EmuState::RUNNING; ++opcount ){
 		CPU::cpuNextEvent = CPU::cpuTotalTicks + 5;
 		CPU::thumbExecute();
 		TIMERS::update();

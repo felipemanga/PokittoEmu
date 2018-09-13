@@ -41,6 +41,7 @@ LIBRARY_PATHS :=
 LD_FLAGS :=
 LIBRARIES := $(shell sdl2-config --libs)
 LIBRARIES += -lSDL2_net
+LIBRARIES += -lSDL2_image
 LIBRARIES += -lpthread
 LD_SYS_LIBS := 
 
