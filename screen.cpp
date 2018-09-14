@@ -2,6 +2,8 @@
 #include "types.hpp"
 #include <SDL2/SDL.h>
 
+extern bool verbose;
+
 namespace SCREEN {
 
 u16 *LCD;
@@ -23,7 +25,10 @@ u32 vblank = false;
 
 
 void LCDReset(){
-    std::cout << "Screen reset" << std::endl;
+    
+    if( verbose )
+	std::cout << "Screen reset" << std::endl;
+    
     colStart = 0;
     colEnd = HEIGHT-1;
     pageStart = 0;
@@ -38,7 +43,11 @@ void LCDReset(){
 
 u8 stubId;
 void stub( u16 D ){
-    std::cout << "ST7775 Stub " << std::hex << u32(stubId) << std::endl;
+    if( verbose )
+	std::cout << "ST7775 Stub "
+		  << std::hex
+		  << u32(stubId)
+		  << std::endl;
 }
 
 void (*cmd)( u16 D ) = stub;

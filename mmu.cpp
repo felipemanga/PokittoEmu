@@ -7,6 +7,8 @@
 #include "timers.hpp"
 #include <iostream>
 
+extern bool verbose;
+
 namespace MMU
 {
     bool mute = true;
@@ -20,20 +22,24 @@ namespace MMU
     template< u8* buffer, u32 base, u32 size, typename retType > 
     retType readBuffer( u32 addr ){
 	if( addr < base ){
-	    std::cout << "Read OOB " << std::hex << addr
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+	    if( verbose ){
+		std::cout << "Read OOB " << std::hex << addr
+			  << " on PC="
+			  << CPU::ADDRESS
+			  << std::endl;
+	    }
 	    return ~0;
 	}
 
 	addr -= base;
 
 	if( addr >= size ){
-	    std::cout << "Read OOB " << std::hex << addr
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+	    if( verbose ){
+		std::cout << "Read OOB " << std::hex << addr
+			  << " on PC="
+			  << CPU::ADDRESS
+			  << std::endl;
+	    }
 	    return ~0;
 	}
 
@@ -42,30 +48,41 @@ namespace MMU
 
     template< typename valType > 
     void writeROR( u32 addr, valType ){
-	// throw?
-	std::cout << " Write to read-only region: " << std::hex << addr
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+	// To-Do: raise interrupt
+	if( verbose ){
+	    std::cout << " Write to read-only region: " << std::hex << addr
+		      << " on PC="
+		      << CPU::ADDRESS
+		      << std::endl;
+	}
     }
 
     template< u8* buffer, u32 base, u32 size, typename valType > 
     void writeBuffer( u32 addr, valType value ){
 	if( addr < base ){
-	    std::cout << "OOB Write " << std::hex << addr
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+	    
+	    // To-Do: raise interrupt
+	    if( verbose ){
+		std::cout << "OOB Write " << std::hex << addr
+			  << " on PC="
+			  << CPU::ADDRESS
+			  << std::endl;
+	    }
+	    
 	    return;
 	}
 
 	addr -= base;
 
 	if( addr >= size ){
-	    std::cout << "OOB Write " << std::hex << addr
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+	    
+	    if( verbose ){
+		std::cout << "OOB Write " << std::hex << addr
+			  << " on PC="
+			  << CPU::ADDRESS
+			  << std::endl;
+	    }
+	    
 	    return;
 	}
 
@@ -78,20 +95,31 @@ namespace MMU
 
     u32 _reserved;
     u32 readHole( u32, u32 addr ){
-	std::cout << "Reading hole: "
-		  << std::hex << addr
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+	// To-Do: raise interrupt
+	if( verbose ){
+	
+	    std::cout << "Reading hole: "
+		      << std::hex << addr
+		      << " on PC="
+		      << CPU::ADDRESS
+		      << std::endl;
+	}
+	
 	return 0;
     }
 
     u32 writeHole( u32, u32, u32 addr ){
-	std::cout << "Writing hole: "
-		  << std::hex << addr
-		  << " on PC="
-		  << CPU::ADDRESS
-		  << std::endl;
+	// To-Do: raise interrupt
+	if( verbose ){
+	
+	    std::cout << "Writing hole: "
+		      << std::hex << addr
+		      << " on PC="
+		      << CPU::ADDRESS
+		      << std::endl;
+	    
+	}
+	
 	return 0;
     }
     
@@ -99,10 +127,17 @@ namespace MMU
     valType readRegister( u32 addr ){
 	u32 idx = (addr - layout.base) >> 2;
 	if( idx >= layout.length ){
-	    std::cout << "Error reading register "
-		      << std::hex << addr
-		      << std::endl;
-	    return 0; // to-do: raise exception?
+
+	    // To-Do: raise interrupt
+	    if( verbose ){
+	    
+		std::cout << "Error reading register "
+			  << std::hex << addr
+			  << std::endl;
+		
+	    }
+	    
+	    return 0;
 	}
 	
 	u32 value = *layout.map[ idx ].value;
@@ -113,7 +148,7 @@ namespace MMU
 
 	if( addr&3 )
 	    value = (value >> ((8<<(addr&0x3))-8)) & valType(~0);
-
+/*
 	if( !mute && !layout.map[idx].mute ){
 	    std::cout << "Read "
 		      << layout.map[idx].name
@@ -125,7 +160,7 @@ namespace MMU
 		      << CPU::ADDRESS
 		      << std::endl;
 	}
-
+*/
 	return value;
     }
 
@@ -133,12 +168,14 @@ namespace MMU
     void writeRegister( u32 addr, valType value ){
 	u32 idx = (addr - layout.base) >> 2;
 	if( idx >= layout.length ){
-	    std::cout << "Error writing register "
-		      << std::hex << addr
-		      << std::endl;
+	    if( verbose ){
+		std::cout << "Error writing register "
+			  << std::hex << addr
+			  << std::endl;
+	    }
 	    return; // to-do: raise exception?
 	}
-
+/*
 	if( !mute ){
 	    std::cout << "write "
 		      << layout.map[idx].name
@@ -150,7 +187,7 @@ namespace MMU
 		      << CPU::ADDRESS
 		      << std::endl;
 	}
-
+*/
 	auto write = layout.map[ idx ].write;
 	u32 oldvalue = *layout.map[ idx ].value;
 	value = (value&valType(~0)) << ((8<<(addr&3))-8);

@@ -34,6 +34,7 @@ std::string srcPath = "file.bin";
 
 bool verifier = false,
     autorec = false,
+    verbose = false,
     canTakeScreenshot;
 u32 screenshot;
 u16 debuggerPort = 0,
@@ -237,6 +238,10 @@ void parseArgs( int argc, char *argv[] ){
 	    switch( arg[1] ){
 	    case 'r':
 		autorec = true;
+		break;
+
+	    case 'V':
+		verbose = true;
 		break;
 
 	    case 's':
