@@ -39,16 +39,20 @@ INCLUDE_PATHS += -I./.
 
 LIBRARY_PATHS :=
 LD_FLAGS :=
-LIBRARIES := #$(shell sdl2-config --libs)
-LIBRARIES += #-lSDL2_net
-LIBRARIES += #-lpthread
-LD_SYS_LIBS := 
+LD_SYS_LIBS :=
 
-CPP = 'emcc' '-c' '-O3' -s USE_SDL=2 -s USE_PTHREADS=0 -s WASM=1 -s EXPORTED_FUNCTIONS="['_reset']"
-LD  = 'emcc' '-O3' -s USE_SDL=2 --preload-file file.bin -s USE_PTHREADS=0 -s WASM=1 -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]' -s EXPORTED_FUNCTIONS="['_reset', '_main']"
+S_FLAGS += -s USE_SDL=2
+S_FLAGS += -s USE_SDL_IMAGE=2
+S_FLAGS += -s SDL2_IMAGE_FORMATS='["png"]'
+S_FLAGS += -s USE_PTHREADS=0
+S_FLAGS += -s WASM=0
+S_FLAGS += -s EXPORTED_FUNCTIONS="['_reset', '_main']"
+S_FLAGS += -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]'
+
+CPP = 'emcc' '-c' '-O3'
+LD  = 'emcc' '-O3' --preload-file file.bin  
 
 CXX_FLAGS += -std=c++17
-#CXX_FLAGS += $(shell sdl2-config --cflags)
 
 .PHONY: all lst size
 
@@ -62,8 +66,8 @@ clean:
 BUILD/%.o : %.cpp
 	+@$(call MAKEDIR,$(dir $@))
 	+@echo "Compile: $(notdir $<)"
-	@$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) -o $@ $<
+	@$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) $(S_FLAGS) -o $@ $<
 
 $(BPROJECT): $(OBJECTS)
 	+@echo "link: $(notdir $@)"
-	@$(LD) $(LD_FLAGS) $(LIBRARY_PATHS) -o $@ $(filter %.o, $^) $(LIBRARIES) $(LD_SYS_LIBS)
+	@$(LD) $(LD_FLAGS) $(LIBRARY_PATHS) $(S_FLAGS) -o $@ $(filter %.o, $^) $(LIBRARIES) $(LD_SYS_LIBS)

@@ -1820,17 +1820,18 @@ namespace CPU
 		echoRes = 0;
 		echo = 0;
 	    }
-*/
 	    if( !echo-- ){
 		dump();
 		echo = echoRes;
 	    }
+*/
 
 	    cpuPrefetch[0] = cpuPrefetch[1];
-
+/*
 	    busPrefetch = false;
 	    if (busPrefetchCount & 0xFFFFFF00)
-		busPrefetchCount = 0x100 | (busPrefetchCount & 0xFF);
+	    busPrefetchCount = 0x100 | (busPrefetchCount & 0xFF);
+*/
 	    clockTicks = 0;
 	    u32 oldArmNextPC = armNextPC;
 
@@ -1846,9 +1847,9 @@ namespace CPU
 
 	    if (clockTicks < 0)
 		return 0;
-
+	    
 	    if (clockTicks == 0)
-		clockTicks = codeTicksAccessSeq16(oldArmNextPC) + 1;
+		clockTicks = 1;
 
 	    cpuTotalTicks += clockTicks;
 

@@ -376,8 +376,13 @@ void loop( void *_sdl ){
 		opcount += tti;
 	    }
 	    
+#if !defined(__EMSCRIPTEN__) || defined(__EMSCRIPTEN_PTHREADS__)
+	    
 	    while( (std::chrono::high_resolution_clock::now() - start) < 16ms )
 		std::this_thread::sleep_for( 1ms );
+	    
+#endif
+	    
 	}
 	    
 	break;
