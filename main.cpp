@@ -171,6 +171,9 @@ uint8_t rgba[220*176*4];
 void SDL::draw(){
     if( !SCREEN::dirty ){
 	delay+=4;
+	#ifndef __EMSCRIPTEN__
+	std::this_thread::sleep_for( 10ms );
+	#endif
 	return;
     }
 
@@ -365,10 +368,12 @@ void loop( void *_sdl ){
 	
 	{
 	    auto start = std::chrono::high_resolution_clock::now();
-	    for( u32 opcount=0; opcount<120000 && emustate == EmuState::RUNNING; ++opcount ){
-		CPU::cpuNextEvent = CPU::cpuTotalTicks + 5;
+	    u32 max = 150000*5;
+	    for( u32 opcount=0; opcount<max && emustate == EmuState::RUNNING; ){
+		u32 tti = std::min( max-opcount, TIMERS::update() );
+		CPU::cpuNextEvent = CPU::cpuTotalTicks + tti;
 		CPU::thumbExecute();
-		TIMERS::update();
+		opcount += tti;
 	    }
 	    
 	    while( (std::chrono::high_resolution_clock::now() - start) < 16ms )

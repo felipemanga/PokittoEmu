@@ -24,11 +24,13 @@ namespace TIMERS {
 	    CR1,
 	    CR2;	
 
-	void tick( u32 delta ){
+	u32 tick( u32 delta ){
 	    
 	    if( !(TCR&1) )
-		return;
-	    
+		return ~0;
+
+	    u32 tti;
+
 	    PC += delta;
 	    
 	    if( PC >= PR ){
@@ -36,6 +38,8 @@ namespace TIMERS {
 		TC++;
 	    }
 	    
+	    return PR - PC;
+
 	}
 
     } B1, B0;
@@ -44,9 +48,10 @@ namespace TIMERS {
 
 	u32 CSR, RVR, CVR, CALIB;
 	
-	void tick( u32 delta ){
+	u32 tick( u32 delta ){
+	    u32 tti;
 	    
-	    if( !(CSR & 1) ) return;
+	    if( !(CSR & 1) ) return ~0;
 	    
 	    // if( !(CSR & 0x4) ) delta >>= 1;
 	    
@@ -55,6 +60,7 @@ namespace TIMERS {
 		CVR += RVR & 0xFFFFFF;
 		CSR |= 1 << 16;
 	    }
+	    tti = CVR;
 
 	    if( CPU::armIrqEnable && (CSR&(1<<16)) ){
 		// std::cout << CVR << std::endl;		
@@ -64,6 +70,7 @@ namespace TIMERS {
 		CPU::interrupt(15);
 	    }
 	    
+	    return tti;
 	}
 	
     } sys;
@@ -74,13 +81,14 @@ namespace TIMERS {
     }
 
 
-    void update(){
+    u32 update(){
 	u32 delta = CPU::cpuTotalTicks - lastTick;
-	if( !delta ) return;
+	if( !delta ) return ~0;
 	lastTick = CPU::cpuTotalTicks;
-	sys.tick( delta );
-	B0.tick( delta );
-	B1.tick( delta );
+	u32 tti = sys.tick( delta );
+	tti = std::min( tti, B0.tick( delta ) );
+	tti = std::min( tti, B1.tick( delta ) );
+	return tti;
     }
 
     template<CT32& ct>
