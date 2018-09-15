@@ -9,6 +9,7 @@
 #include "gif.h"
 
 #include "cpu.hpp"
+#include "sys.hpp"
 #include "timers.hpp"
 #include "gpio.hpp"
 #include "screen.hpp"
@@ -342,6 +343,7 @@ void loop( void *_sdl ){
 		
 	    case SDLK_F2:
 		screenshot = 1;
+		SCREEN::dirty = true;
 		break;
 
 	    }
@@ -387,7 +389,9 @@ void loop( void *_sdl ){
 	    auto start = std::chrono::high_resolution_clock::now();
 	    u32 max = 150000*5;
 	    for( u32 opcount=0; opcount<max && emustate == EmuState::RUNNING; ){
-		u32 tti = std::min( max-opcount, TIMERS::update() );
+		u32 tti = max-opcount;
+		tti = std::min( tti, SYS::update() );
+		tti = std::min( tti, TIMERS::update() );
 		CPU::cpuNextEvent = CPU::cpuTotalTicks + tti;
 		CPU::thumbExecute();
 		opcount += tti;

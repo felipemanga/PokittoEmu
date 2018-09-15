@@ -1,10 +1,11 @@
 #include <iostream>
 #include "types.hpp"
 #include "sys.hpp"
+#include "cpu.hpp"
 
 namespace SYS {
 
-    u32 VTOR;
+    u32 VTOR, AIRCR;
 
     u32 reserved;
     
@@ -157,6 +158,15 @@ namespace SYS {
 		      << std::endl;
 	}
 */
+    }
+
+    u32 update(){
+	if( AIRCR&4 ){
+	    AIRCR = 0x05FA0000;
+	    CPU::reset();
+	}
+	
+	return ~0;
     }
     
 }

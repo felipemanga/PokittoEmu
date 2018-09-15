@@ -144,6 +144,18 @@ namespace TIMERS {
 	MMUREG(B0.CR1),
 	MMUREG(B0.CR2)
     };
+
+    u32 readAIRCR( u32 v, u32 addr ){
+	return 0x05FA0000;
+    }
+    u32 writeAIRCR( u32 v, u32 ov, u32 addr ){
+	std::cout << "Reset requested" << std::endl;
+	if( v & 4 ){
+	    SYS::VTOR = 0;
+	    CPU::cpuNextEvent = 0;
+	}
+	return 0x05FA0000 | (v&4);
+    }
     
     MMU::Register systickMap[] = {
 	MMUREGX(),MMUREGX(), MMUREGX()/*ACTLR*/,MMUREGX(),
@@ -358,7 +370,8 @@ namespace TIMERS {
 	MMUREGX(), // CPUID,
 	MMUREGX(), // ICSR,
 	MMUREGX(),
-	MMUREG(SYS::VTOR)
+	MMUREG(SYS::VTOR),
+	MMUREGRW(SYS::AIRCR, readAIRCR, writeAIRCR)
     };
 
     MMU::Layout ct32b1Layout = {
@@ -385,7 +398,7 @@ namespace TIMERS {
 	lastTick = 0;
 	sys.CALIB = 4;
 	
-/*
+/* */
 	for( u32 i=0; i<sizeof(systickMap)/sizeof(systickMap[0]); ++i ){
 	    std::cout << systickMap[i].name
 		      << " "
