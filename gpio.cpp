@@ -169,7 +169,9 @@ namespace GPIO {
 
     template<> u32 writePin<POUT0>( u32 v, u32 ov, u32 addr ){
 	SD::enabled = !(v & (1<<7));
-	return POUT0 = v;
+	POUT0 = v;
+	PIN0 = (PIN0 & ~DIR0) | (v & DIR0);
+	return v;
     }
 
     template<> u32 writePin<POUT1>( u32 v, u32 ov, u32 addr ){
@@ -177,7 +179,15 @@ namespace GPIO {
 	    SCREEN::LCDWrite( (POUT0>>2)&1, POUT2>>3 );
 	if( !(POUT1 & 1) && (v&1) )
 	    SCREEN::LCDReset();
-	return POUT1 = v;
+	PIN1 = (PIN1 & ~DIR1) | (v & DIR1);
+	POUT1 = v;
+	return v;
+    }
+
+    template<> u32 writePin<POUT2>( u32 v, u32 ov, u32 addr ){
+	POUT2 = v;
+	PIN2 = (PIN2 & ~DIR2) | (v & DIR2);
+	return v;
     }
     
     template<u32 &pin, u32 bit> u32 readByte( u32, u32 addr ){
@@ -563,6 +573,7 @@ namespace GPIO {
     };
 
     void init(){
+	SD::enabled = true;
 	/*
 	for( u32 i=0; i<sizeof(flagMap)/sizeof(flagMap[0]); ++i ){
 	    std::cout << flagMap[i].name

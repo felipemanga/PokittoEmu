@@ -271,7 +271,7 @@ namespace SD {
 	case 7:
 	    state = 1;
 
-	    if( verbose > 1 )
+	    if( verbose >= 1 )
 		std::cout << "SDCMD"
 		      << (altCommand ? "A" : "")
 		      << "CMD"

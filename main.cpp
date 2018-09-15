@@ -181,9 +181,12 @@ void SDL::draw(){
 	#endif
 	return;
     }
+    SCREEN::dirty = false;
 
     SDL_UnlockSurface( vscreen );
     SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
+    SDL_LockSurface(vscreen);
+    SDL_UpdateWindowSurface(m_window);
 
     if( screenshot ){
 	screenshot--;
@@ -218,9 +221,6 @@ void SDL::draw(){
 	    
     }
 //    SDL_RenderPresent( m_renderer );
-    SDL_UpdateWindowSurface(m_window);
-    SDL_LockSurface(vscreen);
-    SCREEN::dirty = false;
     delay = 4;
 
 }
