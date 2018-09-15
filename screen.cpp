@@ -2,7 +2,7 @@
 #include "types.hpp"
 #include <SDL2/SDL.h>
 
-extern bool verbose;
+extern u32 verbose;
 
 namespace SCREEN {
 
@@ -78,8 +78,10 @@ void cmd22( u16 D ){
 
     // std::cout << x << " " << y << " = " << std::hex << D << std::endl;
     
-    if( !(x < 0 || x >= HEIGHT || y < 0 || y >= WIDTH) )
+    if( !(x < 0 || x >= HEIGHT || y < 0 || y >= WIDTH) && LCD[ x*WIDTH+y ] != D ){
 	LCD[ x*WIDTH+y ] = D;
+	dirty = true;
+    }
 
     vblank = false;
     if( !V ){
@@ -103,7 +105,6 @@ void cmd22( u16 D ){
 	    }
 	}
     }
-    dirty = true;
     
 }
 
@@ -125,6 +126,14 @@ void cmd39( u16 D ){
 
 void LCDWrite( u32 cd, u16 v ){
     // LCD[ 88*220 + 110 ] = v;
+    
+    if( verbose>1 )
+	std::cout << "ST7775 Write "
+		  << (!cd ? "C":"D")
+		  << std::hex
+		  << u32(v)
+		  << std::endl;
+    
     if( cd )
 	cmd( v );
     else{

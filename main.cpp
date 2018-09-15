@@ -12,6 +12,8 @@
 #include "timers.hpp"
 #include "gpio.hpp"
 #include "screen.hpp"
+#include "spi.hpp"
+#include "sd.hpp"
 #include "initerror.hpp"
 #include "state.hpp"
 
@@ -31,11 +33,13 @@ using namespace std::chrono_literals;
 
 volatile bool hasQuit = false;
 std::string srcPath = "file.bin";
+std::string imgPath;
 
 bool verifier = false,
-    autorec = false,
-    verbose = false,
-    canTakeScreenshot;
+    canTakeScreenshot = false,
+    autorec = false;
+u32 verbose;
+
 u32 screenshot;
 u16 debuggerPort = 0,
     profiler = 0;
@@ -241,7 +245,7 @@ void parseArgs( int argc, char *argv[] ){
 		break;
 
 	    case 'V':
-		verbose = true;
+		verbose++;
 		break;
 
 	    case 's':
@@ -256,6 +260,14 @@ void parseArgs( int argc, char *argv[] ){
 	    case 'G':		
 		if( i+1>=argc || !(debuggerPort = atoi( argv[++i] )) )
 		    std::cout << "-G switch should be followed by port number." << std::endl;
+
+		break;
+
+	    case 'I':
+		if( i+1>=argc )
+		    std::cout << "-I should be followed by Fat32 SD image." << std::endl;
+		else
+		    imgPath = argv[++i];
 
 		break;
 
@@ -451,6 +463,17 @@ int main( int argc, char * argv[] ){
 	#endif
 
         MMU::init();
+	if( imgPath.empty() ){
+	}else if( !SD::init( imgPath ) ){
+	    std::cerr << "Error: Could not open image file. ["
+		      << imgPath
+		      << "]"
+		      << std::endl;
+	    return 2;
+	}else{
+	    SPI::spi0Out( SD::write );
+	}	
+	
         CPU::init();
         CPU::reset();
 

@@ -4,6 +4,7 @@
 #include "sys.hpp"
 #include "screen.hpp"
 #include "cpu.hpp"
+#include "sd.hpp"
 
 namespace GPIO {
 
@@ -164,6 +165,11 @@ namespace GPIO {
 
     template<u32 &pin> u32 writePin( u32 v, u32 ov=0, u32 addr=0 ){
 	return pin = v;
+    }
+
+    template<> u32 writePin<POUT0>( u32 v, u32 ov, u32 addr ){
+	SD::enabled = !(v & (1<<7));
+	return POUT0 = v;
     }
 
     template<> u32 writePin<POUT1>( u32 v, u32 ov, u32 addr ){

@@ -34,6 +34,8 @@ OBJECTS += BUILD/cpu.o
 OBJECTS += BUILD/gdb.o
 OBJECTS += BUILD/prof.o
 OBJECTS += BUILD/verify.o
+OBJECTS += BUILD/sd.o
+OBJECTS += BUILD/spi.o
 
 INCLUDE_PATHS += -I./.
 
@@ -46,7 +48,7 @@ LIBRARIES += -lpthread
 LD_SYS_LIBS := 
 
 CPP = 'g++' '-c' '-O3'
-LD  = 'g++'
+LD  = 'g++' '-O3'
 
 CXX_FLAGS += -std=c++17
 CXX_FLAGS += $(shell sdl2-config --cflags)

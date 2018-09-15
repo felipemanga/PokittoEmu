@@ -5,6 +5,7 @@
 #include "adc.hpp"
 #include "gpio.hpp"
 #include "timers.hpp"
+#include "spi.hpp"
 #include <iostream>
 
 extern bool verbose;
@@ -304,6 +305,24 @@ namespace MMU
 	&writeRegister< TIMERS::ct32b0Layout, u16 >,
 	&writeRegister< TIMERS::ct32b0Layout, u8  >
     };
+
+    MemoryBank spi0Bank = {
+	&readRegister<  SPI::spi0Layout, u32 >,
+	&readRegister<  SPI::spi0Layout, u16 >,
+	&readRegister<  SPI::spi0Layout, u8  >,
+	&writeRegister< SPI::spi0Layout, u32 >,
+	&writeRegister< SPI::spi0Layout, u16 >,
+	&writeRegister< SPI::spi0Layout, u8  >
+    };
+
+    MemoryBank spi1Bank = {
+	&readRegister<  SPI::spi1Layout, u32 >,
+	&readRegister<  SPI::spi1Layout, u16 >,
+	&readRegister<  SPI::spi1Layout, u8  >,
+	&writeRegister< SPI::spi1Layout, u32 >,
+	&writeRegister< SPI::spi1Layout, u16 >,
+	&writeRegister< SPI::spi1Layout, u8  >
+    };
     
     MemoryBank gpioByteBank = {
 	&readRegister<  GPIO::byteLayout, u32 >,
@@ -369,13 +388,13 @@ namespace MMU
 	voidBank, // 13 - Reserved
 	voidBank, // 14 - PMU
 	voidBank, // 15 - flash/eeprom controller
-	voidBank, // 16 - SSP0
+	spi0Bank, // 16 - SSP0
 	ioconBank, // 17 - IOCON
 	sysconBank, // 18 - SYSCON
 	voidBank, // 19 - USART4
 	voidBank, // 20 - Reserved
 	voidBank, // 21 - Reserved
-	voidBank, // 22 - SSP1
+	spi1Bank, // 22 - SSP1
 	voidBank, // 23 - GPIO Group0 Interrupt
 	voidBank, // 24 - GPIO Group1 Interrupt
 	voidBank, // 25 - Reserved
