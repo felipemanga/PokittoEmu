@@ -398,7 +398,7 @@ namespace TIMERS {
 	lastTick = 0;
 	sys.CALIB = 4;
 	
-/* */
+/* * /
 	for( u32 i=0; i<sizeof(systickMap)/sizeof(systickMap[0]); ++i ){
 	    std::cout << systickMap[i].name
 		      << " "
