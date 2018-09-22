@@ -391,6 +391,8 @@ namespace GDB {
 	    if( isCommand(cmd,"Xfer:memory-map:read") ) {
 	        write(
 		    "l<memory-map>\n"
+		    " <memory type='ram' start='0x20004000' length='0x800'/>\n"
+		    " <memory type='ram' start='0x20000000' length='0x800'/>\n"
 		    " <memory type='ram' start='0x10000000' length='0x8000'/>\n"
 		    " <memory type='ram' start='0' length='0x40000'/>"
 		    "</memory-map>"

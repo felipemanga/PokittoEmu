@@ -5,10 +5,11 @@
 #include "adc.hpp"
 #include "gpio.hpp"
 #include "timers.hpp"
+#include "sct.hpp"
 #include "spi.hpp"
 #include <iostream>
 
-extern bool verbose;
+extern u32 verbose;
 
 namespace MMU
 {
@@ -48,10 +49,12 @@ namespace MMU
     }
 
     template< typename valType > 
-    void writeROR( u32 addr, valType ){
+    void writeROR( u32 addr, valType value ){
 	// To-Do: raise interrupt
 	if( verbose ){
-	    std::cout << " Write to read-only region: " << std::hex << addr
+	    std::cout << " Write to read-only region: "
+		      << std::hex << addr
+		      << " = " << value
 		      << " on PC="
 		      << CPU::ADDRESS
 		      << std::endl;
@@ -65,6 +68,7 @@ namespace MMU
 	    // To-Do: raise interrupt
 	    if( verbose ){
 		std::cout << "OOB Write " << std::hex << addr
+			  << " = " << value
 			  << " on PC="
 			  << CPU::ADDRESS
 			  << std::endl;
@@ -79,6 +83,7 @@ namespace MMU
 	    
 	    if( verbose ){
 		std::cout << "OOB Write " << std::hex << addr
+			  << " = " << value
 			  << " on PC="
 			  << CPU::ADDRESS
 			  << std::endl;
@@ -90,10 +95,24 @@ namespace MMU
 	*((valType *)&buffer[addr]) = value;
     }
 
-    u32 defaultRead( u32 v, u32 addr ){ return v; }
-    u32 defaultWrite( u32 v, u32 ov, u32 addr ){ return v; }
+    u32 defaultRead( u32 v, u32 addr ){
+	if( verbose > 3 )
+	    std::cout << "Read defreg "
+		      << std::hex << addr
+		      << " = " << v << std::endl;
+	return v;
+    }
+    
+    u32 defaultWrite( u32 v, u32 ov, u32 addr ){
+	if( verbose > 3 )
+	    std::cout << "Write defreg "
+		      << std::hex << addr
+		      << " = " << v << std::endl;
+	return v;
+    }
     u32 nopWrite( u32 v, u32 ov, u32 addr ){ return ov; }
 
+    u32 dbg = 0x90;
     u32 _reserved;
     u32 readHole( u32, u32 addr ){
 	// To-Do: raise interrupt
@@ -104,20 +123,28 @@ namespace MMU
 		      << " on PC="
 		      << CPU::ADDRESS
 		      << std::endl;
+
+	    if( addr == 0x400440dc ){
+		return dbg;
+	    }
 	}
 	
 	return 0;
     }
 
-    u32 writeHole( u32, u32, u32 addr ){
+    u32 writeHole( u32 value, u32, u32 addr ){
 	// To-Do: raise interrupt
 	if( verbose ){
 	
 	    std::cout << "Writing hole: "
 		      << std::hex << addr
+		      << " = " << value
 		      << " on PC="
 		      << CPU::ADDRESS
 		      << std::endl;
+	    if( addr == 0x400440dc ){
+		return dbg = value;
+	    }
 	    
 	}
 	
@@ -149,8 +176,8 @@ namespace MMU
 
 	if( addr&3 )
 	    value = (value >> ((8<<(addr&0x3))-8)) & valType(~0);
-/*
-	if( !mute && !layout.map[idx].mute ){
+
+	if( verbose > 2 ){
 	    std::cout << "Read "
 		      << layout.map[idx].name
 		      << std::hex	    
@@ -161,7 +188,7 @@ namespace MMU
 		      << CPU::ADDRESS
 		      << std::endl;
 	}
-*/
+
 	return value;
     }
 
@@ -172,13 +199,14 @@ namespace MMU
 	    if( verbose ){
 		std::cout << "Error writing register "
 			  << std::hex << addr
+			  << " = " << value
 			  << std::endl;
 	    }
 	    return; // to-do: raise exception?
 	}
-/*
-	if( !mute ){
-	    std::cout << "write "
+
+	if( verbose > 2 ){
+	    std::cout << "REG WRITE "
 		      << layout.map[idx].name
 		      << std::hex	    
 		      << "(@"
@@ -188,7 +216,7 @@ namespace MMU
 		      << CPU::ADDRESS
 		      << std::endl;
 	}
-*/
+
 	auto write = layout.map[ idx ].write;
 	u32 oldvalue = *layout.map[ idx ].value;
 	value = (value&valType(~0)) << ((8<<(addr&3))-8);
@@ -406,6 +434,44 @@ namespace MMU
 	voidBank  // 31 - Reserved
     };
 
+
+    MemoryBank sct0Bank = {
+	&readRegister<  SCT::sct0Layout, u32 >,
+	&readRegister<  SCT::sct0Layout, u16 >,
+	&readRegister<  SCT::sct0Layout, u8  >,
+	&writeRegister< SCT::sct0Layout, u32 >,
+	&writeRegister< SCT::sct0Layout, u16 >,
+	&writeRegister< SCT::sct0Layout, u8  >
+    };
+
+    MemoryBank sct1Bank = {
+	&readRegister<  SCT::sct1Layout, u32 >,
+	&readRegister<  SCT::sct1Layout, u16 >,
+	&readRegister<  SCT::sct1Layout, u8  >,
+	&writeRegister< SCT::sct1Layout, u32 >,
+	&writeRegister< SCT::sct1Layout, u16 >,
+	&writeRegister< SCT::sct1Layout, u8  >
+    };
+
+    MemoryBank cdsMap[16] = {
+	voidBank, // 0 - Reserved
+	voidBank, // 1 - Reserved
+	voidBank, // 2 - Reserved
+	voidBank, // 3 - Reserved
+	voidBank, // 4 - Reserved
+	voidBank, // 5 - Reserved
+	sct0Bank, // 6 - Reserved
+	sct1Bank, // 7 - Reserved
+	voidBank, // 8 - Reserved
+	voidBank, // 9 - Reserved
+	voidBank, //10 - Reserved
+	voidBank, //11 - Reserved
+	voidBank, //12 - Reserved
+	voidBank, //13 - Reserved
+	voidBank, //14 - Reserved
+	voidBank, //15 - Reserved
+    };
+
     MemoryBank gpioMap[0x10] = {
 	gpioByteBank,
 	gpioWordBank,
@@ -484,7 +550,15 @@ namespace MMU
 	    &writeMap8 < apbMap, 14, 0x1F >
 	},
 
-	voidBank, // 0x5
+	{ // 0x5 - CDS = CRC, DMA, SCTIMER/PWM, 
+	    &readMap32<  cdsMap, 13, 0xF >,
+	    &readMap16<  cdsMap, 13, 0xF >,
+	    &readMap8 <  cdsMap, 13, 0xF >,
+	    &writeMap32< cdsMap, 13, 0xF >,
+	    &writeMap16< cdsMap, 13, 0xF >,
+	    &writeMap8 < cdsMap, 13, 0xF >	    
+	},
+	
 	voidBank, // 0x6
 	voidBank, // 0x7
 	voidBank, // 0x8

@@ -15,6 +15,7 @@
 #include "screen.hpp"
 #include "spi.hpp"
 #include "sd.hpp"
+#include "sct.hpp"
 #include "initerror.hpp"
 #include "state.hpp"
 

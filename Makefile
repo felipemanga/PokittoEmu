@@ -35,6 +35,7 @@ OBJECTS += BUILD/gdb.o
 OBJECTS += BUILD/prof.o
 OBJECTS += BUILD/verify.o
 OBJECTS += BUILD/sd.o
+OBJECTS += BUILD/sct.o
 OBJECTS += BUILD/spi.o
 
 INCLUDE_PATHS += -I./.
