@@ -61,7 +61,7 @@ namespace MMU
 		      << std::endl;
 	}
 	
-	CPU::interrupt(3);
+	// CPU::interrupt(3);
 	if( GDB::connected() )
 	    GDB::interrupt();
     }
