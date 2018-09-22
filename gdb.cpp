@@ -35,7 +35,7 @@ static std::mutex inmut, outmut, txmut;
 extern bool hasQuit;
 static bool noAckMode = false;
 static std::thread worker;
-
+extern u32 verbose;
 using lock = std::lock_guard<std::mutex>;
 
 char out[0x4000];
@@ -49,7 +49,7 @@ namespace GDB {
     void tx( std::string s ){
 	lock tml(txmut);
 
-	// std::cout << "\n<<(" << s << ")\n";
+	if( verbose ) std::cout << "\n<<(" << s << ")\n";
 	SDLNet_TCP_Send( client, s.c_str(), s.size() );
 	/*
 	std::cout << "\n(";
@@ -84,7 +84,7 @@ namespace GDB {
 		continue;
 	    }
 
-	    // std::cout << '[' << ch << ']';
+	    if( verbose ) std::cout << '[' << ch << ']';
 
 	    {
 		lock omg(outmut);
@@ -367,6 +367,13 @@ namespace GDB {
 	    break;
 
 	case 'q':
+
+	    if( isCommand(cmd,"Rcmd,7265736574") ){
+		std::cout << "Reset command" << std::endl;
+		CPU::reset();
+		write("OK");		
+		break;
+	    }
 	    
 	    if( isCommand(cmd,"Supported") ){
 		write("PacketSize=3fff;qXfer:memory-map:read+;QStartNoAckMode+");
