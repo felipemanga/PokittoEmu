@@ -5,9 +5,11 @@
 #include "adc.hpp"
 #include "gpio.hpp"
 #include "timers.hpp"
+#include "usart.hpp"
 #include "sct.hpp"
 #include "spi.hpp"
 #include <iostream>
+#include "gdb.hpp"
 
 extern u32 verbose;
 
@@ -50,7 +52,6 @@ namespace MMU
 
     template< typename valType > 
     void writeROR( u32 addr, valType value ){
-	// To-Do: raise interrupt
 	if( verbose ){
 	    std::cout << " Write to read-only region: "
 		      << std::hex << addr
@@ -59,6 +60,10 @@ namespace MMU
 		      << CPU::ADDRESS
 		      << std::endl;
 	}
+	
+	CPU::interrupt(3);
+	if( GDB::connected() )
+	    GDB::interrupt();
     }
 
     template< u8* buffer, u32 base, u32 size, typename valType > 
@@ -334,6 +339,15 @@ namespace MMU
 	&writeRegister< TIMERS::ct32b0Layout, u8  >
     };
 
+    MemoryBank usart0Bank = {
+	&readRegister<  USART::usart0Layout, u32 >,
+	&readRegister<  USART::usart0Layout, u16 >,
+	&readRegister<  USART::usart0Layout, u8  >,
+	&writeRegister< USART::usart0Layout, u32 >,
+	&writeRegister< USART::usart0Layout, u16 >,
+	&writeRegister< USART::usart0Layout, u8  >
+    };
+
     MemoryBank spi0Bank = {
 	&readRegister<  SPI::spi0Layout, u32 >,
 	&readRegister<  SPI::spi0Layout, u16 >,
@@ -402,7 +416,7 @@ namespace MMU
     MemoryBank apbMap[32] = {
 	voidBank, // 0 - I2C
 	voidBank, // 1 - WWDT
-	voidBank, // 2 - USART0
+	usart0Bank, // 2 - USART0
 	voidBank, // 3 - 16-bit counter 0
 	voidBank, // 4 - 16-bit counter 1
 	ct32b0Bank, // 5 - 32-bit counter 0

@@ -11,6 +11,7 @@
 #include "gpio.hpp"
 #include "timers.hpp"
 #include "sct.hpp"
+#include "usart.hpp"
 #include "gdb.hpp"
 
 namespace CPU
@@ -59,6 +60,7 @@ namespace CPU
 	GPIO::init();
 	TIMERS::init();
 	SCT::init();
+	USART::init();
 
 	// clean registers
 	for (int i = 0; i < 45; i++)

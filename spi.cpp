@@ -13,6 +13,10 @@ namespace SPI {
 	std::vector< u8 > inBuffer;
 	
 	SPI( u32 id ) : id(id){
+	    init();
+	}
+	
+	void init(){
 	    CR0=0;
 	    CR1=0;
 	    DR=0;
@@ -34,6 +38,11 @@ namespace SPI {
 	
 
     } SPI0(0), SPI1(1);
+
+    void init(){
+	SPI0.init();
+	SPI1.init();
+    }
 
     void spi0In( u32 v ){
 	SPI0.inBuffer.insert( SPI0.inBuffer.begin(), v );
