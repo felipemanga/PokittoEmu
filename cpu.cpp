@@ -10,6 +10,7 @@
 #include "adc.hpp"
 #include "gpio.hpp"
 #include "timers.hpp"
+#include "sct.hpp"
 #include "gdb.hpp"
 
 namespace CPU
@@ -57,6 +58,7 @@ namespace CPU
 	ADC::init();
 	GPIO::init();
 	TIMERS::init();
+	SCT::init();
 
 	// clean registers
 	for (int i = 0; i < 45; i++)

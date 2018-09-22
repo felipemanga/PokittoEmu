@@ -5,7 +5,7 @@
 
 namespace SYS {
 
-    u32 VTOR, AIRCR;
+    u32 VTOR, AIRCR, NVIC_ISER=0;
 
     u32 reserved;
     
@@ -146,6 +146,7 @@ namespace SYS {
 	SYSPLLCLKUEN = 1;
 	SYSPLLSTAT = 1;
 	MAINCLKUEN = 1;
+	SYSAHBCLKCTRL = 0x8004857;
 	SYSAHBCLKDIV = 1;
 	USBPLLCLKUEN = 1;
 	USBPLLSTAT = 1;

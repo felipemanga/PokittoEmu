@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "types.hpp"
 #include "iocon.hpp"
 
@@ -85,9 +87,6 @@ u32 PIO0_0,	// R/W 0x000 configuration for pin RESET/PIO0_0
     PIO2_23  //  R/W 0x150 I/O configuration for pin PIO2_23
     ;
     
-    void init(){
-    }
-
     MMU::Register map[] = {
 	MMUREG(PIO0_0),
 	MMUREG(PIO0_1),
@@ -131,6 +130,7 @@ u32 PIO0_0,	// R/W 0x000 configuration for pin RESET/PIO0_0
 	MMUREG(PIO1_15),
 	MMUREG(PIO1_16),
 	MMUREG(PIO1_17),
+	MMUREG(PIO1_18),
 	MMUREG(PIO1_19),
 	MMUREG(PIO1_20),
 	MMUREG(PIO1_21),
@@ -180,5 +180,100 @@ u32 PIO0_0,	// R/W 0x000 configuration for pin RESET/PIO0_0
 	sizeof(map) / sizeof(map[0]),
 	map
     };
+
+    void init(){
+
+	PIO0_0 = 0x90; 
+	PIO0_1 = 0x90; 
+	PIO0_2 = 0x90; 
+	PIO0_3 = 0x90; 
+	PIO0_4 = 0x90; 
+	PIO0_5 = 0x90; 
+	PIO0_6 = 0x90; 
+	PIO0_7 = 0x90; 
+	PIO0_8 = 0x90; 
+	PIO0_9 = 0x90; 
+	PIO0_10 = 0x90; 
+	PIO0_11 = 0x90; 
+	PIO0_12 = 0x90; 
+	PIO0_13 = 0x90; 
+	PIO0_14 = 0x90; 
+	PIO0_15 = 0x90; 
+	PIO0_16 = 0x90; 
+	PIO0_17 = 0x90; 
+	PIO0_18 = 0x90; 
+	PIO0_19 = 0x90; 
+	PIO0_20 = 0x90; 
+	PIO0_21 = 0x90; 
+	PIO0_22 = 0x90; 
+	PIO0_23 = 0x90; 
+	PIO1_0 = 0x90; 
+	PIO1_1 = 0x90; 
+	PIO1_2 = 0x90; 
+	PIO1_3 = 0x90; 
+	PIO1_4 = 0x90; 
+	PIO1_5 = 0x90; 
+	PIO1_6 = 0x90; 
+	PIO1_7 = 0x90; 
+	PIO1_8 = 0x90; 
+	PIO1_9 = 0x90; 
+	PIO1_10 = 0x90; 
+	PIO1_11 = 0x90; 
+	PIO1_12 = 0x90; 
+	PIO1_13 = 0x90; 
+	PIO1_14 = 0x90; 
+	PIO1_15 = 0x90; 
+	PIO1_16 = 0x90; 
+	PIO1_17 = 0x90; 
+	PIO1_18 = 0x90; 
+	PIO1_19 = 0x90; 
+	PIO1_20 = 0x90; 
+	PIO1_21 = 0x90; 
+	PIO1_22 = 0x90; 
+	PIO1_23 = 0x90; 
+	PIO1_24 = 0x90; 
+	PIO1_25 = 0x90; 
+	PIO1_26 = 0x90; 
+	PIO1_27 = 0x90; 
+	PIO1_28 = 0x90; 
+	PIO1_29 = 0x90; 
+	PIO1_30 = 0x90; 
+	PIO1_31 = 0x90; 
+	PIO2_0 = 0x90; 
+	PIO2_1 = 0x90; 
+	PIO2_2 = 0x90; 
+	PIO2_3 = 0x90; 
+	PIO2_4 = 0x90; 
+	PIO2_5 = 0x90; 
+	PIO2_6 = 0x90; 
+	PIO2_7 = 0x90; 
+	PIO2_8 = 0x90; 
+	PIO2_9 = 0x90; 
+	PIO2_10 = 0x90; 
+	PIO2_11 = 0x90; 
+	PIO2_12 = 0x90; 
+	PIO2_13 = 0x90; 
+	PIO2_14 = 0x90; 
+	PIO2_15 = 0x90; 
+	PIO2_16 = 0x90; 
+	PIO2_17 = 0x90; 
+	PIO2_18 = 0x90; 
+	PIO2_19 = 0x90; 
+	PIO2_20 = 0x90; 
+	PIO2_21 = 0x90; 
+	PIO2_22 = 0x90; 
+	PIO2_23 = 0x90; 
+
+/* * /
+	for( u32 i=0; i<sizeof(map)/sizeof(map[0]); ++i ){
+	    std::cout << map[i].name
+		      << " "
+		      << std::hex
+		      << (layout.base+(i*4))
+		      << std::endl;
+	}
+	/* */
+    }
+    
 }
 
