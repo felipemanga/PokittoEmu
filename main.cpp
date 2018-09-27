@@ -227,12 +227,7 @@ void SDL::draw(){
 
 }
 
-bool loadBin( const std::string &fileName ){
-    std::ifstream inp( fileName, std::ios::binary );
-    if( !inp.good() ) return false;
-    inp.read( (char *) MMU::flash, sizeof(MMU::flash) );
-    return true;
-}
+bool loadBin( const std::string &fileName );
 
 void parseArgs( int argc, char *argv[] ){
     for( u32 i=1; i<argc; ++i ){

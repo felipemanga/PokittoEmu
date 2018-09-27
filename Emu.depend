@@ -451,7 +451,7 @@
 	"types.hpp"
 	"iocon.hpp"
 
-1538056783 source:c:\users\felip\projects\pokittoemu\main.cpp
+1538057325 source:c:\users\felip\projects\pokittoemu\main.cpp
 	<exception>
 	<string>
 	<regex>
@@ -668,4 +668,16 @@
 	"cpu.hpp"
 	<iostream>
 	<vector>
+
+1538058359 source:c:\users\felip\projects\pokittoemu\loadbin.cpp
+	<exception>
+	<string>
+	<regex>
+	<iostream>
+	<fstream>
+	<chrono>
+	<thread>
+	<mutex>
+	"cpu.hpp"
+	"state.hpp"
 
