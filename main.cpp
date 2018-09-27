@@ -3,6 +3,9 @@
 #include <regex>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <thread>
+#include <mutex>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -19,9 +22,6 @@
 #include "initerror.hpp"
 #include "state.hpp"
 
-#include <chrono>
-#include <thread>
-#include <mutex>
 
 #ifndef __EMSCRIPTEN__
 #include "verify.hpp"
@@ -227,12 +227,7 @@ void SDL::draw(){
 
 }
 
-bool loadBin( const std::string &fileName ){
-    std::ifstream inp( fileName, std::ios::binary );
-    if( !inp.good() ) return false;
-    inp.read( (char *) MMU::flash, sizeof(MMU::flash) );
-    return true;
-}
+bool loadBin( const std::string &fileName );
 
 void parseArgs( int argc, char *argv[] ){
     for( u32 i=1; i<argc; ++i ){
@@ -309,16 +304,18 @@ extern "C" void reset(){
     emustate = EmuState::RUNNING;
 }
 
-void loop( void *_sdl ){
+using EventHandler = std::function<void()>; // void (*)();
+std::vector< EventHandler > eventHandlers;
+std::mutex eventmut;
+
+void checkEvents( void *_sdl ){
     SDL &sdl = *(SDL *)_sdl;
 
     SDL_Event e;
-#ifndef __EMSCRIPTEN__
-    GDB::update();
-    VERIFY::update();
-#endif
+
 
     while (SDL_PollEvent(&e)) {
+	std::lock_guard<std::mutex> lock(eventmut);
 		
 	if( e.type == SDL_QUIT ){
 	    hasQuit = true;
@@ -332,14 +329,21 @@ void loop( void *_sdl ){
 		return;
 		
 	    case SDLK_F5:
-		reset();
+		
+		eventHandlers.push_back( [](){
+			reset();
+		    } );
 		break;
 		
 	    case SDLK_F7:
-		if( emustate == EmuState::RUNNING )
-		    emustate = EmuState::STOPPED;
-		else
-		    emustate = EmuState::RUNNING;
+		
+		eventHandlers.push_back( [](){
+			if( emustate == EmuState::RUNNING )
+			    emustate = EmuState::STOPPED;
+			else
+			    emustate = EmuState::RUNNING;
+		    });
+
 		break;
 		
 	    case SDLK_F2:
@@ -361,20 +365,73 @@ void loop( void *_sdl ){
 		    sdl.toggleRecording();
 		break;
 
-	    case SDLK_F9: GDB::interrupt(); break;
-	    case SDLK_UP: GPIO::input(1,13,btnState); break;
-	    case SDLK_DOWN: GPIO::input(1,3,btnState); break;
-	    case SDLK_LEFT: GPIO::input(1,25,btnState); break;
-	    case SDLK_RIGHT: GPIO::input(1,7,btnState); break;
-	    case SDLK_a: GPIO::input(1,9,btnState); break;
+	    case SDLK_F9: 		
+		eventHandlers.push_back( [](){
+			GDB::interrupt(); 
+		    } );
+		break;
+	    case SDLK_UP: 		
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,13,btnState); 
+		    } ); 
+		break;
+	    case SDLK_DOWN: 		
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,3,btnState); 
+		    } ); 
+		break;
+	    case SDLK_LEFT: 		
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,25,btnState); 
+		    } ); 
+		break;
+	    case SDLK_RIGHT: 		
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,7,btnState); 
+		    } );
+		break;
+	    case SDLK_a: 		
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,9,btnState); 
+		    } );
+		break;
 	    case SDLK_s:
-	    case SDLK_b: GPIO::input(1,4,btnState); break;
+	    case SDLK_b: 		
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,4,btnState); 
+		    } );
+		break;
 	    case SDLK_d:
-	    case SDLK_c: GPIO::input(1,10,btnState); break;
+	    case SDLK_c: 		
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,10,btnState); 
+		    } );
+		break;
 	    }
 	}
 
     }
+}
+
+
+void loop( void *_sdl ){
+    SDL &sdl = *(SDL *)_sdl;
+
+    {
+	std::lock_guard<std::mutex> lock(eventmut);
+
+	for( EventHandler ev : eventHandlers ){
+	    ev();
+	}
+
+	eventHandlers.clear();
+    }
+
+    
+#ifndef __EMSCRIPTEN__
+    GDB::update();
+    VERIFY::update();
+#endif
 
     switch( emustate ){
     case EmuState::JUST_STOPPED:
@@ -437,10 +494,12 @@ void loop( void *_sdl ){
 
 void drawLoop( void *_sdl ){
     ((SDL*)_sdl)->draw();
+    checkEvents( _sdl );
 }
 
 void drawAndCpuLoop( void *_sdl ){
     ((SDL*)_sdl)->draw();
+    checkEvents( _sdl );
     loop( _sdl );
 }
 
@@ -500,8 +559,9 @@ int main( int argc, char * argv[] ){
 		    loop(sdl);
 	    }, (void *) &sdl );
 	
-	while( !hasQuit )
+	while( !hasQuit ){
 	    drawLoop( &sdl );
+	}
 
 	cputhread.join();
 	
