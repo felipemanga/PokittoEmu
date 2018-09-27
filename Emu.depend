@@ -394,9 +394,9 @@
 1533469748 c:\users\felip\projects\pokittoemu\adc.hpp
 	"mmu.hpp"
 
-1533469748 c:\users\felip\projects\pokittoemu\mmu.hpp
+1538051520 c:\users\felip\projects\pokittoemu\mmu.hpp
 
-1533905596 source:c:\users\felip\projects\pokittoemu\cpu.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\cpu.cpp
 	<algorithm>
 	<iostream>
 	"cpu.hpp"
@@ -406,13 +406,15 @@
 	"adc.hpp"
 	"gpio.hpp"
 	"timers.hpp"
+	"sct.hpp"
+	"usart.hpp"
 	"gdb.hpp"
 
 1533905596 c:\users\felip\projects\pokittoemu\cpu.hpp
 	"types.hpp"
 	"mmu.hpp"
 
-1533469748 c:\users\felip\projects\pokittoemu\sys.hpp
+1538051520 c:\users\felip\projects\pokittoemu\sys.hpp
 	"mmu.hpp"
 
 1533469748 c:\users\felip\projects\pokittoemu\iocon.hpp
@@ -421,20 +423,22 @@
 1533469748 c:\users\felip\projects\pokittoemu\gpio.hpp
 	"mmu.hpp"
 
-1533469748 c:\users\felip\projects\pokittoemu\timers.hpp
+1536898930 c:\users\felip\projects\pokittoemu\timers.hpp
 	"mmu.hpp"
 
-1533905596 source:c:\users\felip\projects\pokittoemu\gpio.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\gpio.cpp
 	<iostream>
 	"types.hpp"
 	"gpio.hpp"
 	"sys.hpp"
 	"screen.hpp"
 	"cpu.hpp"
+	"sd.hpp"
 
-1533905596 c:\users\felip\projects\pokittoemu\screen.hpp
+1538056298 c:\users\felip\projects\pokittoemu\screen.hpp
+	<mutex>
 
-1533469748 source:c:\users\felip\projects\pokittoemu\iap.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\iap.cpp
 	<iostream>
 	"types.hpp"
 	"iap.hpp"
@@ -442,30 +446,39 @@
 
 1533469748 c:\users\felip\projects\pokittoemu\iap.hpp
 
-1533469748 source:c:\users\felip\projects\pokittoemu\iocon.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\iocon.cpp
+	<iostream>
 	"types.hpp"
 	"iocon.hpp"
 
-1535921959 source:c:\users\felip\projects\pokittoemu\main.cpp
+1538056783 source:c:\users\felip\projects\pokittoemu\main.cpp
 	<exception>
 	<string>
 	<regex>
 	<iostream>
 	<fstream>
+	<chrono>
 	<thread>
 	<mutex>
 	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
 	"gif.h"
 	"cpu.hpp"
+	"sys.hpp"
 	"timers.hpp"
 	"gpio.hpp"
 	"screen.hpp"
+	"spi.hpp"
+	"sd.hpp"
+	"sct.hpp"
 	"initerror.hpp"
 	"state.hpp"
-	"gdb.hpp"
+	"verify.hpp"
 	"prof.hpp"
+	<emscripten/emscripten.h>
+	"gdb.hpp"
 
-1533469748 source:c:\users\felip\projects\pokittoemu\mmu.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\mmu.cpp
 	"types.hpp"
 	"cpu.hpp"
 	"sys.hpp"
@@ -473,7 +486,11 @@
 	"adc.hpp"
 	"gpio.hpp"
 	"timers.hpp"
+	"usart.hpp"
+	"sct.hpp"
+	"spi.hpp"
 	<iostream>
+	"gdb.hpp"
 	"../common/Port.h"
 	"../common/Settings.h"
 	"Cartridge.h"
@@ -483,17 +500,20 @@
 	"Sound.h"
 	<cstdio>
 
-1533905596 source:c:\users\felip\projects\pokittoemu\screen.cpp
+1538056653 source:c:\users\felip\projects\pokittoemu\screen.cpp
 	<iostream>
+	<thread>
+	<mutex>
 	"types.hpp"
 	<SDL2/SDL.h>
 
-1533469748 source:c:\users\felip\projects\pokittoemu\sys.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\sys.cpp
 	<iostream>
 	"types.hpp"
 	"sys.hpp"
+	"cpu.hpp"
 
-1535921959 source:c:\users\felip\projects\pokittoemu\thumb2.cpp
+1536898930 source:c:\users\felip\projects\pokittoemu\thumb2.cpp
 	"cpu.hpp"
 	<iostream>
 	"iap.hpp"
@@ -503,20 +523,32 @@
 	"MMU.h"
 	"../common/Settings.h"
 
-1533469748 source:c:\users\felip\projects\pokittoemu\timers.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\timers.cpp
 	<iostream>
+	<thread>
 	"types.hpp"
 	"timers.hpp"
 	"cpu.hpp"
 	"sys.hpp"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
 
 1533905596 c:\users\felip\projects\pokittoemu\gdb.hpp
 
 1533905596 c:\users\felip\projects\pokittoemu\initerror.hpp
 
-1533905596 c:\users\felip\projects\pokittoemu\state.hpp
+1536898930 c:\users\felip\projects\pokittoemu\state.hpp
 
-1535921958 source:c:\users\felip\projects\pokittoemu\gdb.cpp
+1538051520 source:c:\users\felip\projects\pokittoemu\gdb.cpp
 	<iostream>
 	<cstdio>
 	<numeric>
@@ -547,13 +579,14 @@
 	<stdlib.h>
 	<stdlib.h>
 
-1535921959 c:\users\felip\projects\pokittoemu\prof.hpp
+1536422094 c:\users\felip\projects\pokittoemu\prof.hpp
 
-1535921959 source:c:\users\felip\projects\pokittoemu\prof.cpp
+1536898930 source:c:\users\felip\projects\pokittoemu\prof.cpp
 	<iostream>
 	<cstdio>
 	<numeric>
-	<SDL2/SDL_net.h>
+	<SDL2/SDL.h>
+	<fstream>
 	<vector>
 	<algorithm>
 	<thread>
@@ -561,4 +594,78 @@
 	<chrono>
 	"types.hpp"
 	"cpu.hpp"
+
+1538051520 c:\users\felip\projects\pokittoemu\sct.hpp
+
+1538051520 c:\users\felip\projects\pokittoemu\usart.hpp
+	"mmu.hpp"
+
+1538051520 c:\users\felip\projects\pokittoemu\sd.hpp
+
+1519932851 c:\users\felip\downloads\sdl2-2.0.8\i686-w64-mingw32\include\sdl2\sdl_image.h
+	"SDL.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1538051520 c:\users\felip\projects\pokittoemu\spi.hpp
+	"types.hpp"
+	"mmu.hpp"
+
+1536422094 c:\users\felip\projects\pokittoemu\verify.hpp
+
+1538051520 c:\users\felip\projects\pokittoemu\mmuregx16.h
+
+1536898930 source:c:\users\felip\projects\pokittoemu\verify.cpp
+	<iostream>
+	<cstdio>
+	<numeric>
+	"SDL2/SDL.h"
+	<list>
+	<thread>
+	<mutex>
+	<chrono>
+	<string>
+	<sstream>
+	"types.hpp"
+	"cpu.hpp"
+	"gdb.hpp"
+	"state.hpp"
+	<sys/types.h>
+	<fcntl.h>
+	<stdio.h>
+	<stdlib.h>
+	<unistd.h>
+
+1538051520 source:c:\users\felip\projects\pokittoemu\sct.cpp
+	<iostream>
+	<thread>
+	"types.hpp"
+	"timers.hpp"
+	"cpu.hpp"
+	"sys.hpp"
+	"mmuregx16.h"
+	"mmuregx16.h"
+	"mmuregx16.h"
+
+1538051520 source:c:\users\felip\projects\pokittoemu\sd.cpp
+	<fstream>
+	<memory>
+	<vector>
+	<iostream>
+	"types.hpp"
+	"sd.hpp"
+	"spi.hpp"
+
+1538051520 source:c:\users\felip\projects\pokittoemu\spi.cpp
+	"spi.hpp"
+	"cpu.hpp"
+	<vector>
+
+1538051520 source:c:\users\felip\projects\pokittoemu\usart.cpp
+	"types.hpp"
+	"usart.hpp"
+	"cpu.hpp"
+	<iostream>
+	<vector>
 

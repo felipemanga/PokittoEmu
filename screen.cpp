@@ -1,8 +1,11 @@
 #include <iostream>
+#include <thread>
+#include <mutex>
 #include "types.hpp"
 #include <SDL2/SDL.h>
 
 extern u32 verbose;
+
 
 namespace SCREEN {
 
@@ -10,6 +13,8 @@ u16 *LCD;
 
 #define HEIGHT 176
 #define WIDTH  220
+
+std::mutex mut;
 
 u32 colStart = 0;
 u32 colEnd = HEIGHT-1;
@@ -67,6 +72,8 @@ void cmd21( u16 D ){ // Vertical DRAM Address Set
 }
 
 void cmd22( u16 D ){
+    // std::lock_guard<std::mutex> vml(mut);
+
     s32 cs = colStart;
     s32 ce = colEnd;
     s32 cd = ce - cs;
