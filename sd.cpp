@@ -16,6 +16,7 @@ namespace SD {
     bool enabled = false;
     bool checkCRC = true;
     u32 writeAddress, writeCount;
+    u32 nextReadAddress;
     u32 command = 0;
     u32 altCommand = false;
     u32 argument = 0;
@@ -82,7 +83,15 @@ namespace SD {
     using Command = void (*) ( u32 );
 
     void stubCommand( u32 arg ){
-    // std::cout << ( "Unknown SD command ", cmd, "arg: ", arg.toString(16) );
+	
+	std::cout << "Unknown SD command "
+		  << std::dec
+		  << command
+		  << " arg: "
+		  << std::hex
+		  << arg
+		  << std::endl;
+	
 	response = std::vector<u8>{4};
     }
     
@@ -107,7 +116,16 @@ namespace SD {
 	stubCommand, // 9
 	stubCommand, // 10
 	stubCommand, // 11
-	stubCommand, // 12
+	
+	[]( u32 arg ){ // 12
+
+	    if( state == 16 )
+		state = 0;
+	    
+	    response = std::vector<u8>{ 0, 0 };
+	    
+	},
+
 	[]( u32 arg ){ // verify that the programming was successful
 	    response = std::vector<u8>{ 0, 0 };
 	},
@@ -118,11 +136,10 @@ namespace SD {
 	    response = std::vector<u8>{ arg == 512 ? (idle?1:0) : 1<<6 };
 	},
 	
-	[]( u32 arg ){ // single block read
+	[]( u32 arg ){ // 17 - single block read
 	    if( verbose > 1 )
 		std::cout << "Read block" << arg << std::endl;
 	    u32 addr = arg*512;
-	    u32 state = 0;
 	    u16 CRC=0;
 	    response.clear();
 	    response.push_back(0); // R1
@@ -136,7 +153,25 @@ namespace SD {
 	    response.push_back( CRC&0xFF );
 	},
 
-	stubCommand, // 18
+	[]( u32 arg ){ // 18 - single block read
+	    if( verbose > 1 )
+		std::cout << "Read multi-block " << arg << std::endl;
+	    u32 addr = arg*512;
+	    nextReadAddress = arg+1;
+	    state = 16;
+	    u16 CRC=0;
+	    response.clear();
+	    response.push_back(0); // R1
+	    response.push_back(~1); // Data Token For 17
+	    for( u32 i=0; i<512; ++i ){
+		u8 ret = image[addr++];
+		CRC = ((CRC << 8) ^ crc16[((CRC >> 8) ^ ret) & 0x00FF]);
+		response.push_back(ret);
+	    }
+	    response.push_back( CRC>>8 );
+	    response.push_back( CRC&0xFF );
+	},
+
 	stubCommand, // 19
 	stubCommand, // 20
 	stubCommand, // 21
@@ -222,6 +257,15 @@ namespace SD {
 
 	resetCounter = 0;
 
+	if( state == 16 ){ // multi-block read
+	    if( (b&0x3F) == 12 ){
+		response = std::vector<u8>({0, 0, 0, 0, 0, 0, 0, 0, 0});
+		state = 1;
+	    }else if( response.empty() ){
+		commands[18]( nextReadAddress );
+	    }
+	}
+	
 	if( response.size() ){
 	    SPI::spi0In( response[0] );
 	    response.erase( response.begin() );
@@ -313,6 +357,7 @@ namespace SD {
 	    SPI::spi0In( 0x5 );
 	    state = 1;
 	    return;
+
 	}
 		
 	SPI::spi0In( 0xFF );
