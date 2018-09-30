@@ -37,7 +37,7 @@ namespace GPIO {
 	val = !!val;
 	u32 old = (*PIN[pinId]>>bit) & 1;
 	if( old == val ) return;
-//	std::cout << "Setting " << pinId << "_" << bit << " = " << val << std::endl;
+	// std::cout << "Setting " << std::dec << pinId << "_" << bit << " = " << val << std::endl;
 	*PIN[pinId] = (*PIN[pinId]&~(1<<bit)) | (val<<bit);
 
 	u32 id = bit, f = 1;
@@ -192,7 +192,7 @@ namespace GPIO {
     
     template<u32 &pin, u32 bit> u32 readByte( u32, u32 addr ){
 	u32 off = bit + (addr&3);
-	return pin>>off;
+	return ((pin>>off)&1) << ((addr&3)<<3);
     }
 
     template<u32 &pin, u32 bit> u32 writeByte( u32 v, u32, u32 addr ){
@@ -203,7 +203,7 @@ namespace GPIO {
 
 
     template<u32 &pin, u32 bit> u32 readWord( u32, u32 ){
-	return pin>>bit;
+	return (pin>>bit) & 1;
     }
 
     template<u32 &pin, u32 bit> u32 writeWord( u32 v, u32, u32 ){
@@ -574,6 +574,15 @@ namespace GPIO {
 
     void init(){
 	SD::enabled = true;
+/*
+	for( u32 i=0; i<sizeof(wordMap)/sizeof(wordMap[0]); ++i ){
+	    std::cout << wordMap[i].name
+		      << " "
+		      << std::hex
+		      << (wordLayout.base+(i*4))
+		      << std::endl;
+	}
+*/
 	/*
 	for( u32 i=0; i<sizeof(flagMap)/sizeof(flagMap[0]); ++i ){
 	    std::cout << flagMap[i].name

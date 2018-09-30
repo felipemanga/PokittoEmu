@@ -372,7 +372,13 @@ void checkEvents( void *_sdl ){
 		break;
 	    case SDLK_UP: 		
 		eventHandlers.push_back( [=](){
-			GPIO::input(1,13,btnState); 
+			GPIO::input(1,13,btnState);
+			/*
+			std::cout << std::hex
+				  << int(MMU::read8(0xA0000020+13))
+				  << btnState
+				  << std::endl;
+			*/
 		    } ); 
 		break;
 	    case SDLK_DOWN: 		
@@ -407,6 +413,12 @@ void checkEvents( void *_sdl ){
 			GPIO::input(1,10,btnState); 
 		    } );
 		break;
+	    case SDLK_f:
+		eventHandlers.push_back( [=](){
+			GPIO::input(0,1,btnState); 
+		    } );
+		break;
+		
 	    }
 	}
 
