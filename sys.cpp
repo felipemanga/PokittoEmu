@@ -4,7 +4,7 @@
 #include "cpu.hpp"
 
 namespace SYS {
-
+    u32 vtorReset;
     u32 VTOR, AIRCR, NVIC_ISER=0;
 
     u32 reserved;
@@ -142,7 +142,7 @@ namespace SYS {
 
     void init(){
 	SYSMEMREMAP = 0;
-	VTOR = 0;
+	VTOR = vtorReset;
 	SYSPLLCLKUEN = 1;
 	SYSPLLSTAT = 1;
 	MAINCLKUEN = 1;

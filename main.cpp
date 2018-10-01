@@ -157,6 +157,7 @@ void SDL::toggleRecording(){
 	name += std::to_string(gifNum);
 	name += ".gif";
 	GifBegin( &gif, name.c_str(), 220, 176, 2 );
+	delay = 10;
     }else{
 	GifEnd( &gif );
     }
@@ -177,7 +178,7 @@ uint8_t rgba[220*176*4];
 
 void SDL::draw(){
     if( !SCREEN::dirty ){
-	delay+=4;
+	delay+=2;
 	#ifndef __EMSCRIPTEN__
 	std::this_thread::sleep_for( 10ms );
 	#endif
@@ -188,7 +189,6 @@ void SDL::draw(){
     SDL_UnlockSurface( vscreen );
     SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
     SDL_LockSurface(vscreen);
-    SDL_UpdateWindowSurface(m_window);
 
     if( screenshot ){
 	screenshot--;
@@ -200,7 +200,7 @@ void SDL::draw(){
 #ifndef __EMSCRIPTEN__
 	std::lock_guard<std::mutex> gml(gifmut);
 #endif
-	if( recording ){
+	if( recording && delay > 4 ){
 
 	    uint8_t *rgbap = rgba;
 	    for( u32 i=0; i<220*176; ++i ){
@@ -219,11 +219,14 @@ void SDL::draw(){
 		}
 	    }
 		
+	    delay = 2;
+	    
 	}
 	    
     }
+
+    SDL_UpdateWindowSurface(m_window);
 //    SDL_RenderPresent( m_renderer );
-    delay = 4;
 
 }
 
@@ -243,6 +246,13 @@ void parseArgs( int argc, char *argv[] ){
 
 	    case 'V':
 		verbose++;
+		break;
+
+	    case 'e':
+		if( i+1 >= argc )
+		    std::cout << "-e switch should be followed by entry point address." << std::endl;
+		else
+		    SYS::vtorReset = strtoul( argv[++i], NULL, 16 );
 		break;
 
 	    case 's':

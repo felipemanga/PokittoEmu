@@ -6,8 +6,8 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
-
 #include "cpu.hpp"
+#include "sys.hpp"
 #include "state.hpp"
 
 bool loadBin( const std::string &fileName ){
@@ -17,7 +17,7 @@ bool loadBin( const std::string &fileName ){
     struct {
 	uint32_t id, size;
     } header;
-    uint32_t targetAddr = 0;
+    uint32_t targetAddr = SYS::vtorReset;
 
     while( !inp.eof() ){
 	inp.read( (char *) &header, sizeof(header) );

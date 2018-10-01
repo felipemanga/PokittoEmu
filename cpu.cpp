@@ -67,6 +67,7 @@ namespace CPU
 	    reg[i].I = 0;
 
 	reg[15].I = MMU::read32( SYS::VTOR+4 );
+	std::cout << "R15=" << std::hex << reg[15].I << std::endl;
 	reg[14].I = ~0;
 	reg[13].I = MMU::read32( SYS::VTOR );
 	armIrqEnable = true;
