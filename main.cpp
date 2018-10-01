@@ -248,6 +248,15 @@ void parseArgs( int argc, char *argv[] ){
 		verbose++;
 		break;
 
+	    case 'w':
+		if( i+1 >= argc ) MMU::ignoreBadWrites = 1;
+		else MMU::ignoreBadWrites = atoi( argv[++i] );
+		break;
+
+	    case 'W':
+		MMU::ignoreBadWrites = ~0;
+		break;
+
 	    case 'e':
 		if( i+1 >= argc )
 		    std::cout << "-e switch should be followed by entry point address." << std::endl;

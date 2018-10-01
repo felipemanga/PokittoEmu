@@ -158,7 +158,7 @@ namespace TIMERS {
 	if( v & 4 ){
 	    if( verbose )
 		std::cout << "Reset requested" << std::endl;
-	    SYS::VTOR = 0;
+	    SYS::VTOR = SYS::vtorReset;
 	    CPU::cpuNextEvent = 0;
 	    std::this_thread::sleep_for( 1s );
 	}

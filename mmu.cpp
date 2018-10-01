@@ -12,10 +12,10 @@
 #include "gdb.hpp"
 
 extern u32 verbose;
-
 namespace MMU
 {
     bool mute = true;
+    u32 ignoreBadWrites;
 
     u8 flash[0x40000];
     u8 sram[0x8000];
@@ -50,6 +50,7 @@ namespace MMU
 	return *((retType *)&buffer[addr]);
     }
 
+    u32 warnaddr;
     template< typename valType > 
     void writeROR( u32 addr, valType value ){
 	if( verbose ){
@@ -61,9 +62,24 @@ namespace MMU
 		      << std::endl;
 	}
 	
-	// CPU::interrupt(3);
 	if( GDB::connected() )
 	    GDB::interrupt();
+	else if( ignoreBadWrites )
+	    ignoreBadWrites--;
+	else if( addr < 0x10000000 ){
+	    
+	    CPU::reg[15].I -= 2;
+	    if( warnaddr != CPU::reg[15].I ){
+		std::cout << "Attempt to write to flash (0x"
+			  << std::hex << addr
+			  << ") on PC=0x"
+			  << CPU::ADDRESS
+			  << std::endl;
+	    }
+	    warnaddr = CPU::reg[15].I;
+	    CPU::interrupt(3);
+	}
+
     }
 
     template< u8* buffer, u32 base, u32 size, typename valType > 

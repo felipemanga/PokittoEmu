@@ -2,6 +2,7 @@
 
 namespace MMU
 {
+extern u32 ignoreBadWrites;
 
 extern u8 flash[0x40000];
 extern u8 sram[0x8000];
