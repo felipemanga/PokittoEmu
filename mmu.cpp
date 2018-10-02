@@ -15,6 +15,7 @@ extern u32 verbose;
 namespace MMU
 {
     bool mute = true;
+
     u32 ignoreBadWrites;
 
     u8 flash[0x40000];
@@ -61,11 +62,11 @@ namespace MMU
 		      << CPU::ADDRESS
 		      << std::endl;
 	}
-	
-	if( GDB::connected() )
-	    GDB::interrupt();
-	else if( ignoreBadWrites )
+
+	if( ignoreBadWrites )
 	    ignoreBadWrites--;
+	else if( GDB::connected() )
+	    GDB::interrupt();
 	else if( addr < 0x10000000 ){
 	    
 	    CPU::reg[15].I -= 2;
@@ -169,6 +170,27 @@ namespace MMU
 	    
 	}
 	
+	return 0;
+    }
+
+    u32 dbgRead( u32 v, u32 addr ){
+	std::cout << "DBG Read @ : 0x" << std::hex << CPU::ADDRESS << std::endl;
+	
+	if( GDB::connected() )
+	    GDB::interrupt();
+
+	return v;
+    }
+
+    u32 dbgWrite( u32 value, u32, u32 addr ){
+	std::cout << "DBG @ 0x"
+		  << std::hex
+		  << CPU::ADDRESS << ": 0x"
+		  << value
+		  << " (" << std::dec
+		  << value
+		  << ")"
+		  << std::endl;
 	return 0;
     }
     

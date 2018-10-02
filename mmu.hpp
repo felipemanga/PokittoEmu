@@ -24,6 +24,8 @@ struct Register {
     u32 nopWrite( u32 v, u32 ov, u32 addr );
     u32 readHole( u32 v, u32 addr );
     u32 writeHole( u32 v, u32 ov, u32 addr );
+    u32 dbgRead( u32 v, u32 addr );
+    u32 dbgWrite( u32 v, u32 ov, u32 addr );
 
 #define MMUREGVRW( name, read, write ) { &MMU::_reserved, #name, &read, &write }
     
@@ -39,7 +41,7 @@ struct Register {
 
     extern u32 _reserved;
 #define MMUREGX() { &MMU::_reserved, "RESERVED", &MMU::readHole, &MMU::writeHole }
-#define MMUREGDBG( name ) { &MMU::_reserved, #name, &MMU::readHole, &MMU::writeHole }
+#define MMUREGDBG( name ) { &MMU::_reserved, #name, &MMU::dbgRead, &MMU::dbgWrite }
     
 #define MMUREG( name ) { &name, #name, &MMU::defaultRead, &MMU::defaultWrite }
 
