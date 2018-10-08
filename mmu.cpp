@@ -1,3 +1,4 @@
+#include <cstring>
 #include "types.hpp"
 #include "cpu.hpp"
 #include "sys.hpp"
@@ -24,6 +25,57 @@ namespace MMU
     u8 usbsram[0x800];
     u8 eeprom[0x1000];
 
+    struct ROM_t {
+
+	struct {
+	    u32 usbdApiBase; /*!< USBD API function table base address */
+	    u32 reserved0; /*!< Reserved */
+	    u32 reserved1; /*!< Reserved */
+	    u32 pPWRD; /*!< Power API function table base address */
+	    u32 divApiBase; /*!< Divider API function table base address */
+	    u32 pI2CD; /*!< I2C driver API function table base address */
+	    u32 pDMAD; /*!< DMA driver API function table base address */
+	    u32 reserved2; /*!< Reserved */
+	    u32 reserved3; /*!< Reserved */
+	    u32 pUARTND; /*!< USART 1/2/3/4 driver API function table base address */
+	    u32 reserved4; /*!< Reserved */
+	    u32 pUART0D; /*!< USART 0 driver API function table base address */
+	    
+	} LPC_ROM_API;
+
+	struct {
+	    u32 sidiv;
+	    u32 uidiv;
+	    u32 sidivmod;
+	    u32 uidivmod;
+	} DIV_API;
+	
+    } romstruct = {
+	{
+	    0x30000000, // usbdApiBase
+	    0x00000000, // reserved0
+	    0x00000000, // reserved1
+	    0x30000000, // API_T *pPWRD
+	    0x30000030, // DIV_API_T *divApiBase
+	    0x30000000, // I2CD_API_T *pI2CD
+	    0x30000000, // DMAD_API_T *pDMAD
+	    0x30000000, // u32 reserved2
+	    0x30000000, // u32 reserved3
+	    0x30000000, // UARTD_API_T *pUARTND
+	    0x30000000, // u32 reserved4
+	    0x30000000, // UARTD_API_T *pUART0D
+	},
+
+	{
+	    0x1fff1ff3,
+	    0x1fff1ff5,
+	    0x1fff1ff7,
+	    0x1fff1ff9
+	}
+    };
+
+    u8 rom[ sizeof(romstruct) ];
+
     template< u8* buffer, u32 base, u32 size, typename retType > 
     retType readBuffer( u32 addr ){
 	if( addr < base ){
@@ -31,10 +83,14 @@ namespace MMU
 		std::cout << "Read OOB " << std::hex << addr
 			  << " on PC="
 			  << CPU::ADDRESS
+			  << " base = " << base
 			  << std::endl;
 	    }
 	    return ~0;
 	}
+
+	if( addr == 0x1fff1ff8 )
+	    return retType(0x30000000);
 
 	addr -= base;
 
@@ -43,6 +99,7 @@ namespace MMU
 		std::cout << "Read OOB " << std::hex << addr
 			  << " on PC="
 			  << CPU::ADDRESS
+			  << " base = " << base
 			  << std::endl;
 	    }
 	    return ~0;
@@ -591,7 +648,15 @@ namespace MMU
 	    &writeMap8 < hiramMap, 14, 1 >
 	},
 
-	voidBank, // 0x3
+
+	{ // 0x3 - ROM
+	    &readBuffer< rom, 0x30000000, sizeof(rom), u32 >,
+	    &readBuffer< rom, 0x30000000, sizeof(rom), u16 >,
+	    &readBuffer< rom, 0x30000000, sizeof(rom), u8 >,
+	    &writeROR<u32>,
+	    &writeROR<u16>,
+	    &writeROR<u8>
+	},
 
 	{ // 0x4 - Periferals
 	    &readMap32<  apbMap, 14, 0x1F >,
@@ -640,6 +705,7 @@ namespace MMU
     };
 
     bool init(){
+	memcpy( rom, &romstruct, sizeof(rom) );
 	return true;
     }
 

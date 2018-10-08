@@ -46,6 +46,8 @@ namespace IAP {
 	u32 len = MMU::read32( r0+12 );
 	u32 cclk = MMU::read32( r0+16 );
 
+	// std::cout << "CLK: " << std::hex << cclk << std::endl;
+
 	if( dst + len > sizeof(MMU::flash) ){
 	    std::cout << "ERROR: write beyond flash size" << std::endl;
 	    len = sizeof(MMU::flash) - dst;
@@ -57,6 +59,10 @@ namespace IAP {
 	}
 
 	for( u32 i=0; i<len; ++i ){
+	    /*
+	    if( MMU::flash[dst] != 0xFF )
+		std::cout << "WARN: write to non-empty flash" << std::endl;
+	    */
 	    MMU::flash[dst++] = MMU::read8( src++ );
 	}
 

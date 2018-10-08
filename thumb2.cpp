@@ -1,5 +1,6 @@
 #include "cpu.hpp"
 #include <iostream>
+#include <fstream>
 #include "iap.hpp"
 #include "gdb.hpp"
 
@@ -14,6 +15,7 @@
 
 namespace CPU
 {
+    // std::ofstream out("exec.log");
     bool logops = false;
 #define LOG( name ){ if( logops ) std::cout << #name << " " << std::hex << opcode << std::endl; }
 ///////////////////////////////////////////////////////////////////////////
@@ -747,31 +749,69 @@ namespace CPU
     }
 
 // BLX Rs
+
     static INSN_REGPARM void thumb47b(u32 opcode)
     {
 	LOG(thumb47b);
 	int base = (opcode >> 3) & 15;
 	busPrefetchCount=0;
 
-	if( reg[base].I == 0x1fff1ff1 ){
-	    u32 cmdId = MMU::read32(reg[0].I);
-	    if( cmdId > 62 ){
-		std::cout << "Invalid IAP: " << cmdId << std::endl;
-	    }else{
-		IAP::command[cmdId](reg[0].I, reg[1].I, reg[2].I, reg[3].I);
+	if( (reg[base].I&0xFFFFFFF0) == 0x1fff1ff0 ){
+	    u32 t = (reg[base].I & 0xF) >> 1;
+
+	    switch( t ){
+	    case 0: {
+		u32 cmdId = MMU::read32(reg[0].I);
+		if( cmdId > 62 ){
+		    std::cout << "Invalid IAP: " << cmdId << std::endl;
+		}else{
+		    IAP::command[cmdId](reg[0].I, reg[1].I, reg[2].I, reg[3].I);
+		}
+		break;
 	    }
+		
+	    case 1: {
+		s32 n = reg[0].I, d = reg[1].I;
+		reg[0].I = n / d;
+		break;
+	    }
+
+	    case 2: {
+		u32 n = reg[0].I, d = reg[1].I;
+		reg[0].I = n / d;
+		break;
+	    }
+
+	    case 3: {
+		s32 n = reg[1].I, d = reg[2].I;
+		MMU::write32( reg[0].I,   n / d );
+		MMU::write32( reg[0].I+4, n % d );
+		break;
+	    }
+
+	    case 4: {
+		u32 n = reg[1].I, d = reg[2].I;
+		MMU::write32( reg[0].I,   n / d );
+		MMU::write32( reg[0].I+4, n % d );
+		break;
+	    }
+
+
+	    }
+	    
 	    reg[15].I -= 2;
+	    clockTicks = 42;
 	}else{
 	    reg[14].I = reg[15].I-2;
 	    reg[15].I = reg[base].I;
 	    reg[15].I &= 0xFFFFFFFE;
+	    clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
 	}
 
 	armNextPC = reg[15].I;
 	reg[15].I += 2;
 	THUMB_PREFETCH();
 
-	clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
 
     }
 
@@ -1842,6 +1882,7 @@ namespace CPU
 	    THUMB_PREFETCH_NEXT();
 
 	    // CPU::logops = ADDRESS == 0x51b8;
+	    // out << std::hex << ADDRESS << std::endl;
 
 	    (*thumbInsnTable[opcode>>6])(opcode);
 
