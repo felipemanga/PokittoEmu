@@ -69,8 +69,10 @@ document.addEventListener("DOMContentLoaded", function(){
 
 		function retry(){
 
-		    if( typeof FS == "undefined" )
+		    if( typeof FS == "undefined" ){
 			setTimeout( retry, 100 );
+			return;
+		    }
 
 		    var data = new Uint8Array( ab );
 		    var stream = FS.open('file.bin', 'w+');
