@@ -35,6 +35,7 @@
     </style>
 
     <script>
+    let emuRunning = false;
       
 document.addEventListener("DOMContentLoaded", function(){
     document.body.addEventListener("dragenter", cancelEvent);
@@ -64,11 +65,23 @@ document.addEventListener("DOMContentLoaded", function(){
 		    return rsp.arrayBuffer();
 	    })
 	    .then( ab => {
-		var data = new Uint8Array( ab );
-		var stream = FS.open('file.bin', 'w+');
-		FS.write(stream, data, 0, data.length, 0);
-		FS.close(stream);
-		Module.ccall("reset");		
+
+		retry();
+
+		function retry(){
+
+		    if( typeof FS == "undefined" || !emuRunning ){
+			setTimeout( retry, 100 );
+			return;
+		    }
+
+		    var data = new Uint8Array( ab );
+		    var stream = FS.open('file.bin', 'w+');
+		    FS.write(stream, data, 0, data.length, 0);
+		    FS.close(stream);
+		    Module.ccall("reset");
+		}
+
 	    })
 	    .catch( err => console.error(err) );
 	
@@ -119,7 +132,11 @@ function dropFile( event ){
       var progressElement = document.getElementById('progress');
 
       var Module = {
-        preRun: [],
+          preRun: [
+	      function(){
+		  emuRunning = true;
+	      }
+	  ],
         postRun: [],
         print: (function() {
           return function(text) {
@@ -312,5 +329,3 @@ function intArrayToString(array) {
 </script>
   </body>
 </html>
-
-
