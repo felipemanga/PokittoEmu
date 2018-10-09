@@ -75,6 +75,7 @@ namespace SPI {
 	spi.enabled = (v>>1) & 1;
 	spi.slave = (v>>2) & 1;
 	spi.slaveOutputDisabled = (v>>3) & 1;
+	return v;
     }
 
     template <SPI &spi>

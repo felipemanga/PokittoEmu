@@ -110,7 +110,7 @@ namespace SD {
 	stubCommand, // 7
 	[]( u32 arg ){ // detect SDv2
 	    // arg:  Rsv(0)[31:12], Supply Voltage(1)[11:8], Check Pattern(0xAA)[7:0]
-	    response = std::vector<u8>{idle?1:0, 0, 0, 0x01, 0xAA};
+	    response = std::vector<u8>{u8(idle?1:0), 0, 0, 0x01, 0xAA};
 	},
 	
 	stubCommand, // 9
@@ -133,7 +133,7 @@ namespace SD {
 	stubCommand, // 14
 	stubCommand, // 15
 	[]( u32 arg ){
-	    response = std::vector<u8>{ arg == 512 ? (idle?1:0) : 1<<6 };
+	    response = std::vector<u8>{ u8( arg == 512 ? (idle?1:0) : 1<<6 ) };
 	},
 	
 	[]( u32 arg ){ // 17 - single block read
@@ -193,17 +193,17 @@ namespace SD {
 	stubCommand, stubCommand, stubCommand, stubCommand, // 54
 	[]( u32 arg ){
 	    altCommand = true;
-	    response = std::vector<u8>{idle?1:0};
+	    response = std::vector<u8>{u8(idle?1:0)};
 	},
 	
 	stubCommand, // 56
 	stubCommand, // 57
 	[]( u32 arg ){ // check OCR bit
-	    response = std::vector<u8>{idle?1:0,0x40,0x10,0,0};
+	    response = std::vector<u8>{u8(idle?1:0),0x40,0x10,0,0};
 	},
 	[]( u32 arg ){ // enable/disable CRC checking
 	    checkCRC = !!arg;
-	    response = std::vector<u8>{idle?1:0};
+	    response = std::vector<u8>{u8(idle?1:0)};
 	},
 	stubCommand, // 60
 	stubCommand, stubCommand, stubCommand, stubCommand, stubCommand, // 65

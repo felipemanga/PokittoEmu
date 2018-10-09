@@ -5,11 +5,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>PokittoEmu</title>
     <style>
-      body {
-        font-family: arial;
-        margin: 0;
-      padding: none;
+      body, html {
+      font-family: arial;
+      padding: 0;
       background-color: #444;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      margin: 0;
       }
 
       canvas{
@@ -37,6 +40,40 @@ document.addEventListener("DOMContentLoaded", function(){
     document.body.addEventListener("dragenter", cancelEvent);
     document.body.addEventListener("dragover", cancelEvent);
     document.body.addEventListener("drop", dropFile);
+
+    let url, proxy = "https://cors-anywhere.herokuapp.com/";
+    let match = location.search.match(/[?&](?:file|hex|url)=([^&]+)/);
+    if( match ){
+	url = match[1];
+	if( /^https?%.*/.test(url) )
+	    url = decodeURIComponent(url);
+    }
+
+    if( url ){
+	
+	let match;
+	
+	if( (match = url.match(/^https:\/\/raw.githubusercontent.com\/(.*)$/i)) )
+	    url = 'https://gitcdn.xyz/repo/' + match[1];
+	else if( (match = url.match(/^https?:\/\/([^/]+)/)) && match[1] != location.domain )
+	    url = proxy + url;
+
+	fetch( url )
+	    .then( rsp => {
+		if( rsp.ok )
+		    return rsp.arrayBuffer();
+	    })
+	    .then( ab => {
+		var data = new Uint8Array( ab );
+		var stream = FS.open('file.bin', 'w+');
+		FS.write(stream, data, 0, data.length, 0);
+		FS.close(stream);
+		Module.ccall("reset");		
+	    })
+	    .catch( err => console.error(err) );
+	
+    }
+
 });
 
 function cancelEvent( event ){
