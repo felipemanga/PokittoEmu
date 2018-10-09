@@ -64,11 +64,21 @@ document.addEventListener("DOMContentLoaded", function(){
 		    return rsp.arrayBuffer();
 	    })
 	    .then( ab => {
-		var data = new Uint8Array( ab );
-		var stream = FS.open('file.bin', 'w+');
-		FS.write(stream, data, 0, data.length, 0);
-		FS.close(stream);
-		Module.ccall("reset");		
+
+		retry();
+
+		function retry(){
+
+		    if( typeof FS == "undefined" )
+			setTimeout( retry, 100 );
+
+		    var data = new Uint8Array( ab );
+		    var stream = FS.open('file.bin', 'w+');
+		    FS.write(stream, data, 0, data.length, 0);
+		    FS.close(stream);
+		    Module.ccall("reset");
+		}
+
 	    })
 	    .catch( err => console.error(err) );
 	
