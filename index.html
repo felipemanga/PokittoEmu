@@ -35,6 +35,7 @@
     </style>
 
     <script>
+    let emuRunning = false;
       
 document.addEventListener("DOMContentLoaded", function(){
     document.body.addEventListener("dragenter", cancelEvent);
@@ -69,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 		function retry(){
 
-		    if( typeof FS == "undefined" ){
+		    if( typeof FS == "undefined" || !emuRunning ){
 			setTimeout( retry, 100 );
 			return;
 		    }
@@ -131,7 +132,11 @@ function dropFile( event ){
       var progressElement = document.getElementById('progress');
 
       var Module = {
-        preRun: [],
+          preRun: [
+	      function(){
+		  emuRunning = true;
+	      }
+	  ],
         postRun: [],
         print: (function() {
           return function(text) {
