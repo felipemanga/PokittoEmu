@@ -1,0 +1,4 @@
+-I/usr/include/SDL2
+-I./.
+-D_REENTRANT
+-std=c++17
