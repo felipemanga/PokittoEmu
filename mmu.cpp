@@ -147,7 +147,7 @@ namespace MMU
 	    // To-Do: raise interrupt
 	    if( verbose ){
 		std::cout << "OOB Write " << std::hex << addr
-			  << " = " << value
+			  << " = " << u32(value)
 			  << " on PC="
 			  << CPU::ADDRESS
 			  << std::endl;
@@ -162,7 +162,7 @@ namespace MMU
 	    
 	    if( verbose ){
 		std::cout << "OOB Write " << std::hex << addr
-			  << " = " << value
+			  << " = " << u32(value)
 			  << " on PC="
 			  << CPU::ADDRESS
 			  << std::endl;

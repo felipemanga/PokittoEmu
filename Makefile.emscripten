@@ -6,7 +6,7 @@ else
     RM = '$(SHELL)' -c "rm -rf \"$(1)\""
 endif
 
-OBJDIR := BUILD
+OBJDIR := ONLINE
 SRCDIR := $(CURDIR)
 
 .PHONY: clean
@@ -18,27 +18,27 @@ vpath %.cpp .
 vpath %.h .
 
 PROJECT := PokittoEmu
-BPROJECT := BUILD/PokittoEmu.html
+BPROJECT := ONLINE/PokittoEmu.html
 
-OBJECTS += BUILD/sys.o
-OBJECTS += BUILD/iocon.o
-OBJECTS += BUILD/gpio.o
-OBJECTS += BUILD/adc.o
-OBJECTS += BUILD/iap.o
-OBJECTS += BUILD/timers.o
-OBJECTS += BUILD/usart.o
-OBJECTS += BUILD/thumb2.o
-OBJECTS += BUILD/screen.o
-OBJECTS += BUILD/mmu.o
-OBJECTS += BUILD/main.o
-OBJECTS += BUILD/cpu.o
-OBJECTS += BUILD/gdb.o
-OBJECTS += BUILD/prof.o
-OBJECTS += BUILD/verify.o
-OBJECTS += BUILD/sd.o
-OBJECTS += BUILD/sct.o
-OBJECTS += BUILD/spi.o
-OBJECTS += BUILD/loadBin.o
+OBJECTS += ONLINE/sys.o
+OBJECTS += ONLINE/iocon.o
+OBJECTS += ONLINE/gpio.o
+OBJECTS += ONLINE/adc.o
+OBJECTS += ONLINE/iap.o
+OBJECTS += ONLINE/timers.o
+OBJECTS += ONLINE/usart.o
+OBJECTS += ONLINE/thumb2.o
+OBJECTS += ONLINE/screen.o
+OBJECTS += ONLINE/mmu.o
+OBJECTS += ONLINE/main.o
+OBJECTS += ONLINE/cpu.o
+OBJECTS += ONLINE/gdb.o
+OBJECTS += ONLINE/prof.o
+OBJECTS += ONLINE/verify.o
+OBJECTS += ONLINE/sd.o
+OBJECTS += ONLINE/sct.o
+OBJECTS += ONLINE/spi.o
+OBJECTS += ONLINE/loadBin.o
 
 INCLUDE_PATHS += -I./.
 
@@ -57,7 +57,7 @@ S_FLAGS += -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]'
 CPP = 'emcc' '-c' '-O3'
 LD  = 'emcc' '-O3' --preload-file file.bin  
 
-CXX_FLAGS += -std=c++17
+CXX_FLAGS += -std=c++17 -Wno-comments
 
 .PHONY: all lst size
 
@@ -68,7 +68,7 @@ all: $(BPROJECT) size
 clean:
 	$(call RM,$(OBJDIR))
 
-BUILD/%.o : %.cpp
+ONLINE/%.o : %.cpp
 	+@$(call MAKEDIR,$(dir $@))
 	+@echo "Compile: $(notdir $<)"
 	@$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) $(S_FLAGS) -o $@ $<

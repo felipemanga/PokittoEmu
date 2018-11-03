@@ -50,7 +50,6 @@ class SDL
 {
     SDL_Window * m_window;
     SDL_Renderer * m_renderer;
-    SDL_Surface *vscreen;
     SDL_Surface *screen;
 
     u8 *screenpixels;
@@ -63,12 +62,14 @@ class SDL
     GifWriter gif;
 
 public:
+    SDL_Surface *vscreen;
+
     SDL( Uint32 flags = 0 );
     void toggleRecording();
     virtual ~SDL();
     void draw();
     void savePNG();
-};
+} *sdl;
 
 SDL::SDL( Uint32 flags )
 {
@@ -323,6 +324,10 @@ extern "C" void reset(){
     emustate = EmuState::RUNNING;
 }
 
+extern "C" void takeScreenshot(){
+    IMG_SavePNG( sdl->vscreen, "screenshot.png" );    
+}
+
 using EventHandler = std::function<void()>; // void (*)();
 std::vector< EventHandler > eventHandlers;
 std::mutex eventmut;
@@ -368,6 +373,16 @@ void checkEvents( void *_sdl ){
 	    case SDLK_F2:
 		screenshot = 1;
 		SCREEN::dirty = true;
+		break;
+		
+	    case SDLK_F10:
+		eventHandlers.push_back([=](){
+			std::ofstream os( "dump.img", std::ios::binary );
+	
+			if( os.is_open() )
+			    os.write( reinterpret_cast<char *>(&SD::image[0]), SD::length );
+			
+		    });
 		break;
 
 	    }
@@ -551,7 +566,8 @@ int main( int argc, char * argv[] ){
     try{
 
         SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER );
-
+	::sdl = &sdl;
+	
 	#ifndef __EMSCRIPTEN__
 	if( debuggerPort && !GDB::init( debuggerPort ) )
 	    throw InitError();

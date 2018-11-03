@@ -11,25 +11,33 @@
 #include "state.hpp"
 
 bool loadBin( const std::string &fileName ){
-    std::ifstream inp( fileName, std::ios::binary );
-    if( !inp.good() ) return false;
+    FILE *fp = fopen( fileName.c_str(), "rb" );
+    if( !fp ) return false;
 
     struct {
 	uint32_t id, size;
     } header;
     uint32_t targetAddr = SYS::vtorReset;
 
-    while( !inp.eof() ){
-	inp.read( (char *) &header, sizeof(header) );
+    while( fread( &header, sizeof(header), 1, fp ) == 1 ){
+	
 	if( header.id > 0x10000000 ){
-	    inp.seekg( -8, std::ios_base::cur );
-	    inp.read(
-		(char *) MMU::flash + targetAddr,
-		sizeof(MMU::flash) - targetAddr
+	    fseek( fp, -8, SEEK_CUR );
+	    !fread(
+		MMU::flash + targetAddr,
+		1,
+		sizeof(MMU::flash) - targetAddr,
+		fp
 		);
+
 	    break;
 	}
+
+	fseek( fp, header.size, SEEK_CUR );
+	
     }
+
+    fclose(fp);
 
     return true;
 }

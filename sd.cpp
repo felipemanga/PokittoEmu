@@ -10,7 +10,7 @@
 extern u32 verbose;
 
 namespace SD {
-
+    u32 length;
     std::unique_ptr<u8[]> image;
 
     bool enabled = false;
@@ -35,7 +35,7 @@ namespace SD {
 	    return false;
 
 	is.seekg( 0, ios::end );
-	u32 length = is.tellg();
+	length = is.tellg();
 	image = std::make_unique<u8[]>( length );
 	
 	is.seekg( 0, ios::beg );
