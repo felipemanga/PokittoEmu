@@ -4,12 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <thread>
-#include <mutex>
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include "gif.h"
 
 #include "cpu.hpp"
 #include "sys.hpp"
@@ -22,7 +16,6 @@
 #include "initerror.hpp"
 #include "state.hpp"
 
-
 #ifndef __EMSCRIPTEN__
 #include "verify.hpp"
 #include "prof.hpp"
@@ -31,205 +24,22 @@
 #endif
 #include "gdb.hpp"
 
-using namespace std::chrono_literals;
+#include "./sdl.hpp"
 
 volatile bool hasQuit = false;
 std::string srcPath = "file.bin";
 std::string imgPath;
 
 bool verifier = false,
-    canTakeScreenshot = false,
     autorec = false;
 u32 verbose;
 
-u32 screenshot;
 u16 debuggerPort = 0,
     profiler = 0;
 
-class SDL
-{
-    SDL_Window * m_window;
-    SDL_Renderer * m_renderer;
-    SDL_Surface *screen;
-
-    u8 *screenpixels;
-    u32 gifNum = 0;
-    u32 delay = 2;
-    bool recording = false;
-#ifndef __EMSCRIPTEN__
-    std::mutex gifmut;
-#endif
-    GifWriter gif;
-
-public:
-    SDL_Surface *vscreen;
-
-    SDL( Uint32 flags = 0 );
-    void toggleRecording();
-    virtual ~SDL();
-    void draw();
-    void savePNG();
-} *sdl;
-
-SDL::SDL( Uint32 flags )
-{
-    if ( SDL_Init( flags ) != 0 )
-        throw InitError();
-
-    canTakeScreenshot = (IMG_Init( IMG_INIT_PNG ) & IMG_INIT_PNG) == IMG_INIT_PNG;
-
-    m_window = SDL_CreateWindow("PokittoEmu",
-                             SDL_WINDOWPOS_UNDEFINED,
-                             SDL_WINDOWPOS_UNDEFINED,
-                             220*2, 176*2,
-                             0);
-    if( !m_window )
-	throw InitError();
-
-    m_renderer = SDL_CreateRenderer(
-	m_window,
-	-1,
-	SDL_RENDERER_SOFTWARE// | SDL_RENDERER_PRESENTVSYNC
-	);
-
-    if( !m_renderer )
-	throw InitError();
-
-    recording = false;
-
-    // Clear the window with a black background
-    SDL_SetRenderDrawColor( m_renderer, 0, 0, 0, 255 );
-    SDL_RenderClear( m_renderer );
-    screen = SDL_GetWindowSurface( m_window );
-    vscreen = SDL_CreateRGBSurface(
-	0, // flags
-	220, // w
-	176, // h
-	16, // depth
-	0,
-	0,
-	0,
-	0
-	);
-
-    if( !vscreen )
-	throw InitError();
-
-    SDL_LockSurface(vscreen);
-    SCREEN::LCD = (u16 *) vscreen->pixels;
-
-    SDL_LockSurface(screen);
-    screenpixels = (u8 *) screen->pixels;
-    SDL_UnlockSurface( screen );
-
-}
-
-SDL::~SDL()
-{
-
-    hasQuit = true;
-    
-    if( recording )
-	toggleRecording();
-    
-    if( vscreen ){
-	SDL_UnlockSurface(vscreen);
-	SDL_FreeSurface(vscreen);
-    }
-
-    IMG_Quit();
-
-    SDL_DestroyWindow( m_window );
-    SDL_DestroyRenderer( m_renderer );
-    SDL_Quit();
-    
-}
-
-void SDL::toggleRecording(){
-    recording = !recording;
-#ifndef __EMSCRIPTEN__
-    std::lock_guard<std::mutex> gml(gifmut);
-#endif
-    
-    if( recording ){
-	gifNum++;
-	std::string name = srcPath;
-	name += ".";
-	name += std::to_string(gifNum);
-	name += ".gif";
-	GifBegin( &gif, name.c_str(), 220, 176, 2 );
-	delay = 10;
-    }else{
-	GifEnd( &gif );
-    }
-    
-}
-
-void SDL::savePNG(){
-    gifNum++;
-    std::string name = srcPath;
-    name += ".";
-    name += std::to_string(gifNum);
-    name += ".png";
-
-    IMG_SavePNG( vscreen, name.c_str() );
-}
+SDL *sdl;
 
 uint8_t rgba[220*176*4];
-
-void SDL::draw(){
-    if( !SCREEN::dirty ){
-	delay+=2;
-	#ifndef __EMSCRIPTEN__
-	std::this_thread::sleep_for( 10ms );
-	#endif
-	return;
-    }
-    SCREEN::dirty = false;
-
-    SDL_UnlockSurface( vscreen );
-    SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
-    SDL_LockSurface(vscreen);
-
-    if( screenshot ){
-	screenshot--;
-	if( !screenshot )
-	    savePNG();
-    }
-	
-    {
-#ifndef __EMSCRIPTEN__
-	std::lock_guard<std::mutex> gml(gifmut);
-#endif
-	if( recording && delay > 4 ){
-
-	    uint8_t *rgbap = rgba;
-	    for( u32 i=0; i<220*176; ++i ){
-		u16 c = ((u16 *)SCREEN::LCD)[i];
-		*rgbap++ = float(c >> 11) / 0x1F * 255.0f;
-		*rgbap++ = float((c >> 5) & 0x3F) / 0x3F * 255.0f;
-		*rgbap++ = float(c & 0x1F) / 0x1F * 255.0f;
-		*rgbap++ = 255;
-	    }
-		
-	    GifWriteFrame( &gif, (u8*) rgba, 220, 176, delay, 8 );
-
-	    for( u32 y=0; y<15; ++y ){
-		for( u32 x=0; x<15; ++x ){
-		    screenpixels[ (((y+3)*440+x+3)<<2)+2 ] = ~CPU::cpuTotalTicks;
-		}
-	    }
-		
-	    delay = 2;
-	    
-	}
-	    
-    }
-
-    SDL_UpdateWindowSurface(m_window);
-//    SDL_RenderPresent( m_renderer );
-
-}
 
 bool loadBin( const std::string &fileName );
 
@@ -266,7 +76,7 @@ void parseArgs( int argc, char *argv[] ){
 		break;
 
 	    case 's':
-		if( i+1>=argc || !(screenshot = atoi( argv[++i] )) )
+		if( i+1>=argc || !(sdl->screenshot = atoi( argv[++i] )) )
 		    std::cout << "-s switch should be followed by frames to skip before taking a screenshot." << std::endl;
 		break;
 
@@ -328,151 +138,10 @@ extern "C" void takeScreenshot(){
     IMG_SavePNG( sdl->vscreen, "screenshot.png" );    
 }
 
-using EventHandler = std::function<void()>; // void (*)();
-std::vector< EventHandler > eventHandlers;
-std::mutex eventmut;
-
-void checkEvents( void *_sdl ){
-    SDL &sdl = *(SDL *)_sdl;
-
-    SDL_Event e;
-
-
-    while (SDL_PollEvent(&e)) {
-	std::lock_guard<std::mutex> lock(eventmut);
-		
-	if( e.type == SDL_QUIT ){
-	    hasQuit = true;
-	    return;
-	}
-
-	if( e.type == SDL_KEYUP ){
-	    switch( e.key.keysym.sym ){
-	    case SDLK_ESCAPE:
-		hasQuit = true;
-		return;
-		
-	    case SDLK_F5:
-		
-		eventHandlers.push_back( [](){
-			reset();
-		    } );
-		break;
-		
-	    case SDLK_F7:
-		
-		eventHandlers.push_back( [](){
-			if( emustate == EmuState::RUNNING )
-			    emustate = EmuState::STOPPED;
-			else
-			    emustate = EmuState::RUNNING;
-		    });
-
-		break;
-		
-	    case SDLK_F2:
-		screenshot = 1;
-		SCREEN::dirty = true;
-		break;
-		
-	    case SDLK_F10:
-		eventHandlers.push_back([=](){
-			std::ofstream os( "dump.img", std::ios::binary );
-	
-			if( os.is_open() )
-			    os.write( reinterpret_cast<char *>(&SD::image[0]), SD::length );
-			
-		    });
-		break;
-
-	    }
-	}
-
-	if( emustate == EmuState::STOPPED ) 
-	    continue;
-
-	if( e.type == SDL_KEYDOWN || e.type == SDL_KEYUP ){
-	    u32 btnState = e.type == SDL_KEYDOWN;
-	    switch( e.key.keysym.sym ){		
-	    case SDLK_F3:
-		if(e.type == SDL_KEYDOWN)
-		    sdl.toggleRecording();
-		break;
-
-	    case SDLK_F9: 		
-		eventHandlers.push_back( [](){
-			GDB::interrupt(); 
-		    } );
-		break;
-	    case SDLK_UP: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,13,btnState);
-			/*
-			std::cout << std::hex
-				  << int(MMU::read8(0xA0000020+13))
-				  << btnState
-				  << std::endl;
-			*/
-		    } ); 
-		break;
-	    case SDLK_DOWN: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,3,btnState); 
-		    } ); 
-		break;
-	    case SDLK_LEFT: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,25,btnState); 
-		    } ); 
-		break;
-	    case SDLK_RIGHT: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,7,btnState); 
-		    } );
-		break;
-	    case SDLK_a: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,9,btnState); 
-		    } );
-		break;
-	    case SDLK_s:
-	    case SDLK_b: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,4,btnState); 
-		    } );
-		break;
-	    case SDLK_d:
-	    case SDLK_c: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,10,btnState); 
-		    } );
-		break;
-	    case SDLK_f:
-		eventHandlers.push_back( [=](){
-			GPIO::input(0,1,btnState); 
-		    } );
-		break;
-		
-	    }
-	}
-
-    }
-}
-
-
 void loop( void *_sdl ){
     SDL &sdl = *(SDL *)_sdl;
 
-    {
-	std::lock_guard<std::mutex> lock(eventmut);
-
-	for( EventHandler ev : eventHandlers ){
-	    ev();
-	}
-
-	eventHandlers.clear();
-    }
-
+    sdl.emitEvents();
     
 #ifndef __EMSCRIPTEN__
     GDB::update();
@@ -491,7 +160,9 @@ void loop( void *_sdl ){
 	
 	{
 	    auto start = std::chrono::high_resolution_clock::now();
-	    u32 max = 150000*5;
+	    u32 max = SYS::SYSPLLCTRL == 0x25 ? 0x140000 : 0xc0000;
+            // (45 + (SYS::SYSPLLCTRL-0x23)*15)*1024*1024/30;// 150000*5;
+            
 	    for( u32 opcount=0; opcount<max && emustate == EmuState::RUNNING; ){
 		u32 tti = max-opcount;
 		tti = std::min( tti, SYS::update() );
@@ -526,7 +197,7 @@ void loop( void *_sdl ){
 		
     }
 
-    SCREEN::LCD[ 1*220+1 ] = CPU::cpuTotalTicks;
+    // SCREEN::LCD[ 1*220+1 ] = CPU::cpuTotalTicks;
 
 #ifndef __EMSCRIPTEN__
 	    
@@ -540,12 +211,12 @@ void loop( void *_sdl ){
 
 void drawLoop( void *_sdl ){
     ((SDL*)_sdl)->draw();
-    checkEvents( _sdl );
+    ((SDL*)_sdl)->checkEvents();
 }
 
 void drawAndCpuLoop( void *_sdl ){
     ((SDL*)_sdl)->draw();
-    checkEvents( _sdl );
+    ((SDL*)_sdl)->checkEvents();
     loop( _sdl );
 }
 
@@ -553,24 +224,24 @@ std::thread cputhread;
 
 int main( int argc, char * argv[] ){
 
-    parseArgs( argc, argv );
-
-    srcPath = std::regex_replace( srcPath, std::regex(R"(\.elf$)", std::regex_constants::icase), ".bin" );
-    if( !loadBin( srcPath ) ){
-        std::cerr << "Error: Could not load file. [" << srcPath << "]" << std::endl;
-        return 1;
-    }
-
     CPU::cpuNextEvent = 0;
 
     try{
 
-        SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER );
+        SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_JOYSTICK );
 	::sdl = &sdl;
-	
+
+        parseArgs( argc, argv );
+
+        srcPath = std::regex_replace( srcPath, std::regex(R"(\.elf$)", std::regex_constants::icase), ".bin" );
+        if( !loadBin( srcPath ) ){
+            std::cerr << "Error: Could not load file. [" << srcPath << "]" << std::endl;
+            return 1;
+        }
+
 	#ifndef __EMSCRIPTEN__
 	if( debuggerPort && !GDB::init( debuggerPort ) )
-	    throw InitError();
+	    throw InitError("\\o/");
 	#endif
 
         MMU::init();

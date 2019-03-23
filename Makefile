@@ -31,6 +31,7 @@ OBJECTS += BUILD/thumb2.o
 OBJECTS += BUILD/screen.o
 OBJECTS += BUILD/mmu.o
 OBJECTS += BUILD/main.o
+OBJECTS += BUILD/sdl.o
 OBJECTS += BUILD/cpu.o
 OBJECTS += BUILD/gdb.o
 OBJECTS += BUILD/prof.o
@@ -50,8 +51,8 @@ LIBRARIES += -lSDL2_image
 LIBRARIES += -lpthread
 LD_SYS_LIBS := 
 
-CPP = 'g++' '-c' '-O3'
-LD  = 'g++' '-O3'
+CPP = 'cdb' 'g++' '-c' '-O3'
+LD  = 'cdb' 'g++' '-O3'
 
 CXX_FLAGS += -std=c++17
 CXX_FLAGS += $(shell sdl2-config --cflags)
