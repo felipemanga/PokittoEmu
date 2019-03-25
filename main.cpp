@@ -160,7 +160,7 @@ void loop( void *_sdl ){
 	
 	{
 	    auto start = std::chrono::high_resolution_clock::now();
-	    u32 max = SYS::SYSPLLCTRL == 0x25 ? 0x140000 : 0xc0000;
+	    u32 max = SYS::SYSPLLCTRL == 0x25 ? 0x140000 : 150000*5;
             // (45 + (SYS::SYSPLLCTRL-0x23)*15)*1024*1024/30;// 150000*5;
             
 	    for( u32 opcount=0; opcount<max && emustate == EmuState::RUNNING; ){
