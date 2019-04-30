@@ -42,6 +42,8 @@ struct Register {
     extern u32 _reserved;
 #define MMUREGX() { &MMU::_reserved, "RESERVED", &MMU::readHole, &MMU::writeHole }
 #define MMUREGDBG( name ) { &MMU::_reserved, #name, &MMU::dbgRead, &MMU::dbgWrite }
+
+#define MMUREGLOG( name ) { &name, #name, &MMU::dbgRead, &MMU::dbgWrite }
     
 #define MMUREG( name ) { &name, #name, &MMU::defaultRead, &MMU::defaultWrite }
 

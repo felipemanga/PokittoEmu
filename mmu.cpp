@@ -231,7 +231,19 @@ namespace MMU
     }
 
     u32 dbgRead( u32 v, u32 addr ){
-	std::cout << "DBG Read @ : 0x" << std::hex << CPU::ADDRESS << std::endl;
+        /*
+	std::cout << "DBG Read @ 0x"
+		  << std::hex
+		  << CPU::ADDRESS << ": 0x"
+                  << addr
+                  << " = "
+		  << v
+		  << " (" << std::dec
+		  << v
+		  << ")"
+		  << std::endl;
+        */
+	// std::cout << "DBG Read @ : 0x" << std::hex << CPU::ADDRESS << std::endl;
 	
 	if( GDB::connected() )
 	    GDB::interrupt();
@@ -239,16 +251,19 @@ namespace MMU
 	return v;
     }
 
-    u32 dbgWrite( u32 value, u32, u32 addr ){
-	std::cout << "DBG @ 0x"
+    u32 dbgWrite( u32 value, u32 old, u32 addr ){
+        if( value != old )
+	std::cout << "DBG Write @ 0x"
 		  << std::hex
 		  << CPU::ADDRESS << ": 0x"
+                  << addr
+                  << " = "
 		  << value
 		  << " (" << std::dec
 		  << value
 		  << ")"
 		  << std::endl;
-	return 0;
+	return value;
     }
     
     template< Layout &layout, typename valType >

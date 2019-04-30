@@ -6,7 +6,7 @@
 #include "./screen.hpp"
 #include "./state.hpp"
 #include "./sd.hpp"
-
+#include "./adc.hpp"
 #include "gif.h"
 
 extern volatile EmuState emustate;
@@ -195,7 +195,14 @@ void SDL::emitEvents(){
 void SDL::checkEvents(){
     SDL_Event e;
 
-
+    if( !joysticks.empty() ){
+        ADC::DAT8 = (int32_t(SDL_JoystickGetAxis(joysticks.begin()->second, 4))>>1)+0x8000;
+        ADC::DAT9 = (int32_t(-SDL_JoystickGetAxis(joysticks.begin()->second, 3))>>1)+0x8000;
+    }else{
+        ADC::DAT8 = 0x8000;
+        ADC::DAT9 = 0x8000;
+    }
+    
     while (SDL_PollEvent(&e)) {
 	std::lock_guard<std::mutex> lock(eventmut);
 		

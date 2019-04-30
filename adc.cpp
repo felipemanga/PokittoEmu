@@ -25,6 +25,7 @@ namespace ADC {
 
     void init(){
 	SEQA_GDAT = 0x80000000;
+        DAT8 = DAT9 = 0x8000;
     }
 
     u32 readDAT1( u32, u32 ){
