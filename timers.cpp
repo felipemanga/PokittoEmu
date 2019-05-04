@@ -12,7 +12,7 @@ extern u32 verbose;
 
 namespace TIMERS {
 
-    u32 lastTick;
+    u64 lastTick;
 
     struct CT32 {
 	u32 IR,

@@ -46,6 +46,8 @@ u32 rev32( u32 i ){
 
 namespace GDB {
 
+    static bool interruptRequested = false;
+
     void tx( std::string s ){
 	lock tml(txmut);
 
@@ -95,7 +97,7 @@ namespace GDB {
 
 		switch( ch ){
 		case 3:
-		    interrupt();
+		    interruptRequested = true;
 		    continue;
 
 		case '+': // ACK, ignore;
@@ -237,6 +239,11 @@ namespace GDB {
 
 	if( !server ) return;
 
+        if( interruptRequested ){
+            interruptRequested = false;
+            interrupt();
+        }
+        
 	if( emustate == EmuState::JUST_STOPPED ){
 	    write("T05");
 	    emustate = EmuState::STOPPED;

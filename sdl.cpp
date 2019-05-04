@@ -317,13 +317,18 @@ void SDL::checkEvents(){
 		    } );
 		break;
 		
-	    case SDLK_F7:
+	    case SDLK_F8:
 		
 		eventHandlers.push_back( [](){
-			if( emustate == EmuState::RUNNING )
-			    emustate = EmuState::STOPPED;
-			else
-			    emustate = EmuState::RUNNING;
+                        if( GDB::connected() ){
+                            if( emustate == EmuState::RUNNING )
+                                GDB::interrupt();
+                        }else{
+                            if( emustate == EmuState::RUNNING )
+                                emustate = EmuState::STOPPED;
+                            else
+                                emustate = EmuState::RUNNING;
+                        }
 		    });
 
 		break;

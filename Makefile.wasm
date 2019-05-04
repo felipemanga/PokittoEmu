@@ -51,11 +51,11 @@ LD_SYS_LIBS :=
 S_FLAGS += -s USE_SDL=2
 S_FLAGS += -s USE_SDL_IMAGE=2
 S_FLAGS += -s SDL2_IMAGE_FORMATS='["png"]'
-S_FLAGS += -s USE_PTHREADS=1
-S_FLAGS += -s WASM=0
-S_FLAGS += -s EXPORTED_FUNCTIONS="['_reset', '_main', '_takeScreenshot']"
+S_FLAGS += -s USE_PTHREADS=0
+S_FLAGS += -s WASM=1
+S_FLAGS += -s EXPORTED_FUNCTIONS="['_reset', '_main']"
 S_FLAGS += -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]'
-S_FLAGS += -s ASSERTIONS=1
+# S_FLAGS += -s ASSERTIONS=1
 
 CPP = 'emcc' '-c' '-O3'
 LD  = 'emcc' '-O3' --preload-file file.bin  

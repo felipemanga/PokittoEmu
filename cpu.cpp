@@ -35,8 +35,8 @@ namespace CPU
     bool busPrefetchEnable = false;
     u32 busPrefetchCount = 0;
 
-    u32 cpuTotalTicks;
-    u32 cpuNextEvent;
+    u64 cpuTotalTicks;
+    u64 cpuNextEvent;
 
     void init()
     {

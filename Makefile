@@ -27,6 +27,7 @@ OBJECTS += BUILD/adc.o
 OBJECTS += BUILD/iap.o
 OBJECTS += BUILD/timers.o
 OBJECTS += BUILD/usart.o
+OBJECTS += BUILD/rtc.o
 OBJECTS += BUILD/thumb2.o
 OBJECTS += BUILD/screen.o
 OBJECTS += BUILD/mmu.o

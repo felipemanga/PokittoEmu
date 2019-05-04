@@ -1,5 +1,5 @@
-#include <iostream>
 #include "types.hpp"
+#include <iostream>
 #include "sys.hpp"
 #include "cpu.hpp"
 

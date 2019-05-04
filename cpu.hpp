@@ -61,8 +61,8 @@ namespace CPU
     extern u32 cpuPrefetch[2];
     extern u8 cpuBitsSet[256];
 
-    extern u32 cpuTotalTicks;
-    extern u32 cpuNextEvent;
+    extern u64 cpuTotalTicks;
+    extern u64 cpuNextEvent;
     extern bool holdState;
 
     extern u32 echo, echoRes;
