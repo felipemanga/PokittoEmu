@@ -1,7 +1,3 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/select.h>
-
 #include <exception>
 #include <string>
 #include <regex>
@@ -226,38 +222,7 @@ void drawAndCpuLoop( void *_sdl ){
 
 std::thread cputhread;
 
-std::thread stdiothread;
-
-bool inputAvailable()  
-{
-  struct timeval tv;
-  fd_set fds;
-  tv.tv_sec = 0;
-  tv.tv_usec = 0;
-  FD_ZERO(&fds);
-  FD_SET(STDIN_FILENO, &fds);
-  select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
-  return (FD_ISSET(0, &fds));
-}
-
-void stdioloop(){
-    while( !hasQuit ){
-        if( !inputAvailable() ){
-            std::this_thread::sleep_for( std::chrono::milliseconds(100) );
-            continue;
-        }
-
-        char c;
-        std::cin >> c;
-        if( c == 'b' ){
-            GDB::interrupt();
-        }
-    }
-}
-
 int main( int argc, char * argv[] ){
-
-    stdiothread = std::thread(stdioloop);
 
     CPU::cpuNextEvent = 0;
 
@@ -317,7 +282,6 @@ int main( int argc, char * argv[] ){
 	}
 
 	cputhread.join();
-        stdiothread.join();
 	
 	#elif !defined(__EMSCRIPTEN_PTHREADS__)
 
