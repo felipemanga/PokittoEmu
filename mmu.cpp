@@ -291,7 +291,7 @@ namespace MMU
 	    value = *layout.map[ idx ].value = (*read)( value, addr );
 
 	if( addr&3 )
-	    value = (value >> ((8<<(addr&0x3))-8)) & valType(~0);
+	    value = (value >> ((addr&3)<<3)) & valType(~0);
 
 	if( verbose > 2 ){
 	    std::cout << "Read "
