@@ -17,7 +17,6 @@ namespace GDB {
 #include <cstdio>
 #include <numeric>
 #include <SDL2/SDL_net.h>
-
 #include <list>
 #include <thread>
 #include <mutex>
@@ -27,8 +26,9 @@ namespace GDB {
 #include "cpu.hpp"
 #include "gdb.hpp"
 #include "state.hpp"
+#include "net.hpp"
 
-TCPsocket server, client;
+static TCPsocket server, client;
 
 static std::list<std::string> inPackets, outPackets;
 static std::mutex inmut, outmut, txmut;
@@ -162,11 +162,8 @@ namespace GDB {
     }
         
     bool init( u32 port ){
-
-	if( SDLNet_Init() == -1 )
-	    return false;
-
-	emustate = EmuState::STOPPED;
+        NetManager::hold();
+        emustate = EmuState::STOPPED;
 
 	if( port == 0 )
 	    port = 1234;
@@ -192,7 +189,7 @@ namespace GDB {
 		    SDLNet_TCP_Close(client);
 		if( server )
 		    SDLNet_TCP_Close(server);
-		SDLNet_Quit();
+                NetManager::release();
 	    });
 
 	return true;

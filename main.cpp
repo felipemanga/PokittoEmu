@@ -15,6 +15,7 @@
 #include "sct.hpp"
 #include "initerror.hpp"
 #include "state.hpp"
+#include "pex.hpp"
 
 #ifndef __EMSCRIPTEN__
 #include "verify.hpp"
@@ -35,6 +36,7 @@ bool verifier = false,
 u32 verbose;
 
 u16 debuggerPort = 0,
+    pexPort = 0,
     profiler = 0;
 
 SDL *sdl;
@@ -114,6 +116,15 @@ void parseArgs( int argc, char *argv[] ){
 		#endif
 		break;
 
+            case 'x':
+                pexPort = 2000;
+                break;
+
+            case 'X':
+		if( i+1>=argc || !(pexPort = atoi( argv[++i] )) )
+		    std::cout << "-X switch should be followed by port number." << std::endl;
+                break;
+
 	    default:
 		std::cout << "Unrecognized switch \"" << arg << "\"." << std::endl;
 		break;
@@ -167,6 +178,7 @@ void loop( void *_sdl ){
 		u32 tti = max-opcount;
 		tti = std::min( tti, SYS::update() );
 		tti = std::min( tti, TIMERS::update() );
+                tti = std::min( tti, PEX::update() );
 		CPU::cpuNextEvent = CPU::cpuTotalTicks + tti;
 		CPU::thumbExecute();
 		opcount += tti;
@@ -240,7 +252,10 @@ int main( int argc, char * argv[] ){
         }
 
 	#ifndef __EMSCRIPTEN__
+
 	if( debuggerPort && !GDB::init( debuggerPort ) )
+	    throw InitError("\\o/");
+        if( pexPort && !PEX::init( pexPort ) )
 	    throw InitError("\\o/");
 	#endif
 

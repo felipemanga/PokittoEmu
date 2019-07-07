@@ -31,6 +31,7 @@ OBJECTS += BUILD/rtc.o
 OBJECTS += BUILD/thumb2.o
 OBJECTS += BUILD/screen.o
 OBJECTS += BUILD/mmu.o
+OBJECTS += BUILD/pex.o
 OBJECTS += BUILD/main.o
 OBJECTS += BUILD/sdl.o
 OBJECTS += BUILD/cpu.o

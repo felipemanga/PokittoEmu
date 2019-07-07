@@ -1,4 +1,6 @@
 #include "sdl.hpp"
+#include <SDL2/SDL_net.h>
+#include <mutex>
 
 #include "./cpu.hpp"
 #include "./gdb.hpp"
@@ -420,4 +422,24 @@ void SDL::checkEvents(){
 	}
 
     }
+}
+
+static std::mutex netmut;
+int NetManager::count = 0;
+using lock = std::lock_guard<std::mutex>;
+
+void NetManager::hold(){
+    lock mut(netmut);
+    count++;
+    if( count == 1 ){
+        if( SDLNet_Init() == -1 )
+            throw InitError("\\o/");
+    }
+}
+
+void NetManager::release(){
+    lock mut(netmut);
+    count--;
+    if(!count)
+        SDLNet_Quit();
 }
