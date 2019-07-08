@@ -10,6 +10,7 @@
 #include "./sd.hpp"
 #include "./adc.hpp"
 #include "gif.h"
+#include "net.hpp"
 
 extern volatile EmuState emustate;
 extern volatile bool hasQuit;
@@ -82,10 +83,10 @@ SDL::~SDL()
         SDL_JoystickClose(js.second);
 
     hasQuit = true;
-    
+
     if( recording )
 	toggleRecording();
-    
+
     if( vscreen ){
 	SDL_UnlockSurface(vscreen);
 	SDL_FreeSurface(vscreen);
@@ -96,7 +97,7 @@ SDL::~SDL()
     SDL_DestroyWindow( m_window );
     SDL_DestroyRenderer( m_renderer );
     SDL_Quit();
-    
+
 }
 
 void SDL::toggleRecording(){
@@ -104,7 +105,7 @@ void SDL::toggleRecording(){
 #ifndef __EMSCRIPTEN__
     std::lock_guard<std::mutex> gml(gifmut);
 #endif
-    
+
     if( recording ){
 	gifNum++;
 	std::string name = srcPath;
@@ -116,7 +117,7 @@ void SDL::toggleRecording(){
     }else{
 	GifEnd( &gif );
     }
-    
+
 }
 
 void SDL::savePNG(){
@@ -148,7 +149,7 @@ void SDL::draw(){
 	if( !screenshot )
 	    savePNG();
     }
-	
+
     {
 #ifndef __EMSCRIPTEN__
 	std::lock_guard<std::mutex> gml(gifmut);
@@ -163,7 +164,7 @@ void SDL::draw(){
 		*rgbap++ = float(c & 0x1F) / 0x1F * 255.0f;
 		*rgbap++ = 255;
 	    }
-		
+
 	    GifWriteFrame( &gif, (u8*) rgba, 220, 176, delay, 8 );
 
 	    for( u32 y=0; y<15; ++y ){
@@ -171,11 +172,11 @@ void SDL::draw(){
 		    screenpixels[ (((y+3)*440+x+3)<<2)+2 ] = ~CPU::cpuTotalTicks;
 		}
 	    }
-		
+
 	    delay = 2;
-	    
+
 	}
-	    
+
     }
 
     SDL_UpdateWindowSurface(m_window);
@@ -204,10 +205,10 @@ void SDL::checkEvents(){
         ADC::DAT8 = 0x8000;
         ADC::DAT9 = 0x8000;
     }
-    
+
     while (SDL_PollEvent(&e)) {
 	std::lock_guard<std::mutex> lock(eventmut);
-		
+
 	if( e.type == SDL_QUIT ){
 	    hasQuit = true;
 	    return;
@@ -218,22 +219,22 @@ void SDL::checkEvents(){
             switch( e.jbutton.button ){
             case 0: // a
 		eventHandlers.push_back( [=](){
-			GPIO::input(1,9,btnState); 
+			GPIO::input(1,9,btnState);
 		    } );
                 break;
             case 1: // b
 		eventHandlers.push_back( [=](){
-			GPIO::input(1,4,btnState); 
+			GPIO::input(1,4,btnState);
 		    } );
                 break;
             case 2: // c
 		eventHandlers.push_back( [=](){
-			GPIO::input(1,10,btnState); 
+			GPIO::input(1,10,btnState);
 		    } );
                 break;
             case 3: // flash
 		eventHandlers.push_back( [=](){
-			GPIO::input(0,1,btnState); 
+			GPIO::input(0,1,btnState);
 		    } );
                 break;
             }
@@ -242,27 +243,27 @@ void SDL::checkEvents(){
             int x = 0, y = 0;
             const int deadzone = 1000;
 
-            if( e.jaxis.axis == 0) 
+            if( e.jaxis.axis == 0)
             {
                 if( e.jaxis.value < -deadzone ) x = -1;
                 else if( e.jaxis.value > deadzone ) x = 1;
             }
 
-            if( e.jaxis.axis == 1) 
+            if( e.jaxis.axis == 1)
             {
                 if( e.jaxis.value < -deadzone ) y = -1;
-                else if( e.jaxis.value > deadzone ) y = 1;                
+                else if( e.jaxis.value > deadzone ) y = 1;
             }
 
             if( x != px ){
-                
+
                 if( px < 0 ){
                     eventHandlers.push_back( [=](){
-                            GPIO::input(1,25,false); 
-                        } );                     
+                            GPIO::input(1,25,false);
+                        } );
                 }else if( px > 0 ){
                     eventHandlers.push_back( [=](){
-                            GPIO::input(1,7,false); 
+                            GPIO::input(1,7,false);
                         } );
                 }
 
@@ -270,11 +271,11 @@ void SDL::checkEvents(){
 
                 if( px < 0 ){
                     eventHandlers.push_back( [=](){
-                            GPIO::input(1,25,true); 
-                        } );                     
+                            GPIO::input(1,25,true);
+                        } );
                 }else if( px > 0 ){
                     eventHandlers.push_back( [=](){
-                            GPIO::input(1,7,true); 
+                            GPIO::input(1,7,true);
                         } );
                 }
             }
@@ -287,10 +288,10 @@ void SDL::checkEvents(){
                         } );
                 }else if( py > 0 ){
                     eventHandlers.push_back( [=](){
-                            GPIO::input(1,3,false); 
+                            GPIO::input(1,3,false);
                         } );
                 }
-                
+
                 py = y;
 
                 if( py < 0 ){
@@ -299,10 +300,10 @@ void SDL::checkEvents(){
                         } );
                 }else if( py > 0 ){
                     eventHandlers.push_back( [=](){
-                            GPIO::input(1,3,true); 
+                            GPIO::input(1,3,true);
                         } );
                 }
-                
+
             }
         }
 
@@ -311,16 +312,16 @@ void SDL::checkEvents(){
 	    case SDLK_ESCAPE:
 		hasQuit = true;
 		return;
-		
+
 	    case SDLK_F5:
-		
+
 		eventHandlers.push_back( [](){
 			reset();
 		    } );
 		break;
-		
+
 	    case SDLK_F8:
-		
+
 		eventHandlers.push_back( [](){
                         if( GDB::connected() ){
                             if( emustate == EmuState::RUNNING )
@@ -334,42 +335,42 @@ void SDL::checkEvents(){
 		    });
 
 		break;
-		
+
 	    case SDLK_F2:
 		screenshot = 1;
 		SCREEN::dirty = true;
 		break;
-		
+
 	    case SDLK_F10:
 		eventHandlers.push_back([=](){
 			std::ofstream os( "dump.img", std::ios::binary );
-	
+
 			if( os.is_open() )
 			    os.write( reinterpret_cast<char *>(&SD::image[0]), SD::length );
-			
+
 		    });
 		break;
 
 	    }
 	}
 
-	if( emustate == EmuState::STOPPED ) 
+	if( emustate == EmuState::STOPPED )
 	    continue;
 
 	if( e.type == SDL_KEYDOWN || e.type == SDL_KEYUP ){
 	    u32 btnState = e.type == SDL_KEYDOWN;
-	    switch( e.key.keysym.sym ){		
+	    switch( e.key.keysym.sym ){
 	    case SDLK_F3:
 		if(e.type == SDL_KEYDOWN)
 		    toggleRecording();
 		break;
 
-	    case SDLK_F9: 		
+	    case SDLK_F9:
 		eventHandlers.push_back( [](){
-			GDB::interrupt(); 
+			GDB::interrupt();
 		    } );
 		break;
-	    case SDLK_UP: 		
+	    case SDLK_UP:
 		eventHandlers.push_back( [=](){
 			GPIO::input(1,13,btnState);
 			/*
@@ -378,46 +379,46 @@ void SDL::checkEvents(){
 				  << btnState
 				  << std::endl;
 			*/
-		    } ); 
-		break;
-	    case SDLK_DOWN: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,3,btnState); 
-		    } ); 
-		break;
-	    case SDLK_LEFT: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,25,btnState); 
-		    } ); 
-		break;
-	    case SDLK_RIGHT: 		
-		eventHandlers.push_back( [=](){
-			GPIO::input(1,7,btnState); 
 		    } );
 		break;
-	    case SDLK_a: 		
+	    case SDLK_DOWN:
 		eventHandlers.push_back( [=](){
-			GPIO::input(1,9,btnState); 
+			GPIO::input(1,3,btnState);
+		    } );
+		break;
+	    case SDLK_LEFT:
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,25,btnState);
+		    } );
+		break;
+	    case SDLK_RIGHT:
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,7,btnState);
+		    } );
+		break;
+	    case SDLK_a:
+		eventHandlers.push_back( [=](){
+			GPIO::input(1,9,btnState);
 		    } );
 		break;
 	    case SDLK_s:
-	    case SDLK_b: 		
+	    case SDLK_b:
 		eventHandlers.push_back( [=](){
-			GPIO::input(1,4,btnState); 
+			GPIO::input(1,4,btnState);
 		    } );
 		break;
 	    case SDLK_d:
-	    case SDLK_c: 		
+	    case SDLK_c:
 		eventHandlers.push_back( [=](){
-			GPIO::input(1,10,btnState); 
+			GPIO::input(1,10,btnState);
 		    } );
 		break;
 	    case SDLK_f:
 		eventHandlers.push_back( [=](){
-			GPIO::input(0,1,btnState); 
+			GPIO::input(0,1,btnState);
 		    } );
 		break;
-		
+
 	    }
 	}
 
