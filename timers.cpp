@@ -9,12 +9,13 @@
 using namespace std::chrono_literals;
 
 extern u32 verbose;
-
+u32 CPUID = 1947;
 namespace TIMERS {
 
     u64 lastTick;
 
     struct CT32 {
+        u32 num;
 	u32 IR,
 	    TCR,
 	    TC,
@@ -38,17 +39,102 @@ namespace TIMERS {
 	    u32 tti;
 
 	    PC += delta;
+	    if( PR > PC )
+                return PR - PC;
+
+            PC -= PR;
+            TC++;
+
+            if( MR0 == TC ){
+                constexpr u32 MRI = 1<<0;
+                constexpr u32 MRR = 1<<1;
+                constexpr u32 MRS = 1<<2;
+                
+                if( MCR & MRI ){
+                    IR |= 1<<0;
+                    if( CPU::armIrqEnable){
+                        CPU::interrupt(34+num);
+                    }
+                }
+
+                if( MCR & MRS ){
+                    TCR &= ~1;
+                }
+
+                if( MCR & MRR ){
+                    TC = 0;
+                }
+            }
+
+            if( MR1 == TC ){
+
+                constexpr u32 MRI = 1<<3;
+                constexpr u32 MRR = 1<<4;
+                constexpr u32 MRS = 1<<5;
+
+                if( MCR & MRI ){
+                    IR |= 1<<1;
+                    if( CPU::armIrqEnable){
+                        CPU::interrupt(34+num);
+                    }
+                }
+
+                if( MCR & MRS ){
+                    TCR &= ~1;
+                }
+
+                if( MCR & MRR ){
+                    TC = 0;
+                }
+            }
+
+            if( MR2 == TC ){
+                constexpr u32 MRI = 1<<6;
+                constexpr u32 MRR = 1<<7;
+                constexpr u32 MRS = 1<<8;
+                
+                if( MCR & MRI ){
+                    IR |= 1<<2;
+                    if( CPU::armIrqEnable){
+                        CPU::interrupt(34+num);
+                    }
+                }
+
+                if( MCR & MRS ){
+                    TCR &= ~1;
+                }
+
+                if( MCR & MRR ){
+                    TC = 0;
+                }
+            }
+
+            if( MR3 == TC ){
+                constexpr u32 MRI = 1<<9;
+                constexpr u32 MRR = 1<<10;
+                constexpr u32 MRS = 1<<11;
+                
+                if( MCR & MRI ){
+                    IR |= 1<<3;
+                    if( CPU::armIrqEnable){
+                        CPU::interrupt(34+num);
+                    }
+                }
+
+                if( MCR & MRS ){
+                    TCR &= ~1;
+                }
+
+                if( MCR & MRR ){
+                    TC = 0;
+                }
+            }
 	    
-	    if( PC >= PR ){
-		PC -= PR;
-		TC++;
-	    }
-	    
-	    return PR - PC;
+	    return 1;
 
 	}
 
-    } B1, B0;
+    } B1{1}, B0{0};
     
     struct SysTick {
 
@@ -210,7 +296,7 @@ namespace TIMERS {
 	#include "mmuregx16.h"
 	#include "mmuregx16.h"
 	MMUREGX(),MMUREGX(),MMUREGX(),MMUREGX(), // CPUID,
-	MMUREGX(), // ICSR,
+	MMUREG(CPUID), // ICSR,
 	MMUREGX(),
 	MMUREG(SYS::VTOR),
 	MMUREGRW(SYS::AIRCR, readAIRCR, writeAIRCR)

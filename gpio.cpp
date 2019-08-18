@@ -5,6 +5,7 @@
 #include "screen.hpp"
 #include "cpu.hpp"
 #include "sd.hpp"
+#include "audio.hpp"
 
 namespace GPIO {
 
@@ -197,7 +198,28 @@ namespace GPIO {
 
     template<u32 &pin, u32 bit> u32 writeByte( u32 v, u32, u32 addr ){
 	u32 off = bit + (addr&3);
+        /* */
+        if( ((u8*) &v)[addr&3] != 0 ) pin |= 1 << off;
+        else pin &= ~( 1<<off );
+        /*/
 	pin = (pin & ~(1<<off)) | (!!(v&(0xFF<<((8<<(addr&3))-8)))<<off);
+        /* */
+	return v;
+    }
+
+    u32 t;
+    template<> u32 writeByte<POUT2, 20>( u32 v, u32, u32 addr ){
+	u32 off = 20 + (addr&3);
+        /* */
+        if( ((u8*) &v)[addr&3] != 0 ) POUT2 |= 1 << off;
+        else POUT2 &= ~( 1<<off );
+        /*/
+        POUT2 = (POUT2 & ~(1<<off)) | (!!(v&(0xFF<<((8<<(addr&3))-8)))<<off);
+	/* */
+
+        if( addr == (0xA0000040 + 23) ){
+            AUDIO::write( (POUT1 >> 28) | ((POUT2 >> (20-4))&0xF0));
+        }
 	return v;
     }
 
@@ -215,8 +237,24 @@ namespace GPIO {
 	return writePin<pin>( pin | v );
     }
 
+    template<> u32 setPin<POUT2>( u32 v, u32, u32 ){
+	writePin<POUT2>( POUT2 | v );
+        if( v&(1<<23) ){
+            AUDIO::write( (POUT1 >> 28) | ((POUT2 >> (20-4))&0xF0));
+        }
+        return POUT2;
+    }
+
     template<u32 &pin> u32 clearPin( u32 v, u32, u32 ){
 	return writePin<pin>( pin & ~v, 0, 0 );
+    }
+
+    template<> u32 clearPin<POUT2>( u32 v, u32, u32 ){
+	writePin<POUT2>( POUT2 & ~v );
+        if( v&(1<<23) ){
+            AUDIO::write( (POUT1 >> 28) | ((POUT2 >> (20-4))&0xF0));
+        }
+        return POUT2;
     }
 
     template<u32 &pin> u32 togglePin( u32 v, u32, u32 ){
@@ -229,6 +267,14 @@ namespace GPIO {
 
     template<u32 &pin, u32 &mask> u32 writeMasked( u32 v, u32, u32 ){
 	return writePin<pin>( (pin&mask) | (v&~mask), 0, 0 );
+    }
+
+    template<> u32 writeMasked<POUT2, MASK2>( u32 v, u32, u32 ){
+	writePin<POUT2>( (POUT2&MASK2) | (v&~MASK2), 0, 0 );
+        if(MASK2 == ~(0xF00000)){
+            AUDIO::write( (POUT1 >> 28) | ((POUT2 >> (20-4))&0xF0));
+        }
+        return POUT2;
     }
 
     MMU::Register flagMap[] = {

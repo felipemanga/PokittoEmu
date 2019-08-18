@@ -16,6 +16,7 @@
 #include "initerror.hpp"
 #include "state.hpp"
 #include "pex.hpp"
+#include "audio.hpp"
 
 #ifndef __EMSCRIPTEN__
 #include "verify.hpp"
@@ -34,7 +35,7 @@ std::string imgPath;
 bool verifier = false,
     autorec = false;
 u32 verbose;
-
+u32 audioSampleRate = 8000;
 u16 debuggerPort = 0,
     pexPort = 0,
     profiler = 0;
@@ -53,6 +54,13 @@ void parseArgs( int argc, char *argv[] ){
 
 	if( arg[0] == '-' && arg.size() == 2 ){
 	    switch( arg[1] ){
+            case 'A':
+		if( i+1 >= argc )
+		    std::cout << "-A switch should be followed by audio sample rate." << std::endl;
+		else
+		    audioSampleRate = atoi( argv[++i] );
+		break;
+                
 	    case 'r':
 		autorec = true;
 		break;
@@ -240,7 +248,7 @@ int main( int argc, char * argv[] ){
 
     try{
 
-        SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_JOYSTICK );
+        SDL sdl( SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO );
 	::sdl = &sdl;
 
         parseArgs( argc, argv );
@@ -260,17 +268,15 @@ int main( int argc, char * argv[] ){
 	#endif
 
         MMU::init();
-	if( imgPath.empty() ){
-	}else if( !SD::init( imgPath ) ){
+        if( !SD::init( imgPath ) ){
 	    std::cerr << "Error: Could not open image file. ["
 		      << imgPath
 		      << "]"
 		      << std::endl;
 	    return 2;
-	}else{
-	    SPI::spi0Out( SD::write );
-	}	
-	
+	}
+        SPI::spi0Out( SD::write );
+
         CPU::init();
         CPU::reset();
 
@@ -286,6 +292,7 @@ int main( int argc, char * argv[] ){
 	    sdl.toggleRecording();
 
 	#ifndef __EMSCRIPTEN__
+        AUDIO::init(audioSampleRate);
 	
 	cputhread = std::thread( []( void *sdl ){
 		while( !hasQuit )

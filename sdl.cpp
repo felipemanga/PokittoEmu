@@ -10,6 +10,7 @@
 #include "./sd.hpp"
 #include "./adc.hpp"
 #include "gif.h"
+#include "net.hpp"
 
 extern volatile EmuState emustate;
 extern volatile bool hasQuit;

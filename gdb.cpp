@@ -32,7 +32,7 @@ static TCPsocket server, client;
 
 static std::list<std::string> inPackets, outPackets;
 static std::mutex inmut, outmut, txmut;
-extern bool hasQuit;
+extern volatile bool hasQuit;
 static bool noAckMode = false;
 static std::thread worker;
 extern u32 verbose;

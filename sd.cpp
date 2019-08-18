@@ -27,6 +27,12 @@ namespace SD {
     
     bool init( const std::string &fileName ){
 
+        if( fileName.empty() ){
+            length = 1024;
+            image = std::make_unique<u8[]>( length );
+            return true;
+        }
+
 	using std::ios;
 
 	std::ifstream is( fileName.c_str(), ios::binary );

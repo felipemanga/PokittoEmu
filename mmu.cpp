@@ -335,13 +335,19 @@ namespace MMU
 
 	auto write = layout.map[ idx ].write;
 	u32 oldvalue = *layout.map[ idx ].value;
-	value = (value&valType(~0)) << ((8<<(addr&3))-8);
-	value |= oldvalue & ~(u32(valType(~0))<<((8<<(addr&3))-8) );
+        u32 full;
+        /* */
+        full = oldvalue;
+        ((valType*)&full)[addr&3] = value;
+        /*/
+	full = (value&valType(~0)) << ((8<<(addr&3))-8);
+	full |= oldvalue & ~(u32(valType(~0))<<((8<<(addr&3))-8) );
+        /* */
 	
 	if( write )
-	    value = (*write)( value, oldvalue, addr );
+	    full = (*write)( full, oldvalue, addr );
 	
-	*layout.map[ idx ].value = value;
+	*layout.map[ idx ].value = full;
     }
     
     struct MemoryBank {
