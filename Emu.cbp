@@ -17,10 +17,11 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/Emu" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release/PokittoEmu" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
-				<Option type="0" />
+				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
 				<Option parameters="file.elf" />
 				<Compiler>
 					<Add option="-O2" />
@@ -28,22 +29,23 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="../../Downloads/SDL2-2.0.8/i686-w64-mingw32/lib/libSDL2_net.dll.a" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="C:/Users/felip/Downloads/SDL2-2.0.8/i686-w64-mingw32/include" />
+			<Add directory="C:/Users/felip/Downloads/SDL2-2.0.9/i686-w64-mingw32/include" />
 		</Compiler>
 		<Linker>
 			<Add library="mingw32" />
-			<Add library="SDL2main" />
-			<Add library="SDL2.dll" />
+			<Add library="../../../Downloads/SDL2-2.0.9/i686-w64-mingw32/lib/libSDL2main.a" />
+			<Add library="../../../Downloads/SDL2-2.0.9/i686-w64-mingw32/lib/libSDL2.dll.a" />
 			<Add library="user32" />
 			<Add library="gdi32" />
 			<Add library="winmm" />
 			<Add library="dxguid" />
+			<Add library="../../../Downloads/SDL2-2.0.9/i686-w64-mingw32/lib/libSDL2_image.dll.a" />
+			<Add library="../../../Downloads/SDL2-2.0.9/i686-w64-mingw32/lib/libSDL2_net.dll.a" />
 			<Add directory="C:/Users/felip/Downloads/SDL2-2.0.8/i686-w64-mingw32/lib" />
 		</Linker>
 		<ExtraCommands>
@@ -54,23 +56,45 @@
 		<Unit filename="cpu.cpp" />
 		<Unit filename="cpu.hpp" />
 		<Unit filename="gdb.cpp" />
+		<Unit filename="gdb.hpp" />
+		<Unit filename="gif.h" />
 		<Unit filename="gpio.cpp" />
 		<Unit filename="gpio.hpp" />
 		<Unit filename="iap.cpp" />
 		<Unit filename="iap.hpp" />
+		<Unit filename="initerror.hpp" />
 		<Unit filename="iocon.cpp" />
 		<Unit filename="iocon.hpp" />
+		<Unit filename="loadBin.cpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="mmu.cpp" />
 		<Unit filename="mmu.hpp" />
+		<Unit filename="mmuregx16.h" />
+		<Unit filename="prof.cpp" />
+		<Unit filename="prof.hpp" />
+		<Unit filename="rtc.cpp" />
+		<Unit filename="rtc.hpp" />
 		<Unit filename="screen.cpp" />
 		<Unit filename="screen.hpp" />
+		<Unit filename="sct.cpp" />
+		<Unit filename="sct.hpp" />
+		<Unit filename="sd.cpp" />
+		<Unit filename="sd.hpp" />
+		<Unit filename="sdl.cpp" />
+		<Unit filename="sdl.hpp" />
+		<Unit filename="spi.cpp" />
+		<Unit filename="spi.hpp" />
+		<Unit filename="state.hpp" />
 		<Unit filename="sys.cpp" />
 		<Unit filename="sys.hpp" />
 		<Unit filename="thumb2.cpp" />
 		<Unit filename="timers.cpp" />
 		<Unit filename="timers.hpp" />
 		<Unit filename="types.hpp" />
+		<Unit filename="usart.cpp" />
+		<Unit filename="usart.hpp" />
+		<Unit filename="verify.cpp" />
+		<Unit filename="verify.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
