@@ -54,8 +54,8 @@ LIBRARIES += -lSDL2_image
 LIBRARIES += -lpthread
 LD_SYS_LIBS := 
 
-CPP = 'cdb' 'g++' '-c' '-O3'
-LD  = 'cdb' 'g++' '-O3'
+CPP = 'g++' '-c' '-O3'
+LD  = 'g++' '-O3'
 
 CXX_FLAGS += -std=c++17
 CXX_FLAGS += $(shell sdl2-config --cflags)
