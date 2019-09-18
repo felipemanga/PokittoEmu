@@ -21,6 +21,7 @@ namespace PROF {
     u32 lastTick;
     u32 hits[ sizeof(MMU::flash)>>1 ];
     bool hitCaller;
+    bool dumpOnExit = true;
 
     static std::thread worker;
 
@@ -57,6 +58,9 @@ namespace PROF {
 	    }
 	    
 	}
+
+        if( !dumpOnExit )
+            return;
 
 	std::cout << "Preparing samples..." << std::endl;
 

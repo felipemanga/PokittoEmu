@@ -16,6 +16,7 @@
 #include "sdl.hpp"
 #include "net.hpp"
 #include "gpio.hpp"
+#include "prof.hpp"
 
 u32 samplingFrequency = 48 * 1024 * 1024 >> 4;
 static TCPsocket server, listener;
@@ -41,6 +42,7 @@ public:
     void run(){
         std::string buffer;
         char command = 0;
+        bool profInit = false;
 
         while( !hasQuit ){
 
@@ -67,6 +69,21 @@ public:
             case 'g':
                 command = 0;
                 GDB::interrupt();
+                continue;
+
+            case 'p':
+                command = 0;
+                if( profInit )
+                    continue;
+
+                profInit = true;
+                PROF::dumpOnExit = false;
+                PROF::init(false);
+                continue;
+
+            case 'P':
+                command = 0;
+                SDLNet_TCP_Send( socket, (char*)PROF::hits, sizeof(MMU::flash)<<1 );
                 continue;
             
             case 'f':
