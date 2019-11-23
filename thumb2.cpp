@@ -3,6 +3,7 @@
 #include <fstream>
 #include "iap.hpp"
 #include "gdb.hpp"
+#include "prof.hpp"
 
 /*
   #include "GBA.h"
@@ -1892,6 +1893,8 @@ namespace CPU
 	    if (clockTicks == 0)
 		clockTicks = 1;
 
+            PROF::hits[PREVADDRESS>>1] += clockTicks;
+            
 	    cpuTotalTicks += clockTicks;
 
 	}
