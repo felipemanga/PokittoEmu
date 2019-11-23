@@ -17,16 +17,16 @@ extern uint8_t rgba[220*176*4];
 
 class SDL
 {
-    SDL_Window * m_window;
-    SDL_Renderer * m_renderer;
-    SDL_Surface *screen;
+    SDL_Window * m_window = nullptr;
+    SDL_Renderer * m_renderer = nullptr;
+    SDL_Surface *screen = nullptr;
 
     std::unordered_map<int, SDL_Joystick*> joysticks;
     using EventHandler = std::function<void()>; // void (*)();
     std::vector< EventHandler > eventHandlers;
     std::mutex eventmut;
 
-    u8 *screenpixels;
+    u8 *screenpixels = nullptr;
     u32 gifNum = 0;
     u32 delay = 2;
     bool recording = false;
@@ -37,8 +37,8 @@ class SDL
 #endif
 
 public:
-    u32 screenshot;
-    SDL_Surface *vscreen;
+    u32 screenshot = 0;
+    SDL_Surface *vscreen = nullptr;
 
     SDL( Uint32 flags = 0 );
     void toggleRecording();
