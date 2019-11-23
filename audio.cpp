@@ -52,8 +52,11 @@ namespace AUDIO {
         }
 
         SDL_PauseAudioDevice(dev, 0);
+
         atexit([](){
                 SDL_CloseAudioDevice(dev);
             });
+
+        return true;
     }
 }

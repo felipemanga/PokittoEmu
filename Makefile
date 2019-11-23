@@ -43,6 +43,7 @@ OBJECTS += BUILD/sd.o
 OBJECTS += BUILD/sct.o
 OBJECTS += BUILD/spi.o
 OBJECTS += BUILD/loadBin.o
+OBJECTS += BUILD/loadEeprom.o
 
 INCLUDE_PATHS += -I./.
 

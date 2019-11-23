@@ -29,6 +29,7 @@
 #include "./sdl.hpp"
 
 volatile bool hasQuit = false;
+std::string eepromPath;
 std::string srcPath = "file.bin";
 std::string imgPath;
 
@@ -45,6 +46,8 @@ SDL *sdl;
 uint8_t rgba[220*176*4];
 
 bool loadBin( const std::string &fileName );
+bool loadEeprom( const std::string &fileName );
+void writeEeprom( const std::string &fileName );
 
 void parseArgs( int argc, char *argv[] ){
     for( u32 i=1; i<argc; ++i ){
@@ -259,6 +262,9 @@ int main( int argc, char * argv[] ){
             return 1;
         }
 
+        eepromPath = std::regex_replace( srcPath, std::regex(R"(\.bin)", std::regex_constants::icase), ".eeprom");
+        loadEeprom( eepromPath );
+
 	#ifndef __EMSCRIPTEN__
 
 	if( debuggerPort && !GDB::init( debuggerPort ) )
@@ -304,6 +310,8 @@ int main( int argc, char * argv[] ){
 	}
 
 	cputhread.join();
+
+        writeEeprom(eepromPath);
 	
 	#elif !defined(__EMSCRIPTEN_PTHREADS__)
 

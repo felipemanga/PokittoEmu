@@ -25,6 +25,7 @@ namespace MMU
     u8 sram1[0x800];
     u8 usbsram[0x800];
     u8 eeprom[0x1000];
+    bool eepromDirty = false;
 
     struct ROM_t {
 

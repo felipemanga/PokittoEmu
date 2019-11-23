@@ -2,22 +2,23 @@
 
 namespace MMU
 {
-extern u32 ignoreBadWrites;
+    extern u32 ignoreBadWrites;
 
-extern u8 flash[0x40000];
-extern u8 sram[0x8000];
-extern u8 sram1[0x800];
-extern u8 usbsram[0x800];
+    extern u8 flash[0x40000];
+    extern u8 sram[0x8000];
+    extern u8 sram1[0x800];
+    extern u8 usbsram[0x800];
 
-extern u8 eeprom[0x1000];
+    extern u8 eeprom[0x1000];
+    extern bool eepromDirty;
 
-struct Register {
-    u32 *value;
-    const char *name;
-    u32 (*read)( u32, u32 );
-    u32 (*write)( u32, u32, u32 );
-    u32 mute;
-};
+    struct Register {
+        u32 *value;
+        const char *name;
+        u32 (*read)( u32, u32 );
+        u32 (*write)( u32, u32, u32 );
+        u32 mute;
+    };
 
     u32 defaultRead( u32 v, u32 addr );
     u32 defaultWrite( u32 v, u32 ov, u32 addr );

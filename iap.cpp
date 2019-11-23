@@ -14,7 +14,8 @@ namespace IAP {
 
 	for( u32 i=0; i<byteCount; ++i )
 	    MMU::eeprom[ eeAddress+i ] = MMU::read8( buffAddress+i );
-	
+
+        MMU::eepromDirty = true;
 	MMU::write32( r1, 0 );
     }
 	
@@ -107,6 +108,14 @@ namespace IAP {
 	if( verbose )
 	    std::cout << "Read Part ID" << std::endl;
     }
+
+    void readUID( u32 r0, u32 r1, u32 r2, u32 r3 ){
+        MMU::write32(r1, 0); r1 += 4;
+        MMU::write32(r1, 0x10101010); r1 += 4;
+        MMU::write32(r1, 0x20202020); r1 += 4;
+        MMU::write32(r1, 0x30303030); r1 += 4;
+        MMU::write32(r1, 0x40404040); r1 += 4;
+    }
     
     void (*command[])(u32,u32,u32,u32) = {
 	stub,stub,stub,stub,stub,stub,stub,stub,stub,stub,
@@ -114,7 +123,16 @@ namespace IAP {
 	stub,stub,stub,stub,stub,stub,stub,stub,stub,stub,
 	stub,stub,stub,stub,stub,stub,stub,stub,stub,stub,
 	stub,stub,stub,stub,stub,stub,stub,stub,stub,stub,
-	prewrrite,wrisector,erssector,stub,repid,stub,stub,stub,stub,erspage,
+	prewrrite,
+        wrisector,
+        erssector, // 52
+        stub, // blank check sector 53
+        repid, // read part id 54
+        stub, // read bootcode version number
+        stub, // iap compare
+        stub, // iap reinvoke ISP
+        readUID, // read UID
+        erspage,
 	stub,
 	&writeEEPROM, // 61
 	&readEEPROM   // 62
@@ -122,7 +140,7 @@ namespace IAP {
 
     void stub(u32 id,u32,u32,u32){
 	if( verbose )
-	    std::cout << "IAP STUB " << id << std::endl;
+	    std::cout << "IAP STUB " << MMU::read32(id) << std::endl;
     }
     
 }
