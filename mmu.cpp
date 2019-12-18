@@ -738,6 +738,12 @@ namespace MMU
 
     bool init(){
 	memcpy( rom, &romstruct, sizeof(rom) );
+        for(auto i=0; i<sizeof(sram); ++i)
+            sram[i] = rand();
+        for(auto i=0; i<sizeof(sram1); ++i)
+            sram1[i] = rand();
+        for(auto i=0; i<sizeof(usbsram); ++i)
+            usbsram[i] = rand();
 	return true;
     }
 
