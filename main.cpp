@@ -31,7 +31,7 @@
 volatile bool hasQuit = false;
 std::string eepromPath;
 std::string srcPath = "file.bin";
-std::string imgPath;
+std::string imgPath, outImgPath;
 
 bool verifier = false,
     autorec = false;
@@ -105,10 +105,20 @@ void parseArgs( int argc, char *argv[] ){
 
 	    case 'I':
 		if( i+1>=argc )
-		    std::cout << "-I should be followed by Fat32 SD image." << std::endl;
+		    std::cout << "-I should be followed by Fat32 SD image to read from." << std::endl;
 		else
 		    imgPath = argv[++i];
+                break;
 
+	    case 'o':
+		    outImgPath = "out.img";
+                    break;
+
+	    case 'O':
+		if( i+1>=argc )
+		    std::cout << "-O should be followed by Fat32 SD image to write to." << std::endl;
+		else
+		    outImgPath = argv[++i];
 		break;
 
 	    case 'p':
@@ -274,7 +284,7 @@ int main( int argc, char * argv[] ){
 	#endif
 
         MMU::init();
-        if( !SD::init( imgPath ) ){
+        if( !SD::init( imgPath, outImgPath ) ){
 	    std::cerr << "Error: Could not open image file. ["
 		      << imgPath
 		      << "]"

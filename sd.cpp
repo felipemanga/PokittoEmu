@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <fstream>
 #include <memory>
 #include <vector>
@@ -24,16 +25,26 @@ namespace SD {
     bool idle = true;
     u32 resetCounter = 0;
     std::vector<u8> response;
+    std::string outName;
     
-    bool init( const std::string &fileName ){
+    bool init( const std::string &fileName, const std::string &outName ){
+
+	using std::ios;
+
+        SD::outName = outName;
+	atexit([](){
+                   if(SD::outName.empty() || !image )
+                       return;
+                   std::ofstream os(SD::outName.c_str(), ios::binary);
+                   os.write(reinterpret_cast<char *>(&image[0]), length );
+               });
+
 
         if( fileName.empty() ){
             length = 1024;
             image = std::make_unique<u8[]>( length );
             return true;
         }
-
-	using std::ios;
 
 	std::ifstream is( fileName.c_str(), ios::binary );
 	

@@ -8,7 +8,7 @@
 namespace SD {
     extern u32 length;
     extern std::unique_ptr<u8[]> image;
-    bool init( const std::string &fileName );
+    bool init( const std::string &fileName, const std::string &outputFileName );
     void write( u32 v );
     extern bool enabled;
 }
