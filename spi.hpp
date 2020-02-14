@@ -7,7 +7,7 @@ namespace SPI {
 
     extern MMU::Layout spi0Layout, spi1Layout;
 
-    void spi0In( u32 );
+    void spi0In( u32, bool clear=false );
     void spi1In( u32 );
 
     using Listener = void (*)( u32 v );

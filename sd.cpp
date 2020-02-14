@@ -170,7 +170,7 @@ namespace SD {
 	    response.push_back( CRC&0xFF );
 	},
 
-	[]( u32 arg ){ // 18 - single block read
+	[]( u32 arg ){ // 18 - multi block read
 	    if( verbose > 1 )
 		std::cout << "Read multi-block " << arg << std::endl;
 	    u32 addr = arg*512;
@@ -266,7 +266,8 @@ namespace SD {
 		checkCRC = true;
 		writeAddress = ~0;
 	    }
-	    SPI::spi0In( 0xFF );
+            response.clear();
+	    SPI::spi0In( 0xFF, true );
 	    return;
 	}
 
@@ -284,7 +285,7 @@ namespace SD {
 	}
 	
 	if( response.size() ){
-	    SPI::spi0In( response[0] );
+	    SPI::spi0In( response[0], true );
 	    response.erase( response.begin() );
 	    return;
 	}
@@ -351,7 +352,7 @@ namespace SD {
 		    
 	    commandFunc( argument );
 		    
-	    SPI::spi0In( response[0] );
+	    SPI::spi0In( response[0], true );
 	    response.erase( response.begin() );
 		    
 	    return;
@@ -361,23 +362,23 @@ namespace SD {
 	case 13: // crc1
 	case 14: // crc2
 	    state++;
-	    SPI::spi0In( 0 );
+	    SPI::spi0In( 0, true );
 	    break;
 	case 12:
 	    image[ writeAddress++ ] = b;
 	    writeCount--;
 	    if( !writeCount )
 		state++;
-	    SPI::spi0In( 0 );
+	    SPI::spi0In( 0, true );
 	    return;
 	case 15:
-	    SPI::spi0In( 0x5 );
+	    SPI::spi0In( 0x5, true );
 	    state = 1;
 	    return;
 
 	}
 		
-	SPI::spi0In( 0xFF );
+	SPI::spi0In( 0xFF, true );
 		
     }
     

@@ -51,7 +51,7 @@ namespace GDB {
     void tx( std::string s ){
 	lock tml(txmut);
 
-	if( verbose>1 ) std::cout << "\n<<(" << s << ")\n";
+	if( verbose>2 ) std::cout << "\n<<(" << s << ")\n";
 	SDLNet_TCP_Send( client, s.c_str(), s.size() );
 	/*
 	std::cout << "\n(";
@@ -86,7 +86,7 @@ namespace GDB {
 		continue;
 	    }
 
-	    if( verbose>1 ) std::cout << '[' << ch << ']';
+	    if( verbose>3 ) std::cout << '[' << ch << ']';
 
 	    {
 		lock omg(outmut);

@@ -44,7 +44,8 @@ namespace SPI {
 	SPI1.init();
     }
 
-    void spi0In( u32 v ){
+    void spi0In( u32 v, bool clear ){
+        if(clear) SPI0.inBuffer.clear();
 	SPI0.inBuffer.insert( SPI0.inBuffer.begin(), v );
 	SPI0.SR = (3) | 4;
     }

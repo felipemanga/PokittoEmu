@@ -134,7 +134,7 @@ void cmd39( u16 D ){
 void LCDWrite( u32 cd, u16 v ){
     // LCD[ 88*220 + 110 ] = v;
     
-    if( verbose>1 )
+    if( verbose>2 )
 	std::cout << "ST7775 Write "
 		  << (!cd ? "C":"D")
 		  << std::hex
