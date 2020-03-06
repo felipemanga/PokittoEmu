@@ -24,13 +24,13 @@ Screenshots and recorded GIFs will be saved in the same folder as the currently-
 To run a game directly, pass it as the first command line parameter:
 
 ```
-PokittoEmu path/to/jetpack.elf
+PokittoEmu path/to/jetpack.bin
 ```
 
 ...or on Windows:
 
 ```
-PokittoEmu.exe path\to\jetpack.elf
+PokittoEmu.exe path\to\jetpack.bin
 ```
 
 Note that relative or absolute paths both work.
