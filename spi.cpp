@@ -27,6 +27,7 @@ namespace SPI {
 	    MIS=0;
 	    ICR=0;
 	    DMACR=0;
+            clearable = true;
 	}
 
 	u32 dataSize,
@@ -34,8 +35,10 @@ namespace SPI {
 	    loopBack,
 	    enabled,
 	    slave,
-	    slaveOutputDisabled;
+	    slaveOutputDisabled,
+            frameSize;
 	
+        bool clearable;
 
     } SPI0(0), SPI1(1);
 
@@ -45,14 +48,14 @@ namespace SPI {
     }
 
     void spi0In( u32 v, bool clear ){
-        if(clear) SPI0.inBuffer.clear();
+        if(SPI0.clearable && clear) SPI0.inBuffer.clear();
 	SPI0.inBuffer.insert( SPI0.inBuffer.begin(), v );
-	SPI0.SR = (3) | 4;
+	SPI0.SR = (3) | (SPI0.inBuffer.size() < SPI0.frameSize ? 0 : 4);
     }
 
     void spi1In( u32 v ){
 	SPI1.inBuffer.insert( SPI1.inBuffer.begin(), v );
-	SPI1.SR = (3) | 4;
+	SPI1.SR = (3) | (SPI1.inBuffer.size() < SPI1.frameSize ? 0 : 4);
     }
 
     void spi0Out( Listener l ){
@@ -67,6 +70,7 @@ namespace SPI {
     u32 writeCR0( u32 v, u32 ov, u32 addr ){
 	spi.dataSize = v & 0xF;
 	spi.format = (v>>4) & 0x3;
+        spi.frameSize = (spi.dataSize == 0xF) ? 2 : 1;
 	return v;
     }
 
@@ -81,16 +85,18 @@ namespace SPI {
 
     template <SPI &spi>
     u32 writeDR( u32 v, u32 ov, u32 addr ){
+        spi.clearable = true;
         if (spi.dataSize == 0xF) {
             for( auto listener : spi.listeners )
                 listener( v&0xFF );
             v >>= 8;
+            spi.clearable = false;
         }
 
 	for( auto listener : spi.listeners )
-	    listener( v );
+	    listener( v&0xFF );
 
-	spi.SR = (3) | (spi.inBuffer.empty() ? 0 : 4);
+	spi.SR = (3) | (spi.inBuffer.size() < spi.frameSize ? 0 : 4);
 	return v;
     }
 
@@ -99,15 +105,14 @@ namespace SPI {
         if (spi.dataSize == 0xF && (spi.inBuffer.size() > 1)) {
 	    v = spi.inBuffer.back();
 	    spi.inBuffer.pop_back();
-	    v |= static_cast<u32>(spi.inBuffer.back()) << 8;
+            v <<= 8;
+	    v |= spi.inBuffer.back();
 	    spi.inBuffer.pop_back();
-	    spi.SR = (3) | (spi.inBuffer.empty() ? 0 : 4);
-
         } else if( !spi.inBuffer.empty() ){
 	    v = spi.inBuffer.back();
 	    spi.inBuffer.pop_back();
-	    spi.SR = (3) | (spi.inBuffer.empty() ? 0 : 4);
 	}
+	spi.SR = (3) | (spi.inBuffer.size() < spi.frameSize ? 0 : 4);
 	return v;
     }
 
