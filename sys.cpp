@@ -14,7 +14,11 @@ namespace SYS {
     MMU::Register map[] = {
 	MMUREG( SYSMEMREMAP ),
 	MMUREG( PRESETCTRL ),
+        /* * /
+	MMUREGDBG( SYSPLLCTRL ),
+        /*/
 	MMUREG( SYSPLLCTRL ),
+        /* */
 	MMUREG( SYSPLLSTAT ),
 	MMUREG( USBPLLCTRL ),
 	MMUREG( USBPLLSTAT ),
