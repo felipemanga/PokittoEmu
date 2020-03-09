@@ -81,15 +81,29 @@ namespace SPI {
 
     template <SPI &spi>
     u32 writeDR( u32 v, u32 ov, u32 addr ){
+        if (spi.dataSize == 0xF) {
+            for( auto listener : spi.listeners )
+                listener( v&0xFF );
+            v >>= 8;
+        }
+
 	for( auto listener : spi.listeners )
 	    listener( v );
+
 	spi.SR = (3) | (spi.inBuffer.empty() ? 0 : 4);
 	return v;
     }
 
     template <SPI &spi>
     u32 readDR( u32 v, u32 addr ){
-	if( !spi.inBuffer.empty() ){
+        if (spi.dataSize == 0xF && (spi.inBuffer.size() > 1)) {
+	    v = spi.inBuffer.back();
+	    spi.inBuffer.pop_back();
+	    v |= static_cast<u32>(spi.inBuffer.back()) << 8;
+	    spi.inBuffer.pop_back();
+	    spi.SR = (3) | (spi.inBuffer.empty() ? 0 : 4);
+
+        } else if( !spi.inBuffer.empty() ){
 	    v = spi.inBuffer.back();
 	    spi.inBuffer.pop_back();
 	    spi.SR = (3) | (spi.inBuffer.empty() ? 0 : 4);
