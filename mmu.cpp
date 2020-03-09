@@ -88,6 +88,7 @@ namespace MMU
 			  << " base = " << base
 			  << std::endl;
 	    }
+            CPU::interrupt(3);
 	    return ~0;
 	}
 
@@ -104,6 +105,7 @@ namespace MMU
 			  << " base = " << base
 			  << std::endl;
 	    }
+            CPU::interrupt(3);
 	    return ~0;
 	}
 
@@ -209,6 +211,8 @@ namespace MMU
 		return dbg;
 	    }
 	}
+
+        CPU::interrupt(3);
 	
 	return 0;
     }
@@ -228,6 +232,8 @@ namespace MMU
 	    }
 	    
 	}
+
+        CPU::interrupt(3);
 	
 	return 0;
     }
