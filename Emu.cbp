@@ -19,9 +19,8 @@
 			<Target title="Release">
 				<Option output="bin/Release/PokittoEmu" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Option parameters="file.elf" />
 				<Compiler>
 					<Add option="-O2" />
@@ -53,6 +52,8 @@
 		</ExtraCommands>
 		<Unit filename="adc.cpp" />
 		<Unit filename="adc.hpp" />
+		<Unit filename="audio.cpp" />
+		<Unit filename="audio.hpp" />
 		<Unit filename="cpu.cpp" />
 		<Unit filename="cpu.hpp" />
 		<Unit filename="gdb.cpp" />
@@ -66,10 +67,14 @@
 		<Unit filename="iocon.cpp" />
 		<Unit filename="iocon.hpp" />
 		<Unit filename="loadBin.cpp" />
+		<Unit filename="loadEeprom.cpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="mmu.cpp" />
 		<Unit filename="mmu.hpp" />
 		<Unit filename="mmuregx16.h" />
+		<Unit filename="net.hpp" />
+		<Unit filename="pex.cpp" />
+		<Unit filename="pex.hpp" />
 		<Unit filename="prof.cpp" />
 		<Unit filename="prof.hpp" />
 		<Unit filename="rtc.cpp" />

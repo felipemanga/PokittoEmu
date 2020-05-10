@@ -681,21 +681,21 @@
 	"cpu.hpp"
 	"state.hpp"
 
-1556973704 source:c:\users\felip\documents\my projects\pokittoemu\adc.cpp
+1556970104 source:c:\users\felip\documents\my projects\pokittoemu\adc.cpp
 	<iostream>
 	<cstdlib>
 	"types.hpp"
 	"adc.hpp"
 
-1562548238 c:\users\felip\documents\my projects\pokittoemu\types.hpp
+1562544638 c:\users\felip\documents\my projects\pokittoemu\types.hpp
 	<cstdint>
 
-1556973704 c:\users\felip\documents\my projects\pokittoemu\adc.hpp
+1556970104 c:\users\felip\documents\my projects\pokittoemu\adc.hpp
 	"mmu.hpp"
 
-1556973704 c:\users\felip\documents\my projects\pokittoemu\mmu.hpp
+1581780289 c:\users\felip\documents\my projects\pokittoemu\mmu.hpp
 
-1556973704 source:c:\users\felip\documents\my projects\pokittoemu\cpu.cpp
+1556970104 source:c:\users\felip\documents\my projects\pokittoemu\cpu.cpp
 	<algorithm>
 	<iostream>
 	"cpu.hpp"
@@ -709,30 +709,30 @@
 	"usart.hpp"
 	"gdb.hpp"
 
-1556973704 c:\users\felip\documents\my projects\pokittoemu\cpu.hpp
+1556970104 c:\users\felip\documents\my projects\pokittoemu\cpu.hpp
 	"types.hpp"
 	"mmu.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\sys.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\sys.hpp
 	"mmu.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\iocon.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\iocon.hpp
 	"mmu.hpp"
 
-1562548238 c:\users\felip\documents\my projects\pokittoemu\gpio.hpp
+1562544638 c:\users\felip\documents\my projects\pokittoemu\gpio.hpp
 	"mmu.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\timers.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\timers.hpp
 	"mmu.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\sct.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\sct.hpp
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\usart.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\usart.hpp
 	"mmu.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\gdb.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\gdb.hpp
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\gpio.cpp
+1566157334 source:c:\users\felip\documents\my projects\pokittoemu\gpio.cpp
 	<iostream>
 	"types.hpp"
 	"gpio.hpp"
@@ -740,30 +740,31 @@
 	"screen.hpp"
 	"cpu.hpp"
 	"sd.hpp"
+	"audio.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\screen.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\screen.hpp
 	<mutex>
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\sd.hpp
+1581780289 c:\users\felip\documents\my projects\pokittoemu\sd.hpp
 	<fstream>
 	<memory>
 	<vector>
 	<iostream>
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\iap.cpp
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\iap.cpp
 	<iostream>
 	"types.hpp"
 	"iap.hpp"
 	"mmu.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\iap.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\iap.hpp
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\iocon.cpp
+1556460545 source:c:\users\felip\documents\my projects\pokittoemu\iocon.cpp
 	<iostream>
 	"types.hpp"
 	"iocon.hpp"
 
-1562547752 source:c:\users\felip\documents\my projects\pokittoemu\mmu.cpp
+1584882555 source:c:\users\felip\documents\my projects\pokittoemu\mmu.cpp
 	<cstring>
 	"types.hpp"
 	"cpu.hpp"
@@ -779,28 +780,29 @@
 	<iostream>
 	"gdb.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\spi.hpp
+1581780290 c:\users\felip\documents\my projects\pokittoemu\spi.hpp
 	"types.hpp"
 	"mmu.hpp"
 
-1560168117 source:c:\users\felip\documents\my projects\pokittoemu\sys.cpp
+1584882555 source:c:\users\felip\documents\my projects\pokittoemu\sys.cpp
 	"types.hpp"
 	<iostream>
 	"sys.hpp"
 	"cpu.hpp"
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\thumb2.cpp
+1584882555 source:c:\users\felip\documents\my projects\pokittoemu\thumb2.cpp
 	"cpu.hpp"
 	<iostream>
 	<fstream>
 	"iap.hpp"
 	"gdb.hpp"
+	"prof.hpp"
 	"GBA.h"
 	"Globals.h"
 	"MMU.h"
 	"../common/Settings.h"
 
-1556973704 source:c:\users\felip\documents\my projects\pokittoemu\timers.cpp
+1566157334 source:c:\users\felip\documents\my projects\pokittoemu\timers.cpp
 	<iostream>
 	<thread>
 	"types.hpp"
@@ -819,9 +821,9 @@
 	"mmuregx16.h"
 	"mmuregx16.h"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\mmuregx16.h
+1556460545 c:\users\felip\documents\my projects\pokittoemu\mmuregx16.h
 
-1562548238 source:c:\users\felip\documents\my projects\pokittoemu\gdb.cpp
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\gdb.cpp
 	<iostream>
 	<cstdio>
 	<numeric>
@@ -836,7 +838,7 @@
 	"state.hpp"
 	"net.hpp"
 
-1451811446 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_net.h
+1451807846 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_net.h
 	<stdint.h>
 	"SDL.h"
 	"SDL_endian.h"
@@ -844,7 +846,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl.h
 	"SDL_main.h"
 	"SDL_stdinc.h"
 	"SDL_assert.h"
@@ -877,12 +879,12 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_main.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_main.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_stdinc.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_stdinc.h
 	"SDL_config.h"
 	<sys/types.h>
 	<stdio.h>
@@ -911,34 +913,34 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_config.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_config.h
 	"SDL_platform.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_platform.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_platform.h
 	"AvailabilityMacros.h"
 	"TargetConditionals.h"
 	<winapifamily.h>
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\begin_code.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\begin_code.h
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\close_code.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\close_code.h
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_assert.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_assert.h
 	"SDL_config.h"
 	"begin_code.h"
 	<signal.h>
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_atomic.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_atomic.h
 	"SDL_stdinc.h"
 	"SDL_platform.h"
 	"begin_code.h"
 	<mbarrier.h>
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_audio.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_audio.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_endian.h"
@@ -948,24 +950,24 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_error.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_error.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_endian.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_endian.h
 	"SDL_stdinc.h"
 	<endian.h>
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_mutex.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_mutex.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_thread.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_thread.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_atomic.h"
@@ -976,18 +978,18 @@
 	<stdlib.h>
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_rwops.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_rwops.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_clipboard.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_clipboard.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_cpuinfo.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_cpuinfo.h
 	"SDL_stdinc.h"
 	<intrin.h>
 	<intrin.h>
@@ -1002,7 +1004,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_events.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_events.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
@@ -1016,7 +1018,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_video.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_video.h
 	"SDL_stdinc.h"
 	"SDL_pixels.h"
 	"SDL_rect.h"
@@ -1024,13 +1026,13 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_pixels.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_pixels.h
 	"SDL_stdinc.h"
 	"SDL_endian.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_rect.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_rect.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_pixels.h"
@@ -1038,7 +1040,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_surface.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_surface.h
 	"SDL_stdinc.h"
 	"SDL_pixels.h"
 	"SDL_rect.h"
@@ -1047,11 +1049,11 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_blendmode.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_blendmode.h
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_keyboard.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_keyboard.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_keycode.h"
@@ -1059,27 +1061,27 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_keycode.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_keycode.h
 	"SDL_stdinc.h"
 	"SDL_scancode.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_scancode.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_scancode.h
 	"SDL_stdinc.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_mouse.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_mouse.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_joystick.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_joystick.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_gamecontroller.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_gamecontroller.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_rwops.h"
@@ -1087,11 +1089,11 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_quit.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_quit.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_gesture.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_gesture.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
@@ -1099,66 +1101,66 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_touch.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_touch.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_filesystem.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_filesystem.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_haptic.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_haptic.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"SDL_joystick.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_hints.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_hints.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_loadso.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_loadso.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_log.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_log.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_messagebox.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_messagebox.h
 	"SDL_stdinc.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_power.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_power.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_render.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_render.h
 	"SDL_stdinc.h"
 	"SDL_rect.h"
 	"SDL_video.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_sensor.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_sensor.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_shape.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_shape.h
 	"SDL_stdinc.h"
 	"SDL_pixels.h"
 	"SDL_rect.h"
@@ -1167,7 +1169,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_system.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_system.h
 	"SDL_stdinc.h"
 	"SDL_keyboard.h"
 	"SDL_render.h"
@@ -1175,20 +1177,20 @@
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_timer.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_timer.h
 	"SDL_stdinc.h"
 	"SDL_error.h"
 	"begin_code.h"
 	"close_code.h"
 
-1541002144 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_version.h
+1540998544 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_version.h
 	"SDL_stdinc.h"
 	"begin_code.h"
 	"close_code.h"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\state.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\state.hpp
 
-1562548238 source:c:\users\felip\documents\my projects\pokittoemu\main.cpp
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\main.cpp
 	<exception>
 	<string>
 	<regex>
@@ -1206,19 +1208,20 @@
 	"initerror.hpp"
 	"state.hpp"
 	"pex.hpp"
+	"audio.hpp"
 	"verify.hpp"
 	"prof.hpp"
 	<emscripten/emscripten.h>
 	"gdb.hpp"
 	"./sdl.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\initerror.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\initerror.hpp
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\verify.hpp
+1556460545 c:\users\felip\documents\my projects\pokittoemu\verify.hpp
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\prof.hpp
+1569065751 c:\users\felip\documents\my projects\pokittoemu\prof.hpp
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\sdl.hpp
+1581780290 c:\users\felip\documents\my projects\pokittoemu\sdl.hpp
 	<unordered_map>
 	<thread>
 	<mutex>
@@ -1230,20 +1233,20 @@
 	"types.hpp"
 	"initerror.hpp"
 
-1541001582 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_image.h
+1540997982 c:\users\felip\downloads\sdl2-2.0.9\i686-w64-mingw32\include\sdl2\sdl_image.h
 	"SDL.h"
 	"SDL_version.h"
 	"begin_code.h"
 	"close_code.h"
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\screen.cpp
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\screen.cpp
 	<iostream>
 	<thread>
 	<mutex>
 	"types.hpp"
 	<SDL2/SDL.h>
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\loadbin.cpp
+1556460545 source:c:\users\felip\documents\my projects\pokittoemu\loadbin.cpp
 	<exception>
 	<string>
 	<regex>
@@ -1256,7 +1259,7 @@
 	"sys.hpp"
 	"state.hpp"
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\prof.cpp
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\prof.cpp
 	<iostream>
 	<cstdio>
 	<numeric>
@@ -1270,7 +1273,7 @@
 	"types.hpp"
 	"cpu.hpp"
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\sct.cpp
+1556460545 source:c:\users\felip\documents\my projects\pokittoemu\sct.cpp
 	<iostream>
 	<thread>
 	"types.hpp"
@@ -1281,7 +1284,8 @@
 	"mmuregx16.h"
 	"mmuregx16.h"
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\sd.cpp
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\sd.cpp
+	<cstdio>
 	<fstream>
 	<memory>
 	<vector>
@@ -1290,8 +1294,10 @@
 	"sd.hpp"
 	"spi.hpp"
 
-1556973704 source:c:\users\felip\documents\my projects\pokittoemu\sdl.cpp
+1566157334 source:c:\users\felip\documents\my projects\pokittoemu\sdl.cpp
 	"sdl.hpp"
+	<SDL2/SDL_net.h>
+	<mutex>
 	"./cpu.hpp"
 	"./gdb.hpp"
 	"./gpio.hpp"
@@ -1300,8 +1306,9 @@
 	"./sd.hpp"
 	"./adc.hpp"
 	"gif.h"
+	"net.hpp"
 
-1556464145 c:\users\felip\documents\my projects\pokittoemu\gif.h
+1556460545 c:\users\felip\documents\my projects\pokittoemu\gif.h
 	<stdio.h>
 	<string.h>
 	<stdint.h>
@@ -1310,19 +1317,19 @@
 	<stdlib.h>
 	<stdlib.h>
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\spi.cpp
+1584882555 source:c:\users\felip\documents\my projects\pokittoemu\spi.cpp
 	"spi.hpp"
 	"cpu.hpp"
 	<vector>
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\usart.cpp
+1556460545 source:c:\users\felip\documents\my projects\pokittoemu\usart.cpp
 	"types.hpp"
 	"usart.hpp"
 	"cpu.hpp"
 	<iostream>
 	<vector>
 
-1556464145 source:c:\users\felip\documents\my projects\pokittoemu\verify.cpp
+1556460545 source:c:\users\felip\documents\my projects\pokittoemu\verify.cpp
 	<iostream>
 	<cstdio>
 	<numeric>
@@ -1343,10 +1350,10 @@
 	<stdlib.h>
 	<unistd.h>
 
-1556973704 c:\users\felip\documents\my projects\pokittoemu\rtc.hpp
+1556970104 c:\users\felip\documents\my projects\pokittoemu\rtc.hpp
 	"mmu.hpp"
 
-1556973704 source:c:\users\felip\documents\my projects\pokittoemu\rtc.cpp
+1556970104 source:c:\users\felip\documents\my projects\pokittoemu\rtc.cpp
 	<iostream>
 	<chrono>
 	"types.hpp"
@@ -1354,11 +1361,11 @@
 	"cpu.hpp"
 	"sys.hpp"
 
-1562548238 c:\users\felip\documents\my projects\pokittoemu\net.hpp
+1562544638 c:\users\felip\documents\my projects\pokittoemu\net.hpp
 
-1562548238 c:\users\felip\documents\my projects\pokittoemu\pex.hpp
+1562544638 c:\users\felip\documents\my projects\pokittoemu\pex.hpp
 
-1562548238 source:c:\users\felip\documents\my projects\pokittoemu\pex.cpp
+1569065751 source:c:\users\felip\documents\my projects\pokittoemu\pex.cpp
 	<iostream>
 	<cstdio>
 	<numeric>
@@ -1375,4 +1382,29 @@
 	"sdl.hpp"
 	"net.hpp"
 	"gpio.hpp"
+	"prof.hpp"
+
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\audio.cpp
+	<iostream>
+	"types.hpp"
+	"audio.hpp"
+	"gpio.hpp"
+	<SDL2/SDL.h>
+	<SDL2/SDL_audio.h>
+	<thread>
+
+1566157334 c:\users\felip\documents\my projects\pokittoemu\audio.hpp
+
+1581780289 source:c:\users\felip\documents\my projects\pokittoemu\loadeeprom.cpp
+	<exception>
+	<string>
+	<regex>
+	<iostream>
+	<fstream>
+	<chrono>
+	<thread>
+	<mutex>
+	"cpu.hpp"
+	"sys.hpp"
+	"state.hpp"
 
