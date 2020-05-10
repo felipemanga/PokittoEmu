@@ -1624,6 +1624,14 @@ namespace CPU
 // BLL #offset (forward)
     static INSN_REGPARM void thumbF0(u32 opcode)
     {
+        if(opcode == 0xF3BF){
+            // DMB = 11110011101111111000111101010000
+            armNextPC = reg[15].I;
+            THUMB_PREFETCH();
+            reg[15].I += 2;
+            return;
+        }
+
 	LOG(thumbF0);
 	// int offset = (opcode & 0x7FF);
 	// reg[14].I = reg[15].I + (offset << 12);
