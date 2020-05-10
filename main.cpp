@@ -199,7 +199,9 @@ void loop( void *_sdl ){
 		u32 tti = max-opcount;
 		tti = std::min( tti, SYS::update() );
 		tti = std::min( tti, TIMERS::update() );
+                #ifndef __EMSCRIPTEN__
                 tti = std::min( tti, PEX::update() );
+                #endif
 		CPU::cpuNextEvent = CPU::cpuTotalTicks + tti;
 		CPU::thumbExecute();
 		opcount += tti;

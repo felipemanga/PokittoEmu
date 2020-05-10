@@ -50,7 +50,7 @@ namespace CPU
 // extern bool armState;
     extern bool armIrqEnable;
     extern u32 armNextPC;
-    extern u32 ADDRESS, PREVADDRESS;
+    extern u32 ADDRESS, PREVADDRESS, OPCODE;
     extern int armMode;
     extern bool logops;
 

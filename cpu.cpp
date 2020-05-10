@@ -28,7 +28,7 @@ namespace CPU
 
     bool armIrqEnable = true;
     u32 armNextPC = 0x00000000;
-    u32 ADDRESS, PREVADDRESS;
+    u32 ADDRESS, PREVADDRESS, OPCODE;
     int armMode = 0x1f;
 
     bool busPrefetch = false; //TODO: never read ?
@@ -114,8 +114,8 @@ namespace CPU
     {
 	if( GDB::connected() )
 	    GDB::interrupt();
-	else
-	    reg[15].I += 2;
+        // reg[15].I += 2;
+        printf("EX: %x %x\n", ADDRESS, OPCODE);
     }
 
     void CPUSoftwareInterrupt()

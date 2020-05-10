@@ -1,7 +1,8 @@
 #include "sdl.hpp"
+#ifndef __EMSCRIPTEN__
 #include <SDL2/SDL_net.h>
 #include <mutex>
-
+#endif
 #include "./cpu.hpp"
 #include "./gdb.hpp"
 #include "./gpio.hpp"
@@ -185,7 +186,9 @@ void SDL::draw(){
 }
 
 void SDL::emitEvents(){
+#ifndef __EMSCRIPTEN__
     std::lock_guard<std::mutex> lock(eventmut);
+#endif
 
     for( EventHandler ev : eventHandlers ){
         ev();
@@ -207,7 +210,9 @@ void SDL::checkEvents(){
     }
 
     while (SDL_PollEvent(&e)) {
+        #ifndef __EMSCRIPTEN__
 	std::lock_guard<std::mutex> lock(eventmut);
+        #endif
 
 	if( e.type == SDL_QUIT ){
 	    hasQuit = true;
@@ -425,6 +430,7 @@ void SDL::checkEvents(){
     }
 }
 
+#ifndef __EMSCRIPTEN__
 static std::mutex netmut;
 int NetManager::count = 0;
 using lock = std::lock_guard<std::mutex>;
@@ -444,3 +450,4 @@ void NetManager::release(){
     if(!count)
         SDLNet_Quit();
 }
+#endif

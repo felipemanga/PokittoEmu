@@ -1269,11 +1269,18 @@ namespace CPU
 
 // BKPT
     static void thumbBE( u32 opcode ){
+        static bool wasHit = false;
 	LOG(thumbBE);
 	if( GDB::connected() )
 	    GDB::interrupt();
-	armNextPC -= 2;
-	reg[15].I -= 2;
+        else {
+            if(!wasHit){
+                wasHit = true;
+                printf("Breakpoint hit with no debugger attached. Halting.\n");
+            }
+            armNextPC -= 2;
+            reg[15].I -= 2;
+        }
 	clockTicks += 1;
     }
 
@@ -1863,7 +1870,7 @@ namespace CPU
 	do
 	{
 	    PREVADDRESS = ADDRESS;
-	    u32 opcode = cpuPrefetch[0];
+	    OPCODE = cpuPrefetch[0];
 /*
 	    if( armNextPC&~1 == 0x1250 ){
 		echoRes = 0;
@@ -1893,7 +1900,7 @@ namespace CPU
 	    // CPU::logops = ADDRESS == 0x51b8;
 	    // out << std::hex << ADDRESS << std::endl;
 
-	    (*thumbInsnTable[opcode>>6])(opcode);
+	    (*thumbInsnTable[OPCODE>>6])(OPCODE);
 
 	    if (clockTicks < 0)
 		return 0;

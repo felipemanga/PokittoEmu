@@ -1,3 +1,4 @@
+
 #if !defined(__EMSCRIPTEN__)
 
 #include <iostream>
@@ -12,10 +13,12 @@
 #include <mutex>
 #include <chrono>
 
+extern volatile bool hasQuit;
+
+#endif
+
 #include "types.hpp"
 #include "cpu.hpp"
-
-extern volatile bool hasQuit;
 
 namespace PROF {
     u32 hits[ sizeof(MMU::flash)>>1 ];
@@ -24,5 +27,3 @@ namespace PROF {
     void init( bool _hitCaller ){
     }
 }
-
-#endif

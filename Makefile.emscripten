@@ -21,6 +21,7 @@ PROJECT := PokittoEmu
 BPROJECT := ONLINE/PokittoEmu.html
 
 OBJECTS += ONLINE/sys.o
+OBJECTS += ONLINE/emscriptenstub.o
 OBJECTS += ONLINE/iocon.o
 OBJECTS += ONLINE/gpio.o
 OBJECTS += ONLINE/adc.o
@@ -41,6 +42,7 @@ OBJECTS += ONLINE/sd.o
 OBJECTS += ONLINE/sct.o
 OBJECTS += ONLINE/spi.o
 OBJECTS += ONLINE/loadBin.o
+OBJECTS += ONLINE/loadEeprom.o
 
 INCLUDE_PATHS += -I./.
 

@@ -2,7 +2,9 @@
 
 #include <unordered_map>
 #include <thread>
+#ifndef __EMSCRIPTEN__
 #include <mutex>
+#endif
 #include <chrono>
 #include <functional>
 #include <vector>
@@ -24,7 +26,6 @@ class SDL
     std::unordered_map<int, SDL_Joystick*> joysticks;
     using EventHandler = std::function<void()>; // void (*)();
     std::vector< EventHandler > eventHandlers;
-    std::mutex eventmut;
 
     u8 *screenpixels = nullptr;
     u32 gifNum = 0;
@@ -33,6 +34,7 @@ class SDL
     bool canTakeScreenshot = false;
     
 #ifndef __EMSCRIPTEN__
+    std::mutex eventmut;
     std::mutex gifmut;
 #endif
 

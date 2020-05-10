@@ -41,6 +41,8 @@ OBJECTS += ONLINE/sd.o
 OBJECTS += ONLINE/sct.o
 OBJECTS += ONLINE/spi.o
 OBJECTS += ONLINE/loadBin.o
+OBJECTS += ONLINE/loadEeprom.o
+OBJECTS += ONLINE/emscriptenstub.o
 
 INCLUDE_PATHS += -I./.
 
