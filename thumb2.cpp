@@ -25,21 +25,11 @@ namespace CPU
 
     static INSN_REGPARM void thumbUnknownInsn(u32 opcode)
     {
-	std::cout << "UNKNOWN OP "
-		  << std::hex << opcode
-		  << "@ PC=" << armNextPC-2
-		  << std::endl;
+	printf("UNKNOWN OP %x\n", opcode);
 
 	if( GDB::connected() ){
 	    GDB::interrupt();
 	}
-
-	// LOG(thumbUnknownInsn);
-#ifdef GBA_LOGGING
-	if (settings_log_channel_enabled(LOG_UNDEFINED))
-	    g_message("Undefined THUMB instruction %04x at %08x\n", opcode, armNextPC-2);
-#endif
-	CPUUndefinedException();
     }
 
 // Common macros //////////////////////////////////////////////////////////
@@ -559,16 +549,6 @@ namespace CPU
 	reg[dest].I = reg[(opcode >> 3) & 7].I * rm;
 	if (((s32)rm) < 0)
 	    rm = ~rm;
-	if ((rm & 0xFFFFFF00) == 0)
-	    clockTicks += 0;
-	else if ((rm & 0xFFFF0000) == 0)
-	    clockTicks += 1;
-	else if ((rm & 0xFF000000) == 0)
-	    clockTicks += 2;
-	else
-	    clockTicks += 3;
-	busPrefetchCount = (busPrefetchCount<<clockTicks) | (0xFF>>(8-clockTicks));
-	clockTicks += codeTicksAccess16(armNextPC) + 1;
 	Z_FLAG = reg[dest].I ? false : true;
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
     }
@@ -1716,7 +1696,6 @@ namespace CPU
 
     typedef INSN_REGPARM void (*insnfunc_t)(u32 opcode);
 #define thumbUI thumbUnknownInsn
-#define thumbBP thumbUnknownInsn
     static insnfunc_t thumbInsnTable[1024] =
     {
 	thumb00<0>, thumb00<1>, thumb00<2>, thumb00<3>, thumb00<4>, thumb00<5>, thumb00<6>, thumb00<7>,  // 00
@@ -1883,11 +1862,7 @@ namespace CPU
 */
 
 	    cpuPrefetch[0] = cpuPrefetch[1];
-/*
-	    busPrefetch = false;
-	    if (busPrefetchCount & 0xFFFFFF00)
-	    busPrefetchCount = 0x100 | (busPrefetchCount & 0xFF);
-*/
+
 	    clockTicks = 0;
 	    u32 oldArmNextPC = armNextPC;
 
@@ -1902,15 +1877,15 @@ namespace CPU
 
 	    (*thumbInsnTable[OPCODE>>6])(OPCODE);
 
-	    if (clockTicks < 0)
-		return 0;
+	    // if (clockTicks < 0)
+	    //     return 0;
 	    
 	    if (clockTicks == 0)
 		clockTicks = 1;
 
-            if(PREVADDRESS < sizeof(MMU::flash)){
-                PROF::hits[PREVADDRESS>>1] += clockTicks;
-            }
+            // if(PREVADDRESS < sizeof(MMU::flash)){
+            //     PROF::hits[PREVADDRESS>>1] += clockTicks;
+            // }
             
 	    cpuTotalTicks += clockTicks;
 

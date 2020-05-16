@@ -133,13 +133,13 @@ namespace CPU
 	if( (armNextPC&~1) == 0xFFFFFFF8 )
 	    exitInterrupt();
 	
-	cpuPrefetch[0] = MMU::read16(armNextPC);
-	cpuPrefetch[1] = MMU::read16(armNextPC + 2);
+	cpuPrefetch[0] = MMU::exec16(armNextPC);
+	cpuPrefetch[1] = MMU::exec16(armNextPC + 2);
     }
 
     inline void THUMB_PREFETCH_NEXT()
     {
-	cpuPrefetch[1] = MMU::read16(armNextPC+2);
+	cpuPrefetch[1] = MMU::exec16(armNextPC+2);
     }
 
 } // namespace CPU

@@ -19,8 +19,6 @@ namespace TIMERS {
 	u32 IR,
 	    TCR,
 	    TC,
-	    PR,
-	    PC,
 	    MCR,
 	    MR0,
 	    MR1,
@@ -29,32 +27,32 @@ namespace TIMERS {
 	    CCR,
 	    CR0,
 	    CR1,
-	    CR2;	
+	    CR2;
+        s32 PC, PR;
 
 	u32 tick( u32 delta ){
+            u32 tti = 128;
 	    
 	    if( !(TCR&1) )
 		return ~0;
 
-	    u32 tti;
+            if(PC < 0)
+                PC = 0;
+            PC += delta;
 
-	    PC += delta;
-	    if( PR > PC )
-                return PR - PC;
-
-            PC -= PR;
-            TC++;
-
-            if( MR0 == TC ){
+            auto oldTC = TC;
+            auto CC = PC / (PR + 1);
+            PC -= CC * (PR + 1);
+            TC += CC;
+            
+            if( oldTC < MR0 && TC >= MR0 ){
                 constexpr u32 MRI = 1<<0;
                 constexpr u32 MRR = 1<<1;
                 constexpr u32 MRS = 1<<2;
                 
                 if( MCR & MRI ){
                     IR |= 1<<0;
-                    if( CPU::armIrqEnable){
-                        CPU::interrupt(34+num);
-                    }
+                    tti = (MR0 - TC) * (PR + 1);
                 }
 
                 if( MCR & MRS ){
@@ -62,21 +60,20 @@ namespace TIMERS {
                 }
 
                 if( MCR & MRR ){
-                    TC = 0;
+                    TC -= MR0;
                 }
+            } else if(TC < MR0){
+                tti = (MR0 - TC) * (PR + 1);
             }
 
-            if( MR1 == TC ){
-
+            if( oldTC < MR1 && TC >= MR1 ){
                 constexpr u32 MRI = 1<<3;
                 constexpr u32 MRR = 1<<4;
                 constexpr u32 MRS = 1<<5;
 
                 if( MCR & MRI ){
                     IR |= 1<<1;
-                    if( CPU::armIrqEnable){
-                        CPU::interrupt(34+num);
-                    }
+                    tti = std::min(tti, (MR1 - TC) * (PR + 1));
                 }
 
                 if( MCR & MRS ){
@@ -84,20 +81,20 @@ namespace TIMERS {
                 }
 
                 if( MCR & MRR ){
-                    TC = 0;
+                    TC -= MR1;
                 }
+            } else if(TC < MR1){
+                tti = std::min(tti, (MR1 - TC) * (PR + 1));
             }
 
-            if( MR2 == TC ){
+            if( oldTC < MR2 && TC >=MR2 ){
                 constexpr u32 MRI = 1<<6;
                 constexpr u32 MRR = 1<<7;
                 constexpr u32 MRS = 1<<8;
                 
                 if( MCR & MRI ){
                     IR |= 1<<2;
-                    if( CPU::armIrqEnable){
-                        CPU::interrupt(34+num);
-                    }
+                    tti = std::min(tti, (MR2 - TC) * (PR + 1));
                 }
 
                 if( MCR & MRS ){
@@ -105,20 +102,20 @@ namespace TIMERS {
                 }
 
                 if( MCR & MRR ){
-                    TC = 0;
+                    TC -= MR2;
                 }
+            } else if(TC < MR2){
+                tti = std::min(tti, (MR2 - TC) * (PR + 1));
             }
 
-            if( MR3 == TC ){
+            if( oldTC < MR3 && TC >= MR3 ){
                 constexpr u32 MRI = 1<<9;
                 constexpr u32 MRR = 1<<10;
                 constexpr u32 MRS = 1<<11;
                 
                 if( MCR & MRI ){
                     IR |= 1<<3;
-                    if( CPU::armIrqEnable){
-                        CPU::interrupt(34+num);
-                    }
+                    tti = std::min(tti, (MR3 - TC) * (PR + 1));
                 }
 
                 if( MCR & MRS ){
@@ -126,12 +123,17 @@ namespace TIMERS {
                 }
 
                 if( MCR & MRR ){
-                    TC = 0;
+                    TC -= MR3;
                 }
+            } else if(TC < MR3){
+                tti = std::min(tti, (MR3 - TC) * (PR + 1));
             }
-	    
-	    return 1;
 
+            if(IR && CPU::armIrqEnable){
+                CPU::interrupt(34+num);
+            }
+            
+            return tti;
 	}
 
     } B1{1}, B0{0};
@@ -171,7 +173,6 @@ namespace TIMERS {
 	sys.CSR &= ~(1<<16);
 	return sys.RVR;
     }
-
 
     u32 update(){
 	u32 delta = CPU::cpuTotalTicks - lastTick;

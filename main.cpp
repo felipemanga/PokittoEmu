@@ -32,6 +32,7 @@ volatile bool hasQuit = false;
 std::string eepromPath;
 std::string srcPath = "file.bin";
 std::string imgPath, outImgPath;
+static std::chrono::time_point<std::chrono::high_resolution_clock> start;
 
 bool verifier = false,
     autorec = false;
@@ -191,9 +192,8 @@ void loop( void *_sdl ){
 	GPIO::update();
 	
 	{
-	    auto start = std::chrono::high_resolution_clock::now();
-	    u32 max = SYS::SYSPLLCTRL == 0x25 ? 0x140000 : 150000*5;
-            // (45 + (SYS::SYSPLLCTRL-0x23)*15)*1024*1024/30;// 150000*5;
+            u32 fps = 60;
+	    u32 max = (SYS::SYSPLLCTRL == 0x25 ? 72000000 : 45000000) / fps;
             
 	    for( u32 opcount=0; opcount<max && emustate == EmuState::RUNNING; ){
 		u32 tti = max-opcount;
@@ -202,16 +202,19 @@ void loop( void *_sdl ){
                 #ifndef __EMSCRIPTEN__
                 tti = std::min( tti, PEX::update() );
                 #endif
+                auto ticks = CPU::cpuTotalTicks;
 		CPU::cpuNextEvent = CPU::cpuTotalTicks + tti;
 		CPU::thumbExecute();
-		opcount += tti;
+		opcount += CPU::cpuTotalTicks - ticks;
 	    }
 	    
 #if !defined(__EMSCRIPTEN__) || defined(__EMSCRIPTEN_PTHREADS__)
+
+            decltype(start) nextStart;
+	    while( ((nextStart = std::chrono::high_resolution_clock::now()) - start) < (1000ms/fps) )
+                std::this_thread::sleep_for( 1ms );
 	    
-	    while( (std::chrono::high_resolution_clock::now() - start) < 16ms )
-		std::this_thread::sleep_for( 1ms );
-	    
+            start = nextStart;
 #endif
 	    
 	}
@@ -237,7 +240,7 @@ void loop( void *_sdl ){
 #ifndef __EMSCRIPTEN__
 	    
     if( emustate != EmuState::RUNNING ){
-	std::this_thread::sleep_for( 50ms );
+	std::this_thread::sleep_for( 10ms );
     }
     
 #endif
@@ -309,6 +312,7 @@ int main( int argc, char * argv[] ){
 	if( autorec )
 	    sdl.toggleRecording();
 
+        start = std::chrono::high_resolution_clock::now();
 	#ifndef __EMSCRIPTEN__
         AUDIO::init(audioSampleRate);
 	

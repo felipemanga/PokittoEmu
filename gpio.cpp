@@ -211,7 +211,7 @@ namespace GPIO {
     template<> u32 writeByte<POUT2, 20>( u32 v, u32, u32 addr ){
 	u32 off = 20 + (addr&3);
         /* */
-        if( ((u8*) &v)[addr&3] != 0 ) POUT2 |= 1 << off;
+        if( (((u8*) &v)[addr&3]&1) ) POUT2 |= 1 << off;
         else POUT2 &= ~( 1<<off );
         /*/
         POUT2 = (POUT2 & ~(1<<off)) | (!!(v&(0xFF<<((8<<(addr&3))-8)))<<off);

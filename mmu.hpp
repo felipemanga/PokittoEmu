@@ -46,7 +46,7 @@ namespace MMU
 
 #define MMUREGLOG( name ) { &name, #name, &MMU::dbgRead, &MMU::dbgWrite }
     
-#define MMUREG( name ) { &name, #name, &MMU::defaultRead, &MMU::defaultWrite }
+#define MMUREG( name ) { (u32*)&name, #name, &MMU::defaultRead, &MMU::defaultWrite }
 
     struct Layout {
 	u32 base;
@@ -61,6 +61,12 @@ u32 read32(u32 address);
 u32 read16(u32 address);
 s16 read16s(u32 address);
 u8 read8(u32 address);
+
+inline u32 exec16(u32 address){
+    if(address < 0x40000){
+        return *((u16*)&flash[address&~1]);
+    } else return read16(address);
+}
 
 void write32(u32 address, u32 value);
 void write16(u32 address, u16 value);

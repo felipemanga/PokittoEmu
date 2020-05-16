@@ -328,17 +328,17 @@ namespace MMU
 	    return; // to-do: raise exception?
 	}
 
-	if( verbose > 2 ){
-	    std::cout << "REG WRITE "
-		      << layout.map[idx].name
-		      << std::hex	    
-		      << "(@"
-		      << addr
-		      << ") = " << value << " "
-		      << " on PC="
-		      << CPU::ADDRESS
-		      << std::endl;
-	}
+	// if( verbose > 2 ){
+	//     std::cout << "REG WRITE "
+	// 	      << layout.map[idx].name
+	// 	      << std::hex	    
+	// 	      << "(@"
+	// 	      << addr
+	// 	      << ") = " << value << " "
+	// 	      << " on PC="
+	// 	      << CPU::ADDRESS
+	// 	      << std::endl;
+	// }
 
 	auto write = layout.map[ idx ].write;
 	u32 oldvalue = *layout.map[ idx ].value;
@@ -351,8 +351,7 @@ namespace MMU
 	full |= oldvalue & ~(u32(valType(~0))<<((8<<(addr&3))-8) );
         /* */
 	
-	if( write )
-	    full = (*write)( full, oldvalue, addr );
+        full = (*write)( full, oldvalue, addr );
 	
 	*layout.map[ idx ].value = full;
     }
@@ -762,7 +761,7 @@ namespace MMU
     u32 read16(u32 address){
 	return (*memoryMap[ address>>28 ].read16)( address&~1 );
     }
-
+    
     s16 read16s(u32 address){
 	return (*memoryMap[ address>>28 ].read16)( address&~1 );
     }

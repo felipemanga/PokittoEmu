@@ -2,6 +2,7 @@
 #ifndef __EMSCRIPTEN__
 #include <SDL2/SDL_net.h>
 #include <mutex>
+#include <atomic>
 #endif
 #include "./cpu.hpp"
 #include "./gdb.hpp"
@@ -131,6 +132,8 @@ void SDL::savePNG(){
     IMG_SavePNG( vscreen, name.c_str() );
 }
 
+// extern std::atomic<u32> start, end;
+
 void SDL::draw(){
     if( !SCREEN::dirty ){
 	delay+=2;
@@ -177,6 +180,15 @@ void SDL::draw(){
 	    delay = 2;
 
 	}
+
+        /*
+// audio debugging pixels
+        screenpixels[ ((3 * 440 + ((start*440)/(1<<13))) << 2) + 2 ] = 0xFF;
+
+        screenpixels[ ((7 * 440 + ((end*440)/(1<<13))) << 2) + 2 ] = 0xFF;
+
+        screenpixels[ ((11 * 440 + (CPU::cpuTotalTicks>>18)%440) << 2) + 2 ] = 0xFF;
+        */
 
     }
 
