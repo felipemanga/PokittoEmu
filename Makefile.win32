@@ -1,0 +1,102 @@
+ifeq ($(shell echo $$OS),$$OS)
+    MAKEDIR = if not exist "$(1)" mkdir "$(1)"
+    RM = rmdir /S /Q "$(1)"
+else
+    MAKEDIR = '$(SHELL)' -c "mkdir -p \"$(1)\""
+    RM = '$(SHELL)' -c "rm -rf \"$(1)\""
+endif
+
+OBJDIR := BUILD
+SRCDIR := $(CURDIR)
+
+.PHONY: clean
+
+.SUFFIXES:
+.SUFFIXES: .cpp .o
+
+vpath %.cpp .
+vpath %.h .
+
+PROJECT := PokittoEmu
+BPROJECT := BUILD/PokittoEmu.exe
+
+OBJECTS += BUILD/sys.o
+OBJECTS += BUILD/audio.o
+OBJECTS += BUILD/iocon.o
+OBJECTS += BUILD/gpio.o
+OBJECTS += BUILD/adc.o
+OBJECTS += BUILD/iap.o
+OBJECTS += BUILD/timers.o
+OBJECTS += BUILD/usart.o
+OBJECTS += BUILD/rtc.o
+OBJECTS += BUILD/thumb2.o
+OBJECTS += BUILD/screen.o
+OBJECTS += BUILD/mmu.o
+OBJECTS += BUILD/pex.o
+OBJECTS += BUILD/main.o
+OBJECTS += BUILD/sdl.o
+OBJECTS += BUILD/cpu.o
+OBJECTS += BUILD/gdb.o
+OBJECTS += BUILD/prof.o
+OBJECTS += BUILD/verify.o
+OBJECTS += BUILD/sd.o
+OBJECTS += BUILD/sct.o
+OBJECTS += BUILD/spi.o
+OBJECTS += BUILD/loadBin.o
+OBJECTS += BUILD/loadEeprom.o
+
+INCLUDE_PATHS += -I./.
+INCLUDE_PATHS += -I./lib/SDL2/old_32bitSDL/include
+INCLUDE_PATHS += -I./lib/SDL2/old_32bitSDL/include/SDL2
+INCLUDE_PATHS += -I./lib/SDL2_net-2.0.1/i686-w64-mingw32/include
+INCLUDE_PATHS += -I./lib/SDL2_image-2.0.5/i686-w64-mingw32/include
+LIBRARY_PATHS := -L./lib/SDL2/old_32bitSDL/lib
+LIBRARY_PATHS += -L./lib/SDL2_net-2.0.1/i686-w64-mingw32/lib
+LIBRARY_PATHS += -L./lib/SDL2_image-2.0.5/i686-w64-mingw32/lib
+
+LD_FLAGS := -static
+LIBRARIES += -lmingw32
+LIBRARIES += -static-libgcc 
+LIBRARIES += -static-libstdc++
+LIBRARIES += -lSDL2main
+LIBRARIES += -lSDL2
+LIBRARIES += -lSDL2_net
+LIBRARIES += -lSDL2_image
+LIBRARIES += -luser32
+LIBRARIES += -lgdi32
+LIBRARIES += -lole32
+LIBRARIES += -loleaut32
+LIBRARIES += -lwinmm
+LIBRARIES += -limm32
+LIBRARIES += -lversion
+LIBRARIES += -ldxguid
+LIBRARIES += -lpthread
+LIBRARIES += -lws2_32
+LIBRARIES += -liphlpapi
+LIBRARIES += -lsetupapi
+LIBRARIES += -lhid
+
+LD_SYS_LIBS := 
+
+CPP = 'i686-w64-mingw32-g++' '-c' '-O3'
+LD  = 'i686-w64-mingw32-g++' '-O3'
+
+CXX_FLAGS += -std=c++17
+
+.PHONY: all lst size
+
+
+all: $(BPROJECT) size
+	+@$(call MAKEDIR,$(OBJDIR))
+
+clean:
+	$(call RM,$(OBJDIR))
+
+BUILD/%.o : %.cpp
+	+@$(call MAKEDIR,$(dir $@))
+	+@echo "Compile: $(notdir $<)"
+	@$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) -o $@ $<
+
+$(BPROJECT): $(OBJECTS)
+	+@echo "link: $(notdir $@)"
+	@$(LD) $(LD_FLAGS) $(LIBRARY_PATHS) -o $@ $(filter %.o, $^) $(LIBRARIES) $(LD_SYS_LIBS)
