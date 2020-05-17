@@ -21,6 +21,8 @@ extern "C" void reset();
 
 GifWriter gif;
 
+void scale2x(SDL_Surface *src, SDL_Surface *dst);
+
 SDL::SDL( Uint32 flags )
 {
     if ( SDL_Init( flags ) != 0 )
@@ -62,7 +64,18 @@ SDL::SDL( Uint32 flags )
 	0
 	);
 
-    if( !vscreen )
+    vscreen2x = SDL_CreateRGBSurface(
+	0, // flags
+	2*220, // w
+	2*176, // h
+	16, // depth
+	0,
+	0,
+	0,
+	0
+	);
+
+    if( !vscreen || !vscreen2x )
 	throw InitError(SDL_GetError());
 
     SDL_LockSurface(vscreen);
@@ -145,7 +158,12 @@ void SDL::draw(){
     SCREEN::dirty = false;
 
     SDL_UnlockSurface( vscreen );
-    SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
+    if(useScale2X){
+        scale2x(vscreen, vscreen2x);
+        SDL_BlitScaled( vscreen2x, nullptr, screen, nullptr );
+    }else{
+        SDL_BlitScaled( vscreen, nullptr, screen, nullptr );
+    }
     SDL_LockSurface(vscreen);
 
     if( screenshot ){
@@ -348,8 +366,13 @@ void SDL::checkEvents(){
                     if(ceil(s) != s){
                         s = ceil(s);
                     }
-                    if(s < 6) s++;
-                    else s = 1;
+                    if(!useScale2X){
+                        useScale2X = true;
+                    }else{
+                        useScale2X = false;
+                        if(s < 6) s *= 2;
+                        else s = 1;
+                    }
                     SDL_SetWindowSize(m_window, 220*s, 176*s);
                 }
                 screen = SDL_GetWindowSurface( m_window );

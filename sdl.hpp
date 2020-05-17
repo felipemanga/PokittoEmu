@@ -41,6 +41,8 @@ class SDL
 public:
     u32 screenshot = 0;
     SDL_Surface *vscreen = nullptr;
+    SDL_Surface *vscreen2x = nullptr;
+    bool useScale2X = false;
 
     SDL( Uint32 flags = 0 );
     void toggleRecording();

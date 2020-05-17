@@ -21,6 +21,7 @@ PROJECT := PokittoEmu
 BPROJECT := BUILD/PokittoEmu
 
 OBJECTS += BUILD/sys.o
+OBJECTS += BUILD/scale2x.o
 OBJECTS += BUILD/audio.o
 OBJECTS += BUILD/iocon.o
 OBJECTS += BUILD/gpio.o
