@@ -32,7 +32,7 @@ SDL::SDL( Uint32 flags )
                              SDL_WINDOWPOS_UNDEFINED,
                              SDL_WINDOWPOS_UNDEFINED,
                              220*2, 176*2,
-                             0);
+                             SDL_WINDOW_RESIZABLE);
     if( !m_window )
 	throw InitError(SDL_GetError());
 
@@ -226,6 +226,13 @@ void SDL::checkEvents(){
 	std::lock_guard<std::mutex> lock(eventmut);
         #endif
 
+        if( e.type == SDL_WINDOWEVENT ){
+            if(e.window.event == SDL_WINDOWEVENT_RESIZED){
+                screen = SDL_GetWindowSurface( m_window );
+            }
+            continue;
+        }
+
 	if( e.type == SDL_QUIT ){
 	    hasQuit = true;
 	    return;
@@ -326,6 +333,29 @@ void SDL::checkEvents(){
 
 	if( e.type == SDL_KEYUP ){
 	    switch( e.key.keysym.sym ){
+            case SDLK_w:
+            {
+                int w, h;
+                f32 tr = 220.0f / 176.0f;
+                f32 r;
+                SDL_GetWindowSize(m_window, &w, &h);
+                if(h == 0) r = tr;
+                else r = f32(w) / h;
+                f32 s = w / 220.0f;
+                if(abs(r - tr) > 0.01){
+                    SDL_SetWindowSize(m_window, w, w / tr);
+                } else {
+                    if(ceil(s) != s){
+                        s = ceil(s);
+                    }
+                    if(s < 6) s++;
+                    else s = 1;
+                    SDL_SetWindowSize(m_window, 220*s, 176*s);
+                }
+                screen = SDL_GetWindowSurface( m_window );
+                break;
+            }
+
 	    case SDLK_ESCAPE:
 		hasQuit = true;
 		return;
