@@ -1,4 +1,5 @@
 #include "sdl.hpp"
+#include <math.h>
 #ifndef __EMSCRIPTEN__
 #include <SDL2/SDL_net.h>
 #include <mutex>
@@ -376,6 +377,7 @@ void SDL::checkEvents(){
                     SDL_SetWindowSize(m_window, 220*s, 176*s);
                 }
                 screen = SDL_GetWindowSurface( m_window );
+                SCREEN::dirty = true;
                 break;
             }
 

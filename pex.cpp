@@ -137,7 +137,7 @@ namespace PEX {
 		worker.join();
 		if( server )
 		    SDLNet_TCP_Close(server);
-                clients.empty();
+                clients.clear();
                 NetManager::release();
 	    });
 
