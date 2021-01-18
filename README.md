@@ -1,9 +1,25 @@
 # PokittoEmu
+An emulator for the [Pokitto](https://www.pokitto.com/) DIY handheld game system.
 
-What it says on the tin.
+The development library can be found at the [PokittoLib](https://github.com/pixelbath/PokittoLib) repository.
 
-## Controls
+## Usage
+To run a game directly, pass it as the first command line parameter:
 
+```
+PokittoEmu path/to/jetpack.bin
+```
+
+...or on Windows:
+
+```
+PokittoEmu.exe path\to\jetpack.bin
+```
+
+Note: Relative or absolute paths are both supported. The above syntax also works for `.pop` files.
+
+
+## Emulator Controls
 | Key        | Function                 |
 | ---------- | ------------------------ |
 | Esc        | Quit PokittoEmu          |
@@ -19,18 +35,26 @@ What it says on the tin.
 
 Screenshots and recorded GIFs will be saved in the same folder as the currently-running game.
 
-## Parameters
+## CLI Options
+All switches listed below are optional.
 
-To run a game directly, pass it as the first command line parameter:
+| Option     | Description         |
+|------------|---------------------|
+| `-A rate` | Set audio sample rate to `rate` |
+| `-r` | Automatically record the screen |
+| `-V` | Enable verbose logging |
+| `-w [0|1]` | Set "ignore bad writes" setting (passing without a number defaults to `1`) |
+| `-W` | Toggle "ignore bad writes" setting |
+| `-e addr` | Sets entry point to `addr` |
+| `-s frames` | Take a screenshot after `frames` frames |
+| `-g` | Set debugger port number to `1234` |
+| `-G port` | Set debugger port number to `port` |
+| `-I image.img` | Load SD card image from `image.img` |
+| `-o` | Set output image path to `out.img` |
+| `-O image.img` | Write SD card image to `image.img` |
+| `-p` | Enable profiler |
+| `-P` | Enable profiler and try to guess hot functions |
+| `-v` | (Linux only) Enable verifier |
+| `-x` | Set PEX port to `2000` |
+| `-X port` | Set PEX port to `port` |
 
-```
-PokittoEmu path/to/jetpack.bin
-```
-
-...or on Windows:
-
-```
-PokittoEmu.exe path\to\jetpack.bin
-```
-
-Note that relative or absolute paths both work.
