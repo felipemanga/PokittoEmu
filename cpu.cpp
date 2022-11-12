@@ -31,10 +31,6 @@ namespace CPU
     u32 ADDRESS, PREVADDRESS, OPCODE;
     int armMode = 0x1f;
 
-    bool busPrefetch = false; //TODO: never read ?
-    bool busPrefetchEnable = false;
-    u32 busPrefetchCount = 0;
-
     u64 cpuTotalTicks;
     u64 cpuNextEvent;
 
@@ -213,10 +209,6 @@ namespace CPU
 	armNextPC = reg[15].I;
 	reg[15].I += 2;
 	THUMB_PREFETCH();
-    }
-
-    void enableBusPrefetch(bool enable)
-    {
     }
 
 } // namespace CPU

@@ -54,10 +54,6 @@ namespace CPU
     extern int armMode;
     extern bool logops;
 
-    extern bool busPrefetch;
-    extern bool busPrefetchEnable;
-    extern u32 busPrefetchCount;
-
     extern u32 cpuPrefetch[2];
     extern u8 cpuBitsSet[256];
 
@@ -74,50 +70,6 @@ namespace CPU
     void enableBusPrefetch(bool enable);
 
     int thumbExecute();
-
-// Waitstates when accessing data
-    inline int dataTicksAccess16(u32 address) // DATA 8/16bits NON SEQ
-    {
-	return 0;
-    }
-
-    inline int dataTicksAccess32(u32 address) // DATA 32bits NON SEQ
-    {
-	return 0;
-    }
-
-    inline int dataTicksAccessSeq16(u32 address)// DATA 8/16bits SEQ
-    {
-	return 0;
-    }
-
-    inline int dataTicksAccessSeq32(u32 address)// DATA 32bits SEQ
-    {
-	return 0;
-    }
-
-
-// Waitstates when executing opcode
-    inline int codeTicksAccess16(u32 address) // THUMB NON SEQ
-    {
-	return 0;
-    }
-
-    inline int codeTicksAccess32(u32 address) // ARM NON SEQ
-    {
-	return 0;
-    }
-
-    inline int codeTicksAccessSeq16(u32 address) // THUMB SEQ
-    {
-	return 0;
-    }
-
-    inline int codeTicksAccessSeq32(u32 address) // ARM SEQ
-    {
-	return 0;
-    }
-
     
     void CPUSwitchMode(int mode, bool saveState);
     void CPUSwitchMode(int mode, bool saveState, bool breakLoop);

@@ -18,10 +18,26 @@ namespace CPU
 {
     // std::ofstream out("exec.log");
     bool logops = false;
-#define LOG( name ){ if( logops ) std::cout << #name << " " << std::hex << opcode << std::endl; }
+#define LOG( name )
+    // { if( logops ) std::cout << #name << " " << std::hex << opcode << std::endl; }
 ///////////////////////////////////////////////////////////////////////////
 
     static int clockTicks;
+    static int dependant = 0xFF;
+    static bool clearDependant = false;
+
+    void setDependant(int reg) {
+        clearDependant = false;
+        dependant = reg;
+    }
+
+    inline reg_pair& dep(int id) {
+        if (id == dependant) {
+            clockTicks++;
+            dependant = 0xFF;
+        }
+        return reg[id];
+    }
 
     static INSN_REGPARM void thumbUnknownInsn(u32 opcode)
     {
@@ -81,8 +97,8 @@ namespace CPU
 	LOG(thumb18);
 	int dest = opcode & 0x07;
 	int source = (opcode >> 3) & 0x07;
-	u32 lhs = reg[source].I;
-	u32 rhs = reg[N].I;
+	u32 lhs = dep(source).I;
+        u32 rhs = dep(N).I;
 	u32 res = lhs + rhs;
 	reg[dest].I = res;
 	Z_FLAG = (res == 0) ? true : false;
@@ -98,8 +114,8 @@ namespace CPU
 	LOG(thumb1A);
 	int dest = opcode & 0x07;
 	int source = (opcode >> 3) & 0x07;
-	u32 lhs = reg[source].I;
-	u32 rhs = reg[N].I;
+	u32 lhs = dep(source).I;
+	u32 rhs = dep(N).I;
 	u32 res = lhs - rhs;
 	reg[dest].I = res;
 	Z_FLAG = (res == 0) ? true : false;
@@ -115,7 +131,7 @@ namespace CPU
 	LOG(thumb1C);
 	int dest = opcode & 0x07;
 	int source = (opcode >> 3) & 0x07;
-	u32 lhs = reg[source].I;
+	u32 lhs = dep(source).I;
 	u32 rhs = N;
 	u32 res = lhs + rhs;
 	reg[dest].I = res;
@@ -132,7 +148,7 @@ namespace CPU
 	LOG(thumb1E);
 	int dest = opcode & 0x07;
 	int source = (opcode >> 3) & 0x07;
-	u32 lhs = reg[source].I;
+	u32 lhs = dep(source).I;
 	u32 rhs = N;
 	u32 res = lhs - rhs;
 	reg[dest].I = res;
@@ -154,7 +170,7 @@ namespace CPU
 	u32 value;
 	int shift = N;
 	C_FLAG = (reg[source].I >> (32 - shift)) & 1 ? true : false;
-	value = reg[source].I << shift;
+	value = dep(source).I << shift;
 	reg[dest].I = value;
 	N_FLAG = (value & 0x80000000 ? true : false);
 	Z_FLAG = (value ? false : true);
@@ -166,7 +182,7 @@ namespace CPU
 	LOG(thumb00);
 	int dest = opcode & 0x07;
 	int source = (opcode >> 3) & 0x07;
-	u32 value = reg[source].I;
+	u32 value = dep(source).I;
 	reg[dest].I = value;
 	N_FLAG = (value & 0x80000000 ? true : false);
 	Z_FLAG = (value ? false : true);
@@ -182,7 +198,7 @@ namespace CPU
 	u32 value;
 	int shift = N;
 	C_FLAG = (reg[source].I >> (shift - 1)) & 1 ? true : false;
-	value = reg[source].I >> shift;
+	value = dep(source).I >> shift;
 	reg[dest].I = value;
 	N_FLAG = (value & 0x80000000 ? true : false);
 	Z_FLAG = (value ? false : true);
@@ -195,7 +211,7 @@ namespace CPU
 	int dest = opcode & 0x07;
 	int source = (opcode >> 3) & 0x07;
 	u32 value = 0;
-	C_FLAG = reg[source].I & 0x80000000 ? true : false;
+	C_FLAG = dep(source).I & 0x80000000 ? true : false;
 	reg[dest].I = value;
 	N_FLAG = (value & 0x80000000 ? true : false);
 	Z_FLAG = (value ? false : true);
@@ -211,7 +227,7 @@ namespace CPU
 	u32 value;
 	int shift = N;
 	C_FLAG = ((s32)reg[source].I >> (int)(shift - 1)) & 1 ? true : false;
-	value = (s32)reg[source].I >> (int)shift;
+	value = (s32)dep(source).I >> (int)shift;
 	reg[dest].I = value;
 	N_FLAG = (value & 0x80000000 ? true : false);
 	Z_FLAG = (value ? false : true);
@@ -224,7 +240,7 @@ namespace CPU
 	int dest = opcode & 0x07;
 	int source = (opcode >> 3) & 0x07;
 	u32 value;
-	if (reg[source].I & 0x80000000)
+	if (dep(source).I & 0x80000000)
 	{
 	    value = 0xFFFFFFFF;
 	    C_FLAG = true;
@@ -256,7 +272,7 @@ namespace CPU
     static INSN_REGPARM void thumb28(u32 opcode)
     {
 	LOG(thumb28);
-	u32 lhs = reg[N].I;
+	u32 lhs = dep(N).I;
 	u32 rhs = (opcode & 255);
 	u32 res = lhs - rhs;
 	Z_FLAG = (res == 0) ? true : false;
@@ -270,7 +286,7 @@ namespace CPU
     static INSN_REGPARM void thumb30(u32 opcode)
     {
 	LOG(thumb30);
-	u32 lhs = reg[N].I;
+	u32 lhs = dep(N).I;
 	u32 rhs = (opcode & 255);
 	u32 res = lhs + rhs;
 	reg[N].I = res;
@@ -285,7 +301,7 @@ namespace CPU
     static INSN_REGPARM void thumb38(u32 opcode)
     {
 	LOG(thumb38);
-	u32 lhs = reg[N].I;
+	u32 lhs = dep(N).I;
 	u32 rhs = (opcode & 255);
 	u32 res = lhs - rhs;
 	reg[N].I = res;
@@ -299,7 +315,7 @@ namespace CPU
 
     static inline void CMP_RD_RS(int dest, u32 value)
     {
-	u32 lhs = reg[dest].I;
+	u32 lhs = dep(dest).I;
 	u32 rhs = value;
 	u32 res = lhs - rhs;
 	Z_FLAG = (res == 0) ? true : false;
@@ -313,7 +329,7 @@ namespace CPU
     {
 	LOG(thumb40);
 	int dest = opcode & 7;
-	reg[dest].I &= reg[(opcode >> 3)&7].I;
+	dep(dest).I &= dep((opcode >> 3)&7).I;
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
 	Z_FLAG = reg[dest].I ? false : true;
     }
@@ -323,7 +339,7 @@ namespace CPU
     {
 	LOG(thumb40);
 	int dest = opcode & 7;
-	reg[dest].I ^= reg[(opcode >> 3)&7].I;
+	reg[dest].I ^= dep((opcode >> 3)&7).I;
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
 	Z_FLAG = reg[dest].I ? false : true;
     }
@@ -333,7 +349,7 @@ namespace CPU
     {
 	LOG(thumb40);
 	int dest = opcode & 7;
-	u32 value = reg[(opcode >> 3)&7].B.B0;
+	u32 value = dep((opcode >> 3)&7).B.B0;
 	if (value)
 	{
 	    if (value == 32)
@@ -354,8 +370,7 @@ namespace CPU
 	    reg[dest].I = value;
 	}
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
-	Z_FLAG = reg[dest].I ? false : true;
-	clockTicks = codeTicksAccess16(armNextPC)+2;
+	Z_FLAG = dep(dest).I ? false : true;
     }
 
 // LSR Rd, Rs
@@ -363,7 +378,7 @@ namespace CPU
     {
 	LOG(thumb40);
 	int dest = opcode & 7;
-	u32 value = reg[(opcode >> 3)&7].B.B0;
+	u32 value = dep((opcode >> 3)&7).B.B0;
 	if (value)
 	{
 	    if (value == 32)
@@ -384,8 +399,7 @@ namespace CPU
 	    reg[dest].I = value;
 	}
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
-	Z_FLAG = reg[dest].I ? false : true;
-	clockTicks = codeTicksAccess16(armNextPC)+2;
+	Z_FLAG = dep(dest).I ? false : true;
     }
 
 // ASR Rd, Rs
@@ -393,7 +407,7 @@ namespace CPU
     {
 	LOG(thumb41);
 	int dest = opcode & 7;
-	u32 value = reg[(opcode >> 3)&7].B.B0;
+	u32 value = dep((opcode >> 3)&7).B.B0;
 	if (value)
 	{
 	    if (value < 32)
@@ -417,8 +431,7 @@ namespace CPU
 	    }
 	}
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
-	Z_FLAG = reg[dest].I ? false : true;
-	clockTicks = codeTicksAccess16(armNextPC)+2;
+	Z_FLAG = dep(dest).I ? false : true;
     }
 
 // ADC Rd, Rs
@@ -426,8 +439,8 @@ namespace CPU
     {
 	LOG(thumb41);
 	int dest = opcode & 0x07;
-	u32 value = reg[(opcode >> 3)&7].I;
-	u32 lhs = reg[dest].I;
+	u32 value = dep((opcode >> 3)&7).I;
+	u32 lhs = dep(dest).I;
 	u32 rhs = value;
 	u32 res = lhs + rhs + (u32)C_FLAG;
 	reg[dest].I = res;
@@ -442,8 +455,8 @@ namespace CPU
     {
 	LOG(thumb41);
 	int dest = opcode & 0x07;
-	u32 value = reg[(opcode >> 3)&7].I;
-	u32 lhs = reg[dest].I;
+	u32 value = dep((opcode >> 3)&7).I;
+	u32 lhs = dep(dest).I;
 	u32 rhs = value;
 	u32 res = lhs - rhs - !((u32)C_FLAG);
 	reg[dest].I = res;
@@ -458,7 +471,7 @@ namespace CPU
     {
 	LOG(thumb41);
 	int dest = opcode & 7;
-	u32 value = reg[(opcode >> 3)&7].B.B0;
+	u32 value = dep((opcode >> 3)&7).B.B0;
 
 	if (value)
 	{
@@ -475,8 +488,7 @@ namespace CPU
 		reg[dest].I = value;
 	    }
 	}
-	clockTicks = codeTicksAccess16(armNextPC)+2;
-	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
+	N_FLAG = dep(dest).I & 0x80000000 ? true : false;
 	Z_FLAG = reg[dest].I ? false : true;
     }
 
@@ -484,7 +496,7 @@ namespace CPU
     static INSN_REGPARM void thumb42_0(u32 opcode)
     {
 	LOG(thumb42);
-	u32 value = reg[opcode & 7].I & reg[(opcode >> 3) & 7].I;
+	u32 value = dep(opcode & 7).I & dep((opcode >> 3) & 7).I;
 	N_FLAG = value & 0x80000000 ? true : false;
 	Z_FLAG = value ? false : true;
     }
@@ -495,7 +507,7 @@ namespace CPU
 	LOG(thumb42);
 	int dest = opcode & 7;
 	int source = (opcode >> 3) & 7;
-	u32 lhs = reg[source].I;
+	u32 lhs = dep(source).I;
 	u32 rhs = 0;
 	u32 res = rhs - lhs;
 	reg[dest].I = res;
@@ -510,7 +522,8 @@ namespace CPU
     {
 	LOG(thumb42);
 	int dest = opcode & 7;
-	u32 value = reg[(opcode >> 3)&7].I;
+	u32 value = dep((opcode >> 3)&7).I;
+        dep(dest);
 	CMP_RD_RS(dest, value);
     }
 
@@ -519,8 +532,8 @@ namespace CPU
     {
 	LOG(thumb42);
 	int dest = opcode & 7;
-	u32 value = reg[(opcode >> 3)&7].I;
-	u32 lhs = reg[dest].I;
+	u32 value = dep((opcode >> 3)&7).I;
+	u32 lhs = dep(dest).I;
 	u32 rhs = value;
 	u32 res = lhs + rhs;
 	Z_FLAG = (res == 0) ? true : false;
@@ -534,7 +547,7 @@ namespace CPU
     {
 	LOG(thumb43);
 	int dest = opcode & 7;
-	reg[dest].I |= reg[(opcode >> 3) & 7].I;
+	dep(dest).I |= dep((opcode >> 3) & 7).I;
 	Z_FLAG = reg[dest].I ? false : true;
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
     }
@@ -543,10 +556,9 @@ namespace CPU
     static INSN_REGPARM void thumb43_1(u32 opcode)
     {
 	LOG(thumb43);
-	clockTicks = 1;
 	int dest = opcode & 7;
-	u32 rm = reg[dest].I;
-	reg[dest].I = reg[(opcode >> 3) & 7].I * rm;
+	u32 rm = dep(dest).I;
+	dep(dest).I = reg[(opcode >> 3) & 7].I * rm;
 	if (((s32)rm) < 0)
 	    rm = ~rm;
 	Z_FLAG = reg[dest].I ? false : true;
@@ -558,7 +570,7 @@ namespace CPU
     {
 	LOG(thumb43);
 	int dest = opcode & 7;
-	reg[dest].I &= (~reg[(opcode >> 3) & 7].I);
+	dep(dest).I &= ~dep((opcode >> 3) & 7).I;
 	Z_FLAG = reg[dest].I ? false : true;
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
     }
@@ -568,7 +580,7 @@ namespace CPU
     {
 	LOG(thumb43);
 	int dest = opcode & 7;
-	reg[dest].I = ~reg[(opcode >> 3) & 7].I;
+	reg[dest].I = ~dep((opcode >> 3) & 7).I;
 	Z_FLAG = reg[dest].I ? false : true;
 	N_FLAG = reg[dest].I & 0x80000000 ? true : false;
     }
@@ -579,29 +591,28 @@ namespace CPU
     static INSN_REGPARM void thumb44_0(u32 opcode)
     {
 	LOG(thumb44);
-	reg[opcode&7].I += reg[((opcode>>3)&7)].I;
+	dep(opcode&7).I += dep(((opcode>>3)&7)).I;
     }
 
 // ADD Rd, Hs
     static INSN_REGPARM void thumb44_1(u32 opcode)
     {
 	LOG(thumb44);
-	reg[opcode&7].I += reg[((opcode>>3)&7)+8].I;
+        dep(opcode&7).I += dep(((opcode>>3)&7)+8).I;
     }
 
 // ADD Hd, Rs
     static INSN_REGPARM void thumb44_2(u32 opcode)
     {
 	LOG(thumb44);
-	reg[(opcode&7)+8].I += reg[(opcode>>3)&7].I;
+	dep((opcode&7)+8).I += dep((opcode>>3)&7).I;
 	if ((opcode&7) == 7)
 	{
 	    reg[15].I &= 0xFFFFFFFE;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks = codeTicksAccessSeq16(armNextPC)*2
-		+ codeTicksAccess16(armNextPC) + 3;
+	    clockTicks = 3;
 	}
     }
 
@@ -609,15 +620,14 @@ namespace CPU
     static INSN_REGPARM void thumb44_3(u32 opcode)
     {
 	LOG(thumb44);
-	reg[(opcode&7)+8].I += reg[((opcode>>3)&7)+8].I;
+	dep((opcode&7)+8).I += dep(((opcode>>3)&7)+8).I;
 	if ((opcode&7) == 7)
 	{
 	    reg[15].I &= 0xFFFFFFFE;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks = codeTicksAccessSeq16(armNextPC)*2
-		+ codeTicksAccess16(armNextPC) + 3;
+	    clockTicks = 3;
 	}
     }
 
@@ -626,7 +636,8 @@ namespace CPU
     {
 	LOG(thumb45);
 	int dest = opcode & 7;
-	u32 value = reg[((opcode>>3)&7)+8].I;
+	u32 value = dep(((opcode>>3)&7)+8).I;
+        dep(dest);
 	CMP_RD_RS(dest, value);
     }
 
@@ -635,7 +646,8 @@ namespace CPU
     {
 	LOG(thumb45);
 	int dest = (opcode & 7) + 8;
-	u32 value = reg[(opcode>>3)&7].I;
+	u32 value = dep((opcode>>3)&7).I;
+        dep(dest);
 	CMP_RD_RS(dest, value);
     }
 
@@ -644,7 +656,8 @@ namespace CPU
     {
 	LOG(thumb45);
 	int dest = (opcode & 7) + 8;
-	u32 value = reg[((opcode>>3)&7)+8].I;
+	u32 value = dep(((opcode>>3)&7)+8).I;
+        dep(dest);
 	CMP_RD_RS(dest, value);
     }
 
@@ -652,31 +665,28 @@ namespace CPU
     static INSN_REGPARM void thumb46_0(u32 opcode)
     {
 	LOG(thumb46);
-	reg[opcode&7].I = reg[((opcode>>3)&7)].I;
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
+	reg[opcode&7].I = dep(((opcode>>3)&7)).I;
     }
 
 // MOV Rd, Hs
     static INSN_REGPARM void thumb46_1(u32 opcode)
     {
 	LOG(thumb46);
-	reg[opcode&7].I = reg[((opcode>>3)&7)+8].I;
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
+	reg[opcode&7].I = dep(((opcode>>3)&7)+8).I;
     }
 
 // MOV Hd, Rs
     static INSN_REGPARM void thumb46_2(u32 opcode)
     {
 	LOG(thumb46);
-	reg[(opcode&7)+8].I = reg[(opcode>>3)&7].I;
+	reg[(opcode&7)+8].I = dep((opcode>>3)&7).I;
 	if ((opcode&7) == 7)
 	{
 	    reg[15].I &= 0xFFFFFFFE;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks = codeTicksAccessSeq16(armNextPC)*2
-		+ codeTicksAccess16(armNextPC) + 3;
+	    clockTicks = 3;
 	}
     }
 
@@ -684,14 +694,14 @@ namespace CPU
     static INSN_REGPARM void thumb46_3(u32 opcode)
     {
 	LOG(thumb46);
-	reg[(opcode&7)+8].I = reg[((opcode>>3)&7)+8].I;
+	reg[(opcode&7)+8].I = dep(((opcode>>3)&7)+8).I;
 	if ((opcode&7) == 7)
 	{
 	    reg[15].I &= 0xFFFFFFFE;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
+	    clockTicks = 3;
 	}
     }
 
@@ -700,9 +710,9 @@ namespace CPU
     static INSN_REGPARM void thumb47(u32 opcode)
     {
 	LOG(thumb47);
+        ++clockTicks;
 	int base = (opcode >> 3) & 15;
-	busPrefetchCount=0;
-	reg[15].I = reg[base].I;
+	reg[15].I = dep(base).I;
 	// if (reg[base].I & 1)
 	{
 	    // armState = false;
@@ -714,7 +724,6 @@ namespace CPU
 		exitInterrupt();
 
 	    THUMB_PREFETCH();
-	    clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
 	}
 	/*
 	  else
@@ -724,7 +733,7 @@ namespace CPU
 	  armNextPC = reg[15].I;
 	  reg[15].I += 4;
 	  ARM_PREFETCH();
-	  clockTicks = codeTicksAccessSeq32(armNextPC)*2 + codeTicksAccess32(armNextPC) + 3;
+	  clockTicks = 3;
 	  }
 	*/
     }
@@ -735,9 +744,9 @@ namespace CPU
     {
 	LOG(thumb47b);
 	int base = (opcode >> 3) & 15;
-	busPrefetchCount=0;
+        ++clockTicks;
 
-	if( (reg[base].I&0xFFFFFFF0) == 0x1fff1ff0 ){
+	if( (dep(base).I&0xFFFFFFF0) == 0x1fff1ff0 ){
 	    u32 t = (reg[base].I & 0xF) >> 1;
 
 	    switch( t ){
@@ -786,7 +795,6 @@ namespace CPU
 	    reg[14].I = reg[15].I-2;
 	    reg[15].I = reg[base].I;
 	    reg[15].I &= 0xFFFFFFFE;
-	    clockTicks = codeTicksAccessSeq16(armNextPC)*2 + codeTicksAccess16(armNextPC) + 3;
 	}
 
 	armNextPC = reg[15].I;
@@ -803,166 +811,131 @@ namespace CPU
     {
 	LOG(thumb48);
 	u8 regist = (opcode >> 8) & 7;
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	u32 address = (reg[15].I & 0xFFFFFFFC) + ((opcode & 0xFF) << 2);
 	reg[regist].I = MMU::read32(address);
-	busPrefetchCount=0;
-	clockTicks = 3 + dataTicksAccess32(address) + codeTicksAccess16(armNextPC);
+        setDependant(regist);
+	clockTicks = 2;
     }
 
 // STR Rd, [Rs, Rn]
     static INSN_REGPARM void thumb50(u32 opcode)
     {
 	LOG(thumb50);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode>>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode>>6)&7).I;
 	MMU::write32(address, reg[opcode & 7].I);
-	clockTicks = dataTicksAccess32(address) + codeTicksAccess16(armNextPC) + 2;
     }
 
 // STRH Rd, [Rs, Rn]
     static INSN_REGPARM void thumb52(u32 opcode)
     {
 	LOG(thumb52);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode>>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode>>6)&7).I;
 	MMU::write16(address, reg[opcode&7].W.W0);
-	clockTicks = dataTicksAccess16(address) + codeTicksAccess16(armNextPC) + 2;
     }
 
 // STRB Rd, [Rs, Rn]
     static INSN_REGPARM void thumb54(u32 opcode)
     {
 	LOG(thumb54);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode >>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode >>6)&7).I;
 	MMU::write8(address, reg[opcode & 7].B.B0);
-	clockTicks = dataTicksAccess16(address) + codeTicksAccess16(armNextPC) + 2;
     }
 
 // LDSB Rd, [Rs, Rn]
     static INSN_REGPARM void thumb56(u32 opcode)
     {
 	LOG(thumb56);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode>>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode>>6)&7).I;
 	reg[opcode&7].I = (s8)MMU::read8(address);
-	clockTicks = 3 + dataTicksAccess16(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // LDR Rd, [Rs, Rn]
     static INSN_REGPARM void thumb58(u32 opcode)
     {
 	LOG(thumb58);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode>>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode>>6)&7).I;
 	reg[opcode&7].I = MMU::read32(address);
-	clockTicks = 3 + dataTicksAccess32(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // LDRH Rd, [Rs, Rn]
     static INSN_REGPARM void thumb5A(u32 opcode)
     {
 	LOG(thumb5A);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode>>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode>>6)&7).I;
 	reg[opcode&7].I = MMU::read16(address);
-	clockTicks = 3 + dataTicksAccess32(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // LDRB Rd, [Rs, Rn]
     static INSN_REGPARM void thumb5C(u32 opcode)
     {
 	LOG(thumb5C);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode>>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode>>6)&7).I;
 	reg[opcode&7].I = MMU::read8(address);
-	clockTicks = 3 + dataTicksAccess16(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // LDSH Rd, [Rs, Rn]
     static INSN_REGPARM void thumb5E(u32 opcode)
     {
 	LOG(thumb5E);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + reg[(opcode>>6)&7].I;
+	u32 address = dep((opcode>>3)&7).I + dep((opcode>>6)&7).I;
 	reg[opcode&7].I = (s16)MMU::read16s(address);
-	clockTicks = 3 + dataTicksAccess16(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // STR Rd, [Rs, #Imm]
     static INSN_REGPARM void thumb60(u32 opcode)
     {
 	LOG(thumb60);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + (((opcode>>6)&31)<<2);
+	u32 address = dep((opcode>>3)&7).I + (((opcode>>6)&31)<<2);
 	MMU::write32(address, reg[opcode&7].I);
-	clockTicks = dataTicksAccess32(address) + codeTicksAccess16(armNextPC) + 2;
+        setDependant(opcode & 7);
     }
 
 // LDR Rd, [Rs, #Imm]
     static INSN_REGPARM void thumb68(u32 opcode)
     {
 	LOG(thumb68);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + (((opcode>>6)&31)<<2);
+	u32 address = dep((opcode>>3)&7).I + (((opcode>>6)&31)<<2);
 	reg[opcode&7].I = MMU::read32(address);
-	clockTicks = 3 + dataTicksAccess32(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // STRB Rd, [Rs, #Imm]
     static INSN_REGPARM void thumb70(u32 opcode)
     {
 	LOG(thumb70);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + (((opcode>>6)&31));
+	u32 address = dep((opcode>>3)&7).I + (((opcode>>6)&31));
 	MMU::write8(address, reg[opcode&7].B.B0);
-	clockTicks = dataTicksAccess16(address) + codeTicksAccess16(armNextPC) + 2;
     }
 
 // LDRB Rd, [Rs, #Imm]
     static INSN_REGPARM void thumb78(u32 opcode)
     {
 	LOG(thumb78);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + (((opcode>>6)&31));
+	u32 address = dep((opcode>>3)&7).I + (((opcode>>6)&31));
 	reg[opcode&7].I = MMU::read8(address);
-	clockTicks = 3 + dataTicksAccess16(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // STRH Rd, [Rs, #Imm]
     static INSN_REGPARM void thumb80(u32 opcode)
     {
 	LOG(thumb80);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + (((opcode>>6)&31)<<1);
+	u32 address = dep((opcode>>3)&7).I + (((opcode>>6)&31)<<1);
 	MMU::write16(address, reg[opcode&7].W.W0);
-	clockTicks = dataTicksAccess16(address) + codeTicksAccess16(armNextPC) + 2;
     }
 
 // LDRH Rd, [Rs, #Imm]
     static INSN_REGPARM void thumb88(u32 opcode)
     {
 	LOG(thumb88);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
-	u32 address = reg[(opcode>>3)&7].I + (((opcode>>6)&31)<<1);
+	u32 address = dep((opcode>>3)&7).I + (((opcode>>6)&31)<<1);
 	reg[opcode&7].I = MMU::read16(address);
-	clockTicks = 3 + dataTicksAccess16(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // STR R0~R7, [SP, #Imm]
@@ -970,11 +943,8 @@ namespace CPU
     {
 	LOG(thumb90);
 	u8 regist = (opcode >> 8) & 7;
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	u32 address = reg[13].I + ((opcode&255)<<2);
 	MMU::write32(address, reg[regist].I);
-	clockTicks = dataTicksAccess32(address) + codeTicksAccess16(armNextPC) + 2;
     }
 
 // LDR R0~R7, [SP, #Imm]
@@ -982,11 +952,9 @@ namespace CPU
     {
 	LOG(thumb98);
 	u8 regist = (opcode >> 8) & 7;
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	u32 address = reg[13].I + ((opcode&255)<<2);
 	reg[regist].I = MMU::read32(address);
-	clockTicks = 3 + dataTicksAccess32(address) + codeTicksAccess16(armNextPC);
+        setDependant(opcode & 7);
     }
 
 // PC/stack-related ///////////////////////////////////////////////////////
@@ -997,7 +965,6 @@ namespace CPU
 	LOG(thumbA0);
 	u8 regist = (opcode >> 8) & 7;
 	reg[regist].I = (reg[15].I & 0xFFFFFFFC) + ((opcode&255)<<2);
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // ADD R0~R7, SP, Imm
@@ -1006,7 +973,6 @@ namespace CPU
 	LOG(thumbA8);
 	u8 regist = (opcode >> 8) & 7;
 	reg[regist].I = reg[13].I + ((opcode&255)<<2);
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // ADD SP, Imm
@@ -1017,53 +983,48 @@ namespace CPU
 	if (opcode & 0x80)
 	    offset = -offset;
 	reg[13].I += offset;
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // SXTH
     static INSN_REGPARM void thumbB2a(u32 opcode)
     {
 	LOG(thumbB2a);
-	u32 src = reg[(opcode >> 3) & 7].I;
+	u32 src = dep((opcode >> 3) & 7).I;
 	int dest = opcode & 7;
 	int mask = 0xFFFF;
 	int sign = (src & 0x8000) ? ~mask : 0;
 	reg[dest].I = (mask & src) | sign;
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // SXTB
     static INSN_REGPARM void thumbB2b(u32 opcode)
     {
 	LOG(thumbB2b);
-	u32 src = reg[(opcode >> 3) & 7].I;
+	u32 src = dep((opcode >> 3) & 7).I;
 	int dest = opcode & 7;
 	int mask = 0xFF;
 	int sign = (src & 0x80) ? ~mask : 0;
 	reg[dest].I = (mask & src) | sign;
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // UXTH R0~7
     static INSN_REGPARM void thumbB2c(u32 opcode)
     {
 	LOG(thumbB2);
-	u32 src = reg[(opcode >> 3) & 7].I;
+	u32 src = dep((opcode >> 3) & 7).I;
 	int dest = opcode & 7;
 	int mask = 0xFFFF;
 	reg[dest].I = (mask & src);
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // UXTB
     static INSN_REGPARM void thumbB2d(u32 opcode)
     {
 	LOG(thumbB2d);
-	u32 src = reg[(opcode >> 3) & 7].I;
+	u32 src = dep((opcode >> 3) & 7).I;
 	int dest = opcode & 7;
 	int mask = 0xFF;
 	reg[dest].I = (mask & src);
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // Push and pop ///////////////////////////////////////////////////////////
@@ -1072,16 +1033,9 @@ namespace CPU
     {
 	if (opcode & val)
 	{
-	    MMU::write32(address, reg[r].I);
-	    if (!count)
-	    {
-		clockTicks += 1 + dataTicksAccess32(address);
-	    }
-	    else
-	    {
-		clockTicks += 1 + dataTicksAccessSeq32(address);
-	    }
-	    count++;
+	    MMU::write32(address, dep(r).I);
+            clockTicks += 1;
+	    ++count;
 	    address += 4;
 	}
     }
@@ -1091,15 +1045,8 @@ namespace CPU
 	if (opcode & val)
 	{
 	    reg[r].I = MMU::read32(address);
-	    if (!count)
-	    {
-		clockTicks += 1 + dataTicksAccess32(address);
-	    }
-	    else
-	    {
-		clockTicks += 1 + dataTicksAccessSeq32(address);
-	    }
-	    count++;
+            clockTicks += 1;
+	    ++count;
 	    address += 4;
 	}
     }
@@ -1108,8 +1055,6 @@ namespace CPU
     static INSN_REGPARM void thumbB4(u32 opcode)
     {
 	LOG(thumbB4);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	int count = 0;
 	u32 temp = reg[13].I - 4 * cpuBitsSet[opcode & 0xff];
 	u32 address = temp & 0xFFFFFFFC;
@@ -1121,7 +1066,6 @@ namespace CPU
 	PUSH_REG(opcode, count, address, 32, 5);
 	PUSH_REG(opcode, count, address, 64, 6);
 	PUSH_REG(opcode, count, address, 128, 7);
-	clockTicks += 1 + codeTicksAccess16(armNextPC);
 	reg[13].I = temp;
     }
 
@@ -1129,8 +1073,6 @@ namespace CPU
     static INSN_REGPARM void thumbB5(u32 opcode)
     {
 	LOG(thumbB5);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	int count = 0;
 	u32 temp = reg[13].I - 4 - 4 * cpuBitsSet[opcode & 0xff];
 	u32 address = temp & 0xFFFFFFFC;
@@ -1143,7 +1085,6 @@ namespace CPU
 	PUSH_REG(opcode, count, address, 64, 6);
 	PUSH_REG(opcode, count, address, 128, 7);
 	PUSH_REG(opcode, count, address, 256, 14);
-	clockTicks += 1 + codeTicksAccess16(armNextPC);
 	reg[13].I = temp;
     }
 
@@ -1152,31 +1093,28 @@ namespace CPU
 	LOG(thumbB6);
 	armIrqEnable = 1 ^ ((opcode>>4)&1);
 	// std::cout << "IRQEN " << armIrqEnable << " " << opcode << " " << ADDRESS << std::endl;
-	clockTicks += 1;
     }
 
 // REV rx
     static INSN_REGPARM void thumbBA(u32 opcode)
     {
 	LOG(thumbBA);
-	u32 src = reg[(opcode >> 3) & 7].I;
+	u32 src = dep((opcode >> 3) & 7).I;
 	int dest = opcode & 7;
 	reg[dest].I = (src<<24)
 	    | (src>>24)
 	    | ((src&0xFF00)<<8)
 	    | ((src&0xFF0000)>>8);
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // REV16
     static INSN_REGPARM void thumbBAb(u32 opcode)
     {
 	LOG(thumbBAb);
-	u32 src = reg[(opcode >> 3) & 7].I;
+	u32 src = dep((opcode >> 3) & 7).I;
 	int dest = opcode & 7;
 	reg[dest].I = ((src&0xFF00FF00)>>8)
 	    | ((src&0x00FF00FF)<<8);
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 
@@ -1184,19 +1122,16 @@ namespace CPU
     static INSN_REGPARM void thumbBAc(u32 opcode)
     {
 	LOG(thumbBAc);
-	u32 src = reg[(opcode >> 3) & 7].I;
+	u32 src = dep((opcode >> 3) & 7).I;
 	int dest = opcode & 7;
 	u32 sign = src&0x8000 ? 0xFFFFFF : 0;
 	reg[dest].I = ((src&0xFF00)>>8) | sign;
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // POP {Rlist}
     static INSN_REGPARM void thumbBC(u32 opcode)
     {
 	LOG(thumbBC);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	int count = 0;
 	u32 address = reg[13].I & 0xFFFFFFFC;
 	u32 temp = reg[13].I + 4*cpuBitsSet[opcode & 0xFF];
@@ -1209,15 +1144,12 @@ namespace CPU
 	POP_REG(opcode, count, address, 64, 6);
 	POP_REG(opcode, count, address, 128, 7);
 	reg[13].I = temp;
-	clockTicks = 2 + codeTicksAccess16(armNextPC);
     }
 
 // POP {Rlist, PC}
     static INSN_REGPARM void thumbBD(u32 opcode)
     {
 	LOG(thumbBD);
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	int count = 0;
 	u32 address = reg[13].I & 0xFFFFFFFC;
 	u32 temp = reg[13].I + 4 + 4*cpuBitsSet[opcode & 0xFF];
@@ -1230,21 +1162,12 @@ namespace CPU
 	POP_REG(opcode, count, address, 64, 6);
 	POP_REG(opcode, count, address, 128, 7);
 	reg[15].I = (MMU::read32(address) & 0xFFFFFFFE);
-	if (!count)
-	{
-	    clockTicks += 1 + dataTicksAccess32(address);
-	}
-	else
-	{
-	    clockTicks += 1 + dataTicksAccessSeq32(address);
-	}
-	count++;
+        clockTicks += 1;
+	++count;
 	armNextPC = reg[15].I;
 	reg[15].I += 2;
 	reg[13].I = temp;
 	THUMB_PREFETCH();
-	busPrefetchCount = 0;
-	clockTicks += 3 + codeTicksAccess16(armNextPC) + codeTicksAccess16(armNextPC);
     }
 
 // BKPT
@@ -1267,7 +1190,6 @@ namespace CPU
     // NOP
     static void thumbBF( u32 opcode ){
 	LOG(thumbBF);
-	clockTicks += 1;
     }
 
 // Load/store multiple ////////////////////////////////////////////////////
@@ -1276,17 +1198,10 @@ namespace CPU
     {
 	if (opcode & val)
 	{
-	    MMU::write32(address, reg[r].I);
+	    MMU::write32(address, dep(r).I);
 	    reg[b].I = temp;
-	    if (!count)
-	    {
-		clockTicks += 1 + dataTicksAccess32(address);
-	    }
-	    else
-	    {
-		clockTicks += 1 + dataTicksAccessSeq32(address);
-	    }
-	    count++;
+            clockTicks += 1;
+	    ++count;
 	    address += 4;
 	}
     }
@@ -1296,15 +1211,8 @@ namespace CPU
 	if (opcode & (val))
 	{
 	    reg[(r)].I = MMU::read32(address);
-	    if (!count)
-	    {
-		clockTicks += 1 + dataTicksAccess32(address);
-	    }
-	    else
-	    {
-		clockTicks += 1 + dataTicksAccessSeq32(address);
-	    }
-	    count++;
+            clockTicks += 1;
+	    ++count;
 	    address += 4;
 	}
     }
@@ -1314,8 +1222,6 @@ namespace CPU
     {
 	LOG(thumbC0);
 	u8 regist = (opcode >> 8) & 7;
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	u32 address = reg[regist].I & 0xFFFFFFFC;
 	u32 temp = reg[regist].I + 4*cpuBitsSet[opcode & 0xff];
 	int count = 0;
@@ -1328,7 +1234,6 @@ namespace CPU
 	THUMB_STM_REG(opcode, count, address, temp, 32, 5, regist);
 	THUMB_STM_REG(opcode, count, address, temp, 64, 6, regist);
 	THUMB_STM_REG(opcode, count, address, temp, 128, 7, regist);
-	clockTicks = 1 + codeTicksAccess16(armNextPC);
     }
 
 // LDM R0~R7!, {Rlist}
@@ -1336,8 +1241,6 @@ namespace CPU
     {
 	LOG(thumbC8);
 	u8 regist = (opcode >> 8) & 7;
-	if (busPrefetchCount == 0)
-	    busPrefetch = busPrefetchEnable;
 	u32 address = reg[regist].I & 0xFFFFFFFC;
 	//u32 temp = reg[regist].I + 4*cpuBitsSet[opcode & 0xFF];
 	int count = 0;
@@ -1350,7 +1253,6 @@ namespace CPU
 	THUMB_LDM_REG(opcode, count, address, 32, 5);
 	THUMB_LDM_REG(opcode, count, address, 64, 6);
 	THUMB_LDM_REG(opcode, count, address, 128, 7);
-	clockTicks = 2 + codeTicksAccess16(armNextPC);
 	if (!(opcode & (1<<regist)))
 	    reg[regist].I = address;
     }
@@ -1361,15 +1263,13 @@ namespace CPU
     static INSN_REGPARM void thumbD0(u32 opcode)
     {
 	LOG(thumbD0);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (Z_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1377,15 +1277,13 @@ namespace CPU
     static INSN_REGPARM void thumbD1(u32 opcode)
     {
 	LOG(thumbD1);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (!Z_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1393,15 +1291,13 @@ namespace CPU
     static INSN_REGPARM void thumbD2(u32 opcode)
     {
 	LOG(thumbD2);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (C_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1409,15 +1305,13 @@ namespace CPU
     static INSN_REGPARM void thumbD3(u32 opcode)
     {
 	LOG(thumbD3);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (!C_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1425,15 +1319,13 @@ namespace CPU
     static INSN_REGPARM void thumbD4(u32 opcode)
     {
 	LOG(thumbD4);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (N_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1441,15 +1333,13 @@ namespace CPU
     static INSN_REGPARM void thumbD5(u32 opcode)
     {
 	LOG(thumbD5);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (!N_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1457,15 +1347,13 @@ namespace CPU
     static INSN_REGPARM void thumbD6(u32 opcode)
     {
 	LOG(thumbD6);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (V_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1473,15 +1361,13 @@ namespace CPU
     static INSN_REGPARM void thumbD7(u32 opcode)
     {
 	LOG(thumbD7);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (!V_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1489,15 +1375,13 @@ namespace CPU
     static INSN_REGPARM void thumbD8(u32 opcode)
     {
 	LOG(thumbD8);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (C_FLAG && !Z_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1505,15 +1389,13 @@ namespace CPU
     static INSN_REGPARM void thumbD9(u32 opcode)
     {
 	LOG(thumbD9);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (!C_FLAG || Z_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1521,15 +1403,13 @@ namespace CPU
     static INSN_REGPARM void thumbDA(u32 opcode)
     {
 	LOG(thumbDA);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (N_FLAG == V_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1537,15 +1417,13 @@ namespace CPU
     static INSN_REGPARM void thumbDB(u32 opcode)
     {
 	LOG(thumbDB);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (N_FLAG != V_FLAG)
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1553,15 +1431,13 @@ namespace CPU
     static INSN_REGPARM void thumbDC(u32 opcode)
     {
 	LOG(thumbDC);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (!Z_FLAG && (N_FLAG == V_FLAG))
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1569,15 +1445,13 @@ namespace CPU
     static INSN_REGPARM void thumbDD(u32 opcode)
     {
 	LOG(thumbDD);
-	clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
 	if (Z_FLAG || (N_FLAG != V_FLAG))
 	{
 	    reg[15].I += ((s8)(opcode & 0xFF)) << 1;
 	    armNextPC = reg[15].I;
 	    reg[15].I += 2;
 	    THUMB_PREFETCH();
-	    clockTicks += codeTicksAccessSeq16(armNextPC) + codeTicksAccess16(armNextPC) + 2;
-	    busPrefetchCount=0;
+	    ++clockTicks;
 	}
     }
 
@@ -1589,7 +1463,6 @@ namespace CPU
 	LOG(thumbDF);
 	u32 address = 0;
 	clockTicks = 3;
-	busPrefetchCount=0;
 	CPUSoftwareInterrupt(opcode & 0xFF);
     }
 
@@ -1604,8 +1477,7 @@ namespace CPU
 	armNextPC = reg[15].I;
 	reg[15].I += 2;
 	THUMB_PREFETCH();
-	clockTicks = codeTicksAccessSeq16(armNextPC) * 2 + codeTicksAccess16(armNextPC) + 3;
-	busPrefetchCount=0;
+	++clockTicks;
     }
 
 // BLL #offset (forward)
@@ -1622,7 +1494,7 @@ namespace CPU
 	LOG(thumbF0);
 	// int offset = (opcode & 0x7FF);
 	// reg[14].I = reg[15].I + (offset << 12);
-	// clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
+	// clockTicks = 1;
 	opcode = (opcode << 16) | cpuPrefetch[0];
 	u32 s = (opcode>>26)&1;
 	u32 a = (opcode>>13)&1;
@@ -1637,7 +1509,7 @@ namespace CPU
 	armNextPC = reg[15].I;
 	THUMB_PREFETCH();
 	reg[15].I += 2;
-	clockTicks = 1;
+	clockTicks += 2;
     }
 
 // MRS
@@ -1648,7 +1520,6 @@ namespace CPU
 	armNextPC = reg[15].I;
 	THUMB_PREFETCH();
 	reg[15].I += 2;
-	clockTicks = 1;
     }
 
 // BLL #offset (backward)
@@ -1658,7 +1529,7 @@ namespace CPU
 	/*
 	  int offset = (opcode & 0x7FF);
 	  reg[14].I = reg[15].I + ((offset << 12) | 0xFF800000);
-	  clockTicks = codeTicksAccessSeq16(armNextPC) + 1;
+	  clockTicks = 1;
 	*/
 	opcode = (opcode << 16) | cpuPrefetch[0];
 	u32 s = (opcode>>26)&1;
@@ -1674,7 +1545,7 @@ namespace CPU
 	armNextPC = reg[15].I;
 	THUMB_PREFETCH();
 	reg[15].I += 2;
-	clockTicks = 1;
+	clockTicks += 2;
     }
 
 // BLH #offset
@@ -1688,8 +1559,7 @@ namespace CPU
 	reg[15].I += 2;
 	reg[14].I = temp|1;
 	THUMB_PREFETCH();
-	clockTicks = codeTicksAccessSeq16(armNextPC) * 2 + codeTicksAccess16(armNextPC) + 3;
-	busPrefetchCount = 0;
+	++clockTicks;
     }
 
 // Instruction table //////////////////////////////////////////////////////
@@ -1861,9 +1731,10 @@ namespace CPU
 	    }
 */
 
+            clearDependant = true;
 	    cpuPrefetch[0] = cpuPrefetch[1];
 
-	    clockTicks = 0;
+	    clockTicks = 1;
 	    u32 oldArmNextPC = armNextPC;
 
 	    ADDRESS = armNextPC;
@@ -1888,7 +1759,8 @@ namespace CPU
             // }
             
 	    cpuTotalTicks += clockTicks;
-
+            if (clearDependant)
+                dependant = 0xFF;
 	}
 	while (cpuTotalTicks < cpuNextEvent );
 

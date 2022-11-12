@@ -192,31 +192,40 @@ void loop( void *_sdl ){
 	GPIO::update();
 	
 	{
-            u32 fps = 60;
-	    u32 max = (SYS::SYSPLLCTRL == 0x25 ? 72000000 : 45000000) / fps;
-            
-	    for( u32 opcount=0; opcount<max && emustate == EmuState::RUNNING; ){
-		u32 tti = max-opcount;
-		tti = std::min( tti, SYS::update() );
-		tti = std::min( tti, TIMERS::update() );
-                #ifndef __EMSCRIPTEN__
-                tti = std::min( tti, PEX::update() );
-                #endif
-                auto ticks = CPU::cpuTotalTicks;
-		CPU::cpuNextEvent = CPU::cpuTotalTicks + tti;
-		CPU::thumbExecute();
-		opcount += CPU::cpuTotalTicks - ticks;
-	    }
-	    
+            static auto prevTime = std::chrono::high_resolution_clock::now().time_since_epoch();
+            auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+            auto delta = std::chrono::duration_cast<std::chrono::microseconds>(now - prevTime).count();
+            if (delta > 100000) {
+                delta = 100000;
+            }
+            if (delta < 11000) {
 #if !defined(__EMSCRIPTEN__) || defined(__EMSCRIPTEN_PTHREADS__)
-
-            decltype(start) nextStart;
-	    while( ((nextStart = std::chrono::high_resolution_clock::now()) - start) < (1000ms/fps) )
-                std::this_thread::sleep_for( 1ms );
-	    
-            start = nextStart;
+                std::this_thread::sleep_for(1ms);
 #endif
-	    
+            } else {
+                prevTime = now;
+                u32 max = (SYS::SYSPLLCTRL == 0x25 ? 72 : 45) * delta;
+            
+                for( u32 opcount=0; opcount<max && emustate == EmuState::RUNNING; ){
+                    u32 tti = max-opcount;
+                    tti = std::min( tti, SYS::update() );
+                    tti = std::min( tti, TIMERS::update() );
+#ifndef __EMSCRIPTEN__
+                    tti = std::min( tti, PEX::update() );
+#endif
+                    auto ticks = CPU::cpuTotalTicks;
+                    CPU::cpuNextEvent = CPU::cpuTotalTicks + tti;
+                    CPU::thumbExecute();
+                    opcount += CPU::cpuTotalTicks - ticks;
+                }
+            }
+
+            // decltype(start) nextStart;
+	    // while( ((nextStart = std::chrono::high_resolution_clock::now()) - start) < (1000ms/fps) )
+            //     std::this_thread::sleep_for( 1ms );
+
+            // start = nextStart;
+
 	}
 	    
 	break;
