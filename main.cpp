@@ -277,7 +277,7 @@ int main( int argc, char * argv[] ){
             return 1;
         }
 
-        eepromPath = std::regex_replace( srcPath, std::regex(R"(\.bin)", std::regex_constants::icase), ".eeprom");
+        eepromPath = std::regex_replace( srcPath, std::regex(R"(\.bin|\.pop)", std::regex_constants::icase), ".eeprom");
         loadEeprom( eepromPath );
 
 	#ifndef __EMSCRIPTEN__
