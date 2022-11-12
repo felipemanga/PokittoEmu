@@ -1,4 +1,7 @@
 # PokittoEmu
+
+[![Linux x86_64](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg)](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-linux-x86_64.yml) [![Emscripten](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-emscripten.yml/badge.svg)](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-emscripten.yml) [![Windows i686](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-windows-i686.yml/badge.svg)](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-windows-i686.yml) [![MacOS x86_64](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-macos-x86_64.yml/badge.svg)](https://github.com/felipemanga/PokittoEmu/actions/workflows/c-cpp-macos-x86_64.yml)
+
 An emulator for the [Pokitto](https://www.pokitto.com/) DIY handheld game system.
 
 The development library can be found at the [PokittoLib](https://github.com/pixelbath/PokittoLib) repository.

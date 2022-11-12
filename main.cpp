@@ -322,9 +322,11 @@ int main( int argc, char * argv[] ){
 	    sdl.toggleRecording();
 
         start = std::chrono::high_resolution_clock::now();
-	#ifndef __EMSCRIPTEN__
+
         AUDIO::init(audioSampleRate);
-	
+
+	#ifndef __EMSCRIPTEN__
+
 	cputhread = std::thread( []( void *sdl ){
 		while( !hasQuit )
 		    loop(sdl);

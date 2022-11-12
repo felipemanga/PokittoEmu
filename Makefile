@@ -59,7 +59,7 @@ LD_SYS_LIBS :=
 CPP = 'g++' '-c' '-O3'
 LD  = 'g++' '-O3'
 
-CXX_FLAGS += -std=c++17
+CXX_FLAGS := -std=c++17
 CXX_FLAGS += $(shell sdl2-config --cflags)
 
 .PHONY: all lst size

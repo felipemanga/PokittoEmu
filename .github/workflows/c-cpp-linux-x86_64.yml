@@ -1,0 +1,30 @@
+name: Linux x86_64
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: update Apt
+      run: sudo apt-get update
+    - name: install-dependencies
+      run: sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-net-dev
+    - name: make
+      run: make -j 4
+    - name: package
+      run: ./package
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: pokittoemu-linux-x86_64
+        path: PokittoEmu-x86_64.AppImage
