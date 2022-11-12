@@ -5,6 +5,7 @@
 #include "timers.hpp"
 #include "cpu.hpp"
 #include "sys.hpp"
+#include "audio.hpp"
 
 using namespace std::chrono_literals;
 
@@ -130,6 +131,8 @@ namespace TIMERS {
             }
 
             if(IR && CPU::armIrqEnable){
+                if (num == 0)
+                    AUDIO::checkHLE(MR1);
                 CPU::interrupt(34+num);
             }
             
