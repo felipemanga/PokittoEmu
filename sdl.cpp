@@ -442,6 +442,8 @@ void SDL::checkEvents(){
 			GDB::interrupt();
 		    } );
 		break;
+
+	    case SDLK_i:
 	    case SDLK_UP:
 		eventHandlers.push_back( [=](){
 			GPIO::input(1,13,btnState);
@@ -453,21 +455,28 @@ void SDL::checkEvents(){
 			*/
 		    } );
 		break;
+
+	    case SDLK_k:
 	    case SDLK_DOWN:
 		eventHandlers.push_back( [=](){
 			GPIO::input(1,3,btnState);
 		    } );
 		break;
+
+	    case SDLK_j:
 	    case SDLK_LEFT:
 		eventHandlers.push_back( [=](){
 			GPIO::input(1,25,btnState);
 		    } );
 		break;
+
+	    case SDLK_l:
 	    case SDLK_RIGHT:
 		eventHandlers.push_back( [=](){
 			GPIO::input(1,7,btnState);
 		    } );
 		break;
+
 	    case SDLK_a:
 		eventHandlers.push_back( [=](){
 			GPIO::input(1,9,btnState);
