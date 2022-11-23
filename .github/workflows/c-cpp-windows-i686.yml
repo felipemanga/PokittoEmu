@@ -51,6 +51,7 @@ jobs:
         cp /mingw32/bin/libLerc.dll ./
         cp /mingw32/bin/libzstd.dll ./
         cp /mingw32/bin/liblzma*.dll ./
+        cp /mingw32/bin/libwinpthread*.dll ./
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
