@@ -102,7 +102,7 @@ function dropFile( event ){
     var files = dt.files;
     for( var i=0; i<files.length; ++i ){
 	var file = files[i];
-	if( !/\.bin|\.pop$/i.test(file.name) )
+	if( !/\.bin|\.pop|\.zip$/i.test(file.name) )
 	    continue;
 
 	let fr = new FileReader();
