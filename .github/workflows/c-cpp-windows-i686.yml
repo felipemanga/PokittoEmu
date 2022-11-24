@@ -53,6 +53,12 @@ jobs:
         cp /mingw32/bin/liblcms*.dll ./
         cp /mingw32/bin/libhwy*.dll ./
         cp /mingw32/bin/libarchive*.dll ./
+        cp /mingw32/bin/libb2-*.dll ./
+        cp /mingw32/bin/libbz2-*.dll ./
+        cp /mingw32/bin/libcrypto-*.dll ./
+        cp /mingw32/bin/libexpat-*.dll ./
+        cp /mingw32/bin/libiconv-*.dll ./
+        cp /mingw32/bin/liblz4.dll ./
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
