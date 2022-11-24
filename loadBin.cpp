@@ -41,3 +41,29 @@ bool loadBin( const std::string &fileName ){
 
     return true;
 }
+
+bool loadBin( const std::vector<uint8_t> &file ){
+    struct {
+	uint32_t id, size;
+    } header;
+    uint32_t targetAddr = SYS::vtorReset;
+    uint32_t cursor = 0;
+    uint32_t max = file.size();
+
+    while(cursor < max - sizeof(header)){
+	memcpy(&header, &file[cursor], sizeof(header));
+
+	if( header.id > 0x10000000 ){
+	    memcpy(
+		MMU::flash + targetAddr,
+                &file[cursor],
+		sizeof(MMU::flash) - targetAddr
+		);
+	    break;
+	}
+
+        cursor += sizeof(header);
+        cursor += header.size;
+    }
+    return true;
+}

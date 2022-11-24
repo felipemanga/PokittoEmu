@@ -17,6 +17,7 @@
 #include "state.hpp"
 #include "pex.hpp"
 #include "audio.hpp"
+#include "zip2fat.hpp"
 
 #ifndef __EMSCRIPTEN__
 #include "verify.hpp"
@@ -281,12 +282,14 @@ int main( int argc, char * argv[] ){
         parseArgs( argc, argv );
 
         srcPath = std::regex_replace( srcPath, std::regex(R"(\.elf$)", std::regex_constants::icase), ".bin" );
-        if( !loadBin( srcPath ) ){
+
+        if (convertFile(srcPath)) {
+        } else if ( !loadBin( srcPath ) ){
             std::cerr << "Error: Could not load file. [" << srcPath << "]" << std::endl;
             return 1;
         }
 
-        eepromPath = std::regex_replace( srcPath, std::regex(R"(\.bin|\.pop)", std::regex_constants::icase), ".eeprom");
+        eepromPath = std::regex_replace( srcPath, std::regex(R"(\.[a-z]*$)", std::regex_constants::icase), ".eeprom");
         loadEeprom( eepromPath );
 
 	#ifndef __EMSCRIPTEN__

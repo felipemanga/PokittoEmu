@@ -15,6 +15,7 @@ SRCDIR := $(CURDIR)
 .SUFFIXES: .cpp .o
 
 vpath %.cpp .
+vpath %.c .
 vpath %.h .
 
 PROJECT := PokittoEmu
@@ -46,6 +47,12 @@ OBJECTS += BUILD/spi.o
 OBJECTS += BUILD/loadBin.o
 OBJECTS += BUILD/loadEeprom.o
 
+OBJECTS += BUILD/zip2fat.o
+OBJECTS += BUILD/miniz.o
+OBJECTS += BUILD/ChaN/ccsbcs.o
+OBJECTS += BUILD/ChaN/diskio.o
+OBJECTS += BUILD/ChaN/ff.o
+
 INCLUDE_PATHS += -I./.
 
 LIBRARY_PATHS :=
@@ -56,8 +63,9 @@ LIBRARIES += -lSDL2_image
 LIBRARIES += -lpthread
 LD_SYS_LIBS := 
 
-CPP = 'g++' '-c' '-O3'
-LD  = 'g++' '-O3'
+CPP = 'g++' '-c' '-Og' '-g'
+C = 'gcc' '-c' '-Og' '-g'
+LD  = 'g++' '-Og' '-g'
 
 CXX_FLAGS := -std=c++17
 CXX_FLAGS += $(shell sdl2-config --cflags)
@@ -75,6 +83,11 @@ BUILD/%.o : %.cpp
 	+@$(call MAKEDIR,$(dir $@))
 	+@echo "Compile: $(notdir $<)"
 	@$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) -o $@ $<
+
+BUILD/%.o : %.c
+	+@$(call MAKEDIR,$(dir $@))
+	+@echo "Compile: $(notdir $<)"
+	@$(C) $(INCLUDE_PATHS) -o $@ $<
 
 $(BPROJECT): $(OBJECTS)
 	+@echo "link: $(notdir $@)"

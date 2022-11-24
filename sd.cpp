@@ -41,8 +41,10 @@ namespace SD {
 
 
         if( fileName.empty() ){
-            length = 1024;
-            image = std::make_unique<u8[]>( length );
+            if (!image) {
+                length = 1024;
+                image = std::make_unique<u8[]>( length );
+            }
             return true;
         }
 
