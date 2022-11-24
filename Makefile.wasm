@@ -46,6 +46,12 @@ OBJECTS += ONLINE/loadBin.o
 OBJECTS += ONLINE/loadEeprom.o
 OBJECTS += ONLINE/emscriptenstub.o
 
+OBJECTS += ONLINE/zip2fat.o
+OBJECTS += ONLINE/miniz.o
+OBJECTS += ONLINE/ChaN/ccsbcs.o
+OBJECTS += ONLINE/ChaN/diskio.o
+OBJECTS += ONLINE/ChaN/ff.o
+
 INCLUDE_PATHS += -I./.
 
 LIBRARY_PATHS :=
@@ -62,6 +68,7 @@ S_FLAGS += -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"]'
 # S_FLAGS += -s ASSERTIONS=1
 
 CPP = 'emcc' '-c' '-O3'
+C = 'emcc' '-c' '-O3'
 LD  = 'emcc' '-O3' --preload-file file.bin  
 
 CXX_FLAGS += -std=c++17 -Wno-comments
@@ -79,6 +86,11 @@ ONLINE/%.o : %.cpp
 	+@$(call MAKEDIR,$(dir $@))
 	+@echo "Compile: $(notdir $<)"
 	@$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) $(S_FLAGS) -o $@ $<
+
+ONLINE/%.o : %.c
+	+@$(call MAKEDIR,$(dir $@))
+	+@echo "Compile: $(notdir $<)"
+	@$(C) $(INCLUDE_PATHS) $(S_FLAGS) -o $@ $<
 
 $(BPROJECT): $(OBJECTS)
 	+@echo "link: $(notdir $@)"

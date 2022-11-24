@@ -28,7 +28,7 @@ jobs:
     - name: make
       run: make -j 4 -f Makefile.wasm
     - name: Copy Files
-      run: cp ONLINE/* emscripten/
+      run: cp -r ONLINE/* emscripten/
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1
       with:

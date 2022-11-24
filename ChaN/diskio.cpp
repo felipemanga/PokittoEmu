@@ -10,7 +10,7 @@
 #include <vector>
 #include <cstdint>
 #include <iostream>
-
+#include <cstring>
 
 namespace YAPFS
 {
