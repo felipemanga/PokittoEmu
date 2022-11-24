@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  LDFLAGS: -L/usr/local/opt/libarchive/lib
+  CXXFLAGS: -I/usr/local/opt/libarchive/include
+
 jobs:
   build:
 
@@ -16,7 +20,7 @@ jobs:
       with:
         submodules: 'true'
     - name: install-dependencies
-      run: brew install sdl2 sdl2_image sdl2_net
+      run: brew install sdl2 sdl2_image sdl2_net libarchive
     - name: make
       run: make -j 4
     - name: package

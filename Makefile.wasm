@@ -46,12 +46,6 @@ OBJECTS += ONLINE/loadBin.o
 OBJECTS += ONLINE/loadEeprom.o
 OBJECTS += ONLINE/emscriptenstub.o
 
-OBJECTS += ONLINE/zip2fat.o
-OBJECTS += ONLINE/miniz.o
-OBJECTS += ONLINE/ChaN/ccsbcs.o
-OBJECTS += ONLINE/ChaN/diskio.o
-OBJECTS += ONLINE/ChaN/ff.o
-
 INCLUDE_PATHS += -I./.
 
 LIBRARY_PATHS :=

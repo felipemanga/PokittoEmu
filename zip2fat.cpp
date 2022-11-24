@@ -3,13 +3,13 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
+#include <cstring>
 
 #include "types.hpp"
 #include "sd.hpp"
 
-extern "C" {
-#include "miniz.h"
-}
+#include <archive.h>
+#include <archive_entry.h>
 
 #include "./ChaN/ffconf.h"
 #include "./ChaN/fileff.h"
@@ -138,61 +138,88 @@ public:
 };
 
 bool convertFile(const std::string& zipFileName) {
-    mz_bool status;
-    mz_zip_archive zip_archive;
-    // Now try to open the archive.
-    memset(&zip_archive, 0, sizeof(zip_archive));
-    status = mz_zip_reader_init_file(&zip_archive, zipFileName.c_str(), 0);
-    if (!status) {
+    bool binLoaded = false;
+
+    auto a = archive_read_new();
+    archive_read_support_format_7zip(a);
+    archive_read_support_format_gnutar(a);
+    archive_read_support_format_rar(a);
+    archive_read_support_format_tar(a);
+    archive_read_support_format_zip(a);
+
+    auto r = archive_read_open_filename(a, zipFileName.c_str(), 10240);
+    if (r) {
+        exit(1);
         return false;
     }
-    bool binLoaded = false;
-    size_t accSize = 0;
-    std::string fileName;
-    auto numFiles = (int)mz_zip_reader_get_num_files(&zip_archive);
-    for (int i = 0; i < numFiles; i++) {
-        mz_zip_archive_file_stat file_stat;
-        if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
-            printf("mz_zip_reader_file_stat() failed!\n");
-            continue;
+
+    struct FileEntry {
+        std::string path;
+        std::vector<u8> data;
+        bool isDirectory;
+    };
+    std::vector<std::unique_ptr<FileEntry>> files;
+    size_t totalSize = 0;
+
+    for (;;) {
+        archive_entry *entry = nullptr;
+        r = archive_read_next_header(a, &entry);
+        if (r == ARCHIVE_EOF)
+            break;
+        if (r != ARCHIVE_OK)
+            exit(2);
+
+        std::string fileName = archive_entry_pathname(entry);
+
+        std::unique_ptr<FileEntry> fe;
+        if (fileName.find("__MACOSX") != std::string::npos);
+        else if (fileName.find(".DS_Store") != std::string::npos);
+        else {
+            fe = std::make_unique<FileEntry>();
+            fe->path = fileName;
+            fe->isDirectory = archive_entry_filetype(entry) == 16384;
         }
 
-        fileName = file_stat.m_filename;
-        if (fileName.find("__MACOSX") != std::string::npos)
-            continue;
-        if (fileName.find(".DS_Store") != std::string::npos)
-            continue;
+	for (;;) {
+            const void *buff;
+            size_t size;
+#if ARCHIVE_VERSION_NUMBER >= 3000000
+            int64_t offset;
+#else
+            off_t offset;
+#endif
+            r = archive_read_data_block(a, &buff, &size, &offset);
+            if (r == ARCHIVE_EOF)
+                break;
+            if (r != ARCHIVE_OK)
+                exit(4);
+            if (!fe)
+                continue;
+            auto ubuff = reinterpret_cast<const u8*>(buff);
+            fe->data.insert(fe->data.end(), ubuff, &ubuff[size]);
+	}
 
-        auto size = (size_t)file_stat.m_uncomp_size;
-        size = (size | 0x1FF) + 1;
-        accSize += size;
+        if (fe) {
+            totalSize += (fe->data.size() | 0x1FF) + 1;
+            files.push_back(std::move(fe));
+        }
     }
 
-    accSize += 1024 * 1024; // at least 1mb for free space + book keeping
-    accSize *= 2;           // error margin
-    accSize |= 0xFFFFF;     // round up to nearest MB
-    accSize++;
-    // std::cout << "Initializing image " << accSize << std::endl;
+    archive_read_close(a);
+    archive_read_free(a);
+
+    totalSize += 1024 * 1024; // at least 1mb for free space + book keeping
+    totalSize *= 2;           // error margin
+    totalSize |= 0xFFFFF;     // round up to nearest MB
+    totalSize++;
 
     std::vector<uint8_t> image;
-    image.resize(accSize);
+    image.resize(totalSize);
     initYAPFS(image);
 
-    for (int i = 0; i < numFiles; i++) {
-        mz_zip_archive_file_stat file_stat;
-        if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
-            printf("mz_zip_reader_file_stat() failed!\n");
-            continue;
-        }
-
-        fileName = file_stat.m_filename;
-        if (fileName.find("__MACOSX") != std::string::npos)
-            continue;
-        if (fileName.find(".DS_Store") != std::string::npos)
-            continue;
-
-        auto isDir = mz_zip_reader_is_file_a_directory(&zip_archive, i);
-        if (isDir) {
+    for (auto& entry : files) {
+        auto fileName = entry->path;
+        if (entry->isDirectory) {
             fileName = fileName.substr(0, fileName.size() - 1);
             if (auto error = YAPFS::f_mkdir(fileName.c_str())) {
                 std::cout << "Error creating dir " << fileName << std::endl;
@@ -201,33 +228,24 @@ bool convertFile(const std::string& zipFileName) {
             continue;
         }
 
-        size_t uncomp_size;
-        auto p = mz_zip_reader_extract_file_to_heap(&zip_archive, file_stat.m_filename, &uncomp_size, 0);
-        if (!p) {
-            printf("mz_zip_reader_extract_file_to_heap() failed!\n");
-            continue;
-        }
-
         if (!binLoaded) {
             if (auto it = fileName.rfind('.'); it != std::string::npos) {
                 auto ext = fileName.substr(it + 1, std::string::npos);
                 std::transform(ext.begin(), ext.end(), ext.begin(), [](char c){return std::tolower(c);});
                 if (ext == "pop" || ext == "bin") {
-                    binLoaded = loadBin({reinterpret_cast<uint8_t*>(p), reinterpret_cast<uint8_t*>(p) + uncomp_size});
+                    binLoaded = loadBin(entry->data);
                 }
             }
         }
 
         File file;
         file.openRW(fileName.c_str(), true, false);
-        file.write(p, uncomp_size);
-        mz_free(p);
+        file.write(entry->data.data(), entry->data.size());
     }
 
     SD::length = image.size();
     SD::image = std::make_unique<u8[]>(image.size());
     memcpy(SD::image.get(), image.data(), image.size());
 
-    mz_zip_reader_end(&zip_archive);
     return binLoaded;
 }

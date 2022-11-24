@@ -48,7 +48,6 @@ OBJECTS += BUILD/loadBin.o
 OBJECTS += BUILD/loadEeprom.o
 
 OBJECTS += BUILD/zip2fat.o
-OBJECTS += BUILD/miniz.o
 OBJECTS += BUILD/ChaN/ccsbcs.o
 OBJECTS += BUILD/ChaN/diskio.o
 OBJECTS += BUILD/ChaN/ff.o
@@ -60,6 +59,7 @@ LD_FLAGS :=
 LIBRARIES := $(shell sdl2-config --libs)
 LIBRARIES += -lSDL2_net
 LIBRARIES += -lSDL2_image
+LIBRARIES += -larchive
 LIBRARIES += -lpthread
 LD_SYS_LIBS := 
 

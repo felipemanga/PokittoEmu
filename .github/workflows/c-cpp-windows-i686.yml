@@ -21,12 +21,10 @@ jobs:
           base-devel
           git
           mingw-w64-i686-gcc
-          mingw-w64-i686-openssl
-          mingw-w64-i686-v8 
-          mingw-w64-i686-icu
-          mingw-w64-i686-SDL2 
+          mingw-w64-i686-SDL2
           mingw-w64-i686-SDL2_image
           mingw-w64-i686-SDL2_net
+          mingw-w64-i686-libarchive
     - uses: actions/checkout@v2
       with:
         submodules: 'true'
@@ -37,7 +35,6 @@ jobs:
         cp /mingw32/bin/libgcc_s_dw2-1.dll ./
         cp /mingw32/bin/libstdc++*.dll ./
         cp /mingw32/bin/libpng*.dll ./
-        cp /mingw32/bin/libv8.dll ./
         cp /mingw32/bin/SDL2_image.dll ./
         cp /mingw32/bin/SDL2_net.dll ./
         cp /mingw32/bin/SDL2.dll ./
@@ -55,6 +52,7 @@ jobs:
         cp /mingw32/bin/libbrotli*.dll ./
         cp /mingw32/bin/liblcms*.dll ./
         cp /mingw32/bin/libhwy*.dll ./
+        cp /mingw32/bin/libarchive*.dll ./
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
