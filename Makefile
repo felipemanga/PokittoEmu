@@ -55,7 +55,7 @@ OBJECTS += BUILD/ChaN/ff.o
 INCLUDE_PATHS += -I./.
 
 LIBRARY_PATHS :=
-LD_FLAGS :=
+
 LIBRARIES := $(shell sdl2-config --libs)
 LIBRARIES += -lSDL2_net
 LIBRARIES += -lSDL2_image
@@ -67,7 +67,8 @@ CPP = 'g++' '-c' '-O3'
 C = 'gcc' '-c' '-O3'
 LD  = 'g++' '-O3'
 
-CXX_FLAGS := -std=c++17
+CXX_FLAGS += -std=c++17
+CXX_FLAGS += -Wcomment
 CXX_FLAGS += $(shell sdl2-config --cflags)
 
 .PHONY: all lst size
