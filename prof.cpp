@@ -24,6 +24,7 @@ namespace PROF {
     bool dumpOnExit = true;
     bool hitCaller;
 
+#if !defined(__EMSCRIPTEN__)
     struct Sample{
 	u32 addr;
 	u32 count;
@@ -56,12 +57,15 @@ namespace PROF {
 	    out << std::hex << samples[i].addr << "  " << samples[i].count << std::endl;
 	}
     }
+#endif
 
     void init( bool _hitCaller ){
+#if !defined(__EMSCRIPTEN__)
 	hitCaller = _hitCaller;
 	atexit([](){
             if( dumpOnExit )
                 dump();
         });
+#endif
     }
 }
