@@ -149,7 +149,6 @@ bool convertFile(const std::string& zipFileName) {
 
     auto r = archive_read_open_filename(a, zipFileName.c_str(), 10240);
     if (r) {
-        exit(1);
         return false;
     }
 
