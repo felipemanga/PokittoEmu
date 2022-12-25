@@ -1754,9 +1754,9 @@ namespace CPU
 	    if (clockTicks == 0)
 		clockTicks = 1;
 
-            // if(PREVADDRESS < sizeof(MMU::flash)){
-            //     PROF::hits[PREVADDRESS>>1] += clockTicks;
-            // }
+            if(PREVADDRESS < sizeof(MMU::flash)){
+                PROF::hits[PREVADDRESS>>1] += clockTicks;
+            }
             
 	    cpuTotalTicks += clockTicks;
             if (clearDependant)
