@@ -18,7 +18,7 @@ jobs:
     - name: update Apt
       run: sudo apt-get update
     - name: install-dependencies
-      run: sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-net-dev libarchive-dev
+      run: sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-net-dev libarchive-dev fuse libfuse2
     - name: make
       run: make -j 4
     - name: package
